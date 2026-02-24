@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { UserController } from './user.controller';
 import { AuthService } from './auth.service';
 import { FaceService } from './face.service';
+import { TwoFactorAuthService } from './two-factor-auth.service';
 import { User, UserSchema } from './schemas/user.schema';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CompanyConfig, CompanyConfigSchema } from '../company/schemas/company-config.schema';
@@ -29,7 +30,7 @@ import { CompanyConfig, CompanyConfigSchema } from '../company/schemas/company-c
     ]),
   ],
   controllers: [AuthController, UserController],
-  providers: [AuthService, FaceService, JwtStrategy],
+  providers: [AuthService, FaceService, TwoFactorAuthService, JwtStrategy],
   exports: [AuthService, MongooseModule, JwtModule, PassportModule],
 })
 export class AuthModule { }

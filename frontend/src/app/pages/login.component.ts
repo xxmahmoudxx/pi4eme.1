@@ -16,7 +16,7 @@ import { TranslateModule } from '@ngx-translate/core';
       <p>{{ 'LOGIN.SUBTITLE' | translate }}</p>
 
       <!-- ── Tabs ── -->
-      <div class="tabs">
+      <div class="tabs" *ngIf="step === 'credentials'">
         <button class="tab" [class.active]="mode === 'password'" (click)="mode = 'password'; reset()">
           🔑 Password
         </button>
@@ -26,7 +26,7 @@ import { TranslateModule } from '@ngx-translate/core';
       </div>
 
       <!-- ─────────── PASSWORD MODE ─────────── -->
-      <form *ngIf="mode === 'password'" (ngSubmit)="submit()">
+      <form *ngIf="mode === 'password' && step === 'credentials'" (ngSubmit)="submit()">
         <label>{{ 'LOGIN.EMAIL' | translate }}</label>
         <input type="email" [(ngModel)]="email" name="email" required />
 
@@ -38,8 +38,34 @@ import { TranslateModule } from '@ngx-translate/core';
         </button>
       </form>
 
+      <!-- ─────────── 2FA OTP STEP ─────────── -->
+      <div *ngIf="step === 'otp'" class="otp-section">
+        <div class="otp-icon">🔐</div>
+        <h3>Two-Factor Authentication</h3>
+        <p class="otp-hint">Open Google Authenticator and enter the 6-digit code.</p>
+
+        <input
+          type="text"
+          class="otp-input"
+          [(ngModel)]="otpCode"
+          name="otpCode"
+          placeholder="000000"
+          maxlength="6"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+        />
+
+        <button class="button" (click)="submitOtp()" [disabled]="loading || otpCode.length !== 6">
+          {{ loading ? 'Verifying…' : 'Verify Code' }}
+        </button>
+
+        <p *ngIf="otpError" class="error-msg">{{ otpError }}</p>
+
+        <button class="btn-back" (click)="backToLogin()">← Back to login</button>
+      </div>
+
       <!-- ─────────── FACE LOGIN MODE ─────────── -->
-      <div *ngIf="mode === 'face'" class="face-section">
+      <div *ngIf="mode === 'face' && step === 'credentials'" class="face-section">
         <label>Your Email (so we know whose face to match)</label>
         <input type="email" [(ngModel)]="email" name="email" placeholder="Your email address" />
 
@@ -80,7 +106,7 @@ import { TranslateModule } from '@ngx-translate/core';
         </div>
       </div>
 
-      <p class="hint">
+      <p class="hint" *ngIf="step === 'credentials'">
         {{ 'LOGIN.NEW_HERE' | translate }}
         <a routerLink="/signup">{{ 'LOGIN.CREATE_ACCOUNT' | translate }}</a>
       </p>
@@ -103,6 +129,27 @@ import { TranslateModule } from '@ngx-translate/core';
     form { display: flex; flex-direction: column; gap: 10px; }
     input { padding: 9px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 14px; }
     .hint { font-size: 12px; color: #6b7280; margin-top: 12px; }
+
+    /* OTP section */
+    .otp-section {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 14px; padding: 10px 0;
+    }
+    .otp-icon { font-size: 48px; line-height: 1; }
+    .otp-section h3 { margin: 0; font-size: 18px; color: #1f2937; }
+    .otp-hint { margin: 0; font-size: 13px; color: #6b7280; text-align: center; }
+    .otp-input {
+      width: 160px; text-align: center; font-size: 28px; letter-spacing: 6px;
+      padding: 12px; border-radius: 8px; border: 2px solid #3b82f6;
+      font-weight: 700; color: #1d4ed8;
+    }
+    .otp-input:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+    .error-msg { color: #dc2626; font-size: 13px; margin: 0; }
+    .btn-back {
+      background: none; border: none; color: #6b7280; cursor: pointer;
+      font-size: 13px; padding: 4px;
+    }
+    .btn-back:hover { color: #374151; }
 
     /* Face section */
     .face-section { display: flex; flex-direction: column; gap: 10px; }
@@ -142,9 +189,15 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class LoginComponent {
   mode: 'password' | 'face' = 'password';
+  step: 'credentials' | 'otp' = 'credentials';
   email = '';
   password = '';
   loading = false;
+
+  // 2FA OTP state
+  tempToken = '';
+  otpCode = '';
+  otpError = '';
 
   // Face state
   faceStatus: 'idle' | 'loading' | 'camera' | 'scanning' | 'success' | 'failed' | 'no-face' = 'idle';
@@ -167,16 +220,59 @@ export class LoginComponent {
     this.loading = false;
   }
 
+  backToLogin() {
+    this.step = 'credentials';
+    this.tempToken = '';
+    this.otpCode = '';
+    this.otpError = '';
+    this.loading = false;
+  }
+
   // ── Password login ─────────────────────────────────────
   submit() {
     this.loading = true;
     this.authService.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/sales']),
+      next: (response: any) => {
+        this.loading = false;
+        if (response.requiresTwoFactor) {
+          // Switch to OTP step
+          this.tempToken = response.tempToken;
+          this.step = 'otp';
+        } else {
+          this.navigateAfterLogin();
+        }
+      },
       error: (err) => {
         this.loading = false;
         alert(err.error?.message || 'Login failed. Check credentials.');
       },
     });
+  }
+
+  // ── OTP verification ────────────────────────────────────
+  submitOtp() {
+    this.loading = true;
+    this.otpError = '';
+    this.authService.verifyTwoFactor(this.tempToken, this.otpCode).subscribe({
+      next: () => {
+        this.loading = false;
+        this.navigateAfterLogin();
+      },
+      error: (err) => {
+        this.loading = false;
+        this.otpError = err.error?.message || 'Invalid code. Try again.';
+        this.otpCode = '';
+      },
+    });
+  }
+
+  private navigateAfterLogin() {
+    const role = this.authService['currentUserRole'].value;
+    if (role === 'Admin') {
+      this.router.navigate(['/admin']);
+    } else {
+      this.router.navigate(['/sales']);
+    }
   }
 
   // ── Face login ─────────────────────────────────────────
@@ -207,7 +303,6 @@ export class LoginComponent {
     if (!video) return;
     this.faceStatus = 'scanning';
 
-    // Generate 128-float face embedding from live video
     const descriptor = await this.faceService.getEmbedding(video);
 
     this.stream?.getTracks().forEach(t => t.stop());
@@ -217,14 +312,9 @@ export class LoginComponent {
     if (!descriptor) { this.faceStatus = 'no-face'; return; }
 
     try {
-      // Send email + embedding → backend checks match → returns JWT
       const result = await this.faceService.faceLogin(this.email, descriptor);
       this.faceStatus = 'success';
-
-      // Store token via AuthService so BehaviorSubjects update correctly
       this.authService.setToken(result.access_token);
-
-      // Short pause so user sees "✅ Face matched!" then navigate
       setTimeout(() => this.router.navigate(['/sales']), 1000);
     } catch (err: any) {
       this.errorMsg = err.error?.message || 'Face login failed — try again or use password';

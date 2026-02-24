@@ -12,6 +12,7 @@
         <a routerLink="/assistant">{{ 'NAV.ASSISTANT' | translate }}</a>
       </ng-container>
       <a routerLink="/admin" *ngIf="isAdmin$ | async">{{ 'NAV.ADMIN' | translate }}</a>
+      <a routerLink="/settings">Settings</a>
       <a routerLink="/login" (click)="logout()">{{ 'NAV.LOGOUT' | translate }}</a>
     </nav>
     <div class="lang-selector">

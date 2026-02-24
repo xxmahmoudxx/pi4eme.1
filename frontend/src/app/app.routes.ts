@@ -7,6 +7,7 @@ import { ReportDashboardComponent } from './pages/report-dashboard.component';
 import { AssistantComponent } from './pages/assistant.component';
 import { AdminPanelComponent } from './pages/admin-panel.component';
 import { FaceVerifyComponent } from './pages/face-verify.component';
+import { SettingsComponent } from './pages/settings.component';
 
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
@@ -23,4 +24,5 @@ export const routes: Routes = [
   { path: 'assistant', component: AssistantComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [authGuard, rolesGuard(['Admin'], '/sales')] },
   { path: 'face-verify', component: FaceVerifyComponent, canActivate: [authGuard] },
+  { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
 ];
