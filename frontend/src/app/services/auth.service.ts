@@ -36,11 +36,16 @@ export class AuthService {
       .post<{ access_token: string }>(`${this.apiBase}/auth/login`, { email, password })
       .pipe(
         tap((response) => {
-          localStorage.setItem(this.tokenKey, response.access_token);
-          this.loggedIn.next(true);
-          this.currentUserRole.next(this.getRoleFromToken());
+          this.setToken(response.access_token);
         }),
       );
+  }
+
+  /** Call this after receiving a token from any source (face login, etc.) */
+  setToken(token: string) {
+    localStorage.setItem(this.tokenKey, token);
+    this.loggedIn.next(true);
+    this.currentUserRole.next(this.getRoleFromToken());
   }
 
   getToken() {

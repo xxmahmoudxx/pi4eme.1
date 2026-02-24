@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# Angular cache
+frontend/.angular/
+frontend/node_modules/
+
+# Build
+backend/dist/
+
+# Models (optional — big files)
+frontend/src/assets/models/
+
+# Logs
+*.log
