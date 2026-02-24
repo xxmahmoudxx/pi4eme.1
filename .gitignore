@@ -12,4 +12,4 @@ backend/dist/
 frontend/src/assets/models/
 
 # Logs
-*.log
+*.logtmpclaude*
