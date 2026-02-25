@@ -1,5 +1,5 @@
 $base = "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights"
-$dest = "d:\0HACHWA\frontend\src\assets\models"
+$dest = "d:\0hachewet\Pi4eme\frontend\src\assets\models"
 $files = @(
     "ssd_mobilenetv1_model-weights_manifest.json",
     "ssd_mobilenetv1_model-shard1",
