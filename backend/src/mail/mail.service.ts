@@ -4,22 +4,20 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailService {
   private transporter = nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-        auth: {
-      user: 'a32d8a001@smtp-brevo.com',
-      pass: 'xsmtpsib-76aaa32de13ea80654a04218bdaf72e8301641310b98c4b209f434d16c476d9b-x12sZw9O9xvYFoIN',
+    host: process.env.MAIL_HOST || 'smtp-relay.brevo.com',
+    port: Number(process.env.MAIL_PORT) || 587,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
     },
   });
 
   async sendVerificationEmail(email: string, token: string) {
-    const verifyUrl = `http://localhost:3000/auth/verify-email?token=${token}`;
-  
-    console.log('Sending email to:', email); // ← add this
-    console.log('Verify URL:', verifyUrl);   // ← add this
-  
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const verifyUrl = `${backendUrl}/auth/verify-email?token=${token}`;
+
     const info = await this.transporter.sendMail({
-      from: `"BI Platform" <tenexa63@gmail.com>`,
+      from: `"BI Platform" <${process.env.MAIL_FROM || 'noreply@biplatform.com'}>`,
       to: email,
       subject: 'Verify your email',
       html: `
@@ -36,7 +34,7 @@ export class MailService {
   <p>This link expires in 24 hours.</p>
 `,
     });
-  
-    console.log('Email sent:', info.messageId); // ← add this
+
+    console.log('Email sent:', info.messageId);
   }
 }

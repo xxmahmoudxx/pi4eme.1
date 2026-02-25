@@ -17,9 +17,9 @@ const auth_service_1 = require("../auth.service");
 let GithubStrategy = class GithubStrategy extends (0, passport_1.PassportStrategy)(passport_github2_1.Strategy, 'github') {
     constructor(authService) {
         super({
-            clientID: 'Ov23liEx25zN3A607E4r',
-            clientSecret: '15fe86f6afd196d07cefd836157d7f34ed7ce9b1',
-            callbackURL: 'http://localhost:3000/auth/github/callback',
+            clientID: process.env.GITHUB_CLIENT_ID,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET,
+            callbackURL: process.env.GITHUB_CALLBACK_URL || 'http://localhost:3000/auth/github/callback',
             scope: ['user:email'],
         });
         this.authService = authService;
