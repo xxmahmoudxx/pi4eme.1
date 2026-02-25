@@ -43,7 +43,9 @@ export class TwoFactorAuthService {
       secret,
       encoding: 'base32',
       token,
-      window: 1,
+      // Allow a wider time window so codes work immediately
+      // even if your PC and phone clocks differ a bit.
+      window: 5,
     });
   }
 }
