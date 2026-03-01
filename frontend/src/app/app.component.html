@@ -2,21 +2,29 @@
   <header class="app-header">
     <div class="brand">
       <span class="brand-title">BI Platform</span>
-      <span class="brand-sub">{{ 'NAV.BRAND_SUB' | translate }}</span>
+      <span class="brand-sub">{{ "NAV.BRAND_SUB" | translate }}</span>
     </div>
     <nav class="nav" *ngIf="showNavigation">
       <ng-container *ngIf="!(isAdmin$ | async)">
-        <a routerLink="/sales">{{ 'NAV.SALES' | translate }}</a>
-        <a routerLink="/purchases">{{ 'NAV.PURCHASES' | translate }}</a>
-        <a routerLink="/report">{{ 'NAV.REPORT' | translate }}</a>
-        <a routerLink="/assistant">{{ 'NAV.ASSISTANT' | translate }}</a>
+        <a routerLink="/sales">{{ "NAV.SALES" | translate }}</a>
+        <a routerLink="/purchases">{{ "NAV.PURCHASES" | translate }}</a>
+        <a routerLink="/report">{{ "NAV.REPORT" | translate }}</a>
+        <a routerLink="/assistant">{{ "NAV.ASSISTANT" | translate }}</a>
       </ng-container>
-      <a routerLink="/admin" *ngIf="isAdmin$ | async">{{ 'NAV.ADMIN' | translate }}</a>
+      <a routerLink="/admin" *ngIf="isAdmin$ | async">{{
+        "NAV.ADMIN" | translate
+      }}</a>
       <a routerLink="/settings">Settings</a>
-      <a routerLink="/login" (click)="logout()">{{ 'NAV.LOGOUT' | translate }}</a>
+      <a routerLink="/login" (click)="logout()">{{
+        "NAV.LOGOUT" | translate
+      }}</a>
     </nav>
     <div class="lang-selector">
-      <select #langSelect (change)="changeLang(langSelect.value)" [value]="currentLang">
+      <select
+        #langSelect
+        (change)="changeLang(langSelect.value)"
+        [value]="currentLang"
+      >
         <option value="en">EN</option>
         <option value="fr">FR</option>
         <option value="ar">AR</option>
