@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 type SetupStep = 'idle' | 'qr' | 'confirming' | 'done';
@@ -9,135 +10,159 @@ type DisableStep = 'idle' | 'confirming';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="page-container">
-      <div class="card settings-card">
-        <h2>Account Settings</h2>
+      <h2>Security Settings</h2>
 
-        <!-- ── Loading ── -->
-        <div *ngIf="loading" class="status-loading">Loading…</div>
+      <!-- ── Loading ── -->
+      <div *ngIf="loading" class="status-loading">Loading…</div>
+
+      <div *ngIf="!loading" class="sections">
 
         <!-- ── 2FA Section ── -->
-        <section *ngIf="!loading" class="section-2fa">
+        <section class="section-card" [class.expanded]="activeSection === '2fa'" (click)="activeSection === '2fa' ? null : activeSection = '2fa'">
           <div class="section-header">
-            <div>
+            <div class="section-icon">🔐</div>
+            <div class="section-info">
               <h3>Two-Factor Authentication</h3>
-              <p class="section-desc">Add an extra layer of security — require a code from Google Authenticator on each login.</p>
+              <p class="section-desc">Require a code from Google Authenticator on each login.</p>
             </div>
             <span class="badge" [class.badge-on]="twoFactorEnabled" [class.badge-off]="!twoFactorEnabled">
               {{ twoFactorEnabled ? 'ON' : 'OFF' }}
             </span>
           </div>
 
-          <!-- ────────── ENABLE FLOW ────────── -->
-          <ng-container *ngIf="!twoFactorEnabled">
+          <!-- 2FA Content (visible when expanded) -->
+          <div class="section-content" *ngIf="activeSection === '2fa'">
 
-            <!-- Step 1: Initial button -->
-            <div *ngIf="enableStep === 'idle'" class="action-area">
-              <button class="btn btn-primary" (click)="startEnable()" [disabled]="actionLoading">
-                {{ actionLoading ? 'Generating…' : 'Enable 2FA' }}
-              </button>
-            </div>
-
-            <!-- Step 2: Show QR code -->
-            <div *ngIf="enableStep === 'qr'" class="qr-area">
-              <p class="qr-instructions">
-                1. Open <strong>Google Authenticator</strong> on your phone.<br>
-                2. Tap <strong>+</strong> → <strong>Scan a QR code</strong>.<br>
-                3. Scan the code below.
-              </p>
-              <div class="qr-wrapper">
-                <img [src]="qrCode" alt="2FA QR Code" class="qr-image" />
-              </div>
-              <p class="manual-key">
-                Can't scan? Enter this key manually:<br>
-                <code>{{ manualSecret }}</code>
-              </p>
-              <button class="btn btn-primary" (click)="enableStep = 'confirming'">
-                I've scanned it — Enter code
-              </button>
-              <button class="btn btn-ghost" (click)="cancelEnable()">Cancel</button>
-            </div>
-
-            <!-- Step 3: Confirm with 6-digit code -->
-            <div *ngIf="enableStep === 'confirming'" class="confirm-area">
-              <p class="confirm-desc">Enter the 6-digit code from Google Authenticator to confirm setup:</p>
-              <input
-                type="text"
-                class="otp-input"
-                [(ngModel)]="confirmCode"
-                placeholder="000000"
-                maxlength="6"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-              />
-              <p *ngIf="actionError" class="error-msg">{{ actionError }}</p>
-              <div class="btn-row">
-                <button class="btn btn-success" (click)="confirmEnable()"
-                        [disabled]="actionLoading || confirmCode.length !== 6">
-                  {{ actionLoading ? 'Activating…' : 'Activate 2FA' }}
-                </button>
-                <button class="btn btn-ghost" (click)="enableStep = 'qr'" [disabled]="actionLoading">
-                  Back
+            <!-- ────────── ENABLE FLOW ────────── -->
+            <ng-container *ngIf="!twoFactorEnabled">
+              <div *ngIf="enableStep === 'idle'" class="action-area">
+                <button class="btn btn-primary" (click)="startEnable(); $event.stopPropagation()" [disabled]="actionLoading">
+                  {{ actionLoading ? 'Generating…' : 'Enable 2FA' }}
                 </button>
               </div>
-            </div>
 
-            <!-- Step 4: Done -->
-            <div *ngIf="enableStep === 'done'" class="success-banner">
-              ✅ 2FA is now active. You'll be asked for a code on your next login.
-            </div>
-          </ng-container>
-
-          <!-- ────────── DISABLE FLOW ────────── -->
-          <ng-container *ngIf="twoFactorEnabled">
-            <div *ngIf="disableStep === 'idle'" class="action-area">
-              <button class="btn btn-danger" (click)="disableStep = 'confirming'">
-                Disable 2FA
-              </button>
-            </div>
-
-            <div *ngIf="disableStep === 'confirming'" class="confirm-area">
-              <p class="confirm-desc">Enter your current 6-digit code to confirm disabling 2FA:</p>
-              <input
-                type="text"
-                class="otp-input"
-                [(ngModel)]="disableCode"
-                placeholder="000000"
-                maxlength="6"
-                inputmode="numeric"
-              />
-              <p *ngIf="actionError" class="error-msg">{{ actionError }}</p>
-              <div class="btn-row">
-                <button class="btn btn-danger" (click)="confirmDisable()"
-                        [disabled]="actionLoading || disableCode.length !== 6">
-                  {{ actionLoading ? 'Disabling…' : 'Confirm Disable' }}
+              <div *ngIf="enableStep === 'qr'" class="qr-area" (click)="$event.stopPropagation()">
+                <p class="qr-instructions">
+                  1. Open <strong>Google Authenticator</strong> on your phone.<br>
+                  2. Tap <strong>+</strong> → <strong>Scan a QR code</strong>.<br>
+                  3. Scan the code below.
+                </p>
+                <div class="qr-wrapper">
+                  <img [src]="qrCode" alt="2FA QR Code" class="qr-image" />
+                </div>
+                <p class="manual-key">
+                  Can't scan? Enter this key manually:<br>
+                  <code>{{ manualSecret }}</code>
+                </p>
+                <button class="btn btn-primary" (click)="enableStep = 'confirming'">
+                  I've scanned it — Enter code
                 </button>
-                <button class="btn btn-ghost" (click)="cancelDisable()" [disabled]="actionLoading">
-                  Cancel
+                <button class="btn btn-ghost" (click)="cancelEnable()">Cancel</button>
+              </div>
+
+              <div *ngIf="enableStep === 'confirming'" class="confirm-area" (click)="$event.stopPropagation()">
+                <p class="confirm-desc">Enter the 6-digit code from Google Authenticator to confirm setup:</p>
+                <input
+                  type="text"
+                  class="otp-input"
+                  [(ngModel)]="confirmCode"
+                  placeholder="000000"
+                  maxlength="6"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                />
+                <p *ngIf="actionError" class="error-msg">{{ actionError }}</p>
+                <div class="btn-row">
+                  <button class="btn btn-success" (click)="confirmEnable()"
+                          [disabled]="actionLoading || confirmCode.length !== 6">
+                    {{ actionLoading ? 'Activating…' : 'Activate 2FA' }}
+                  </button>
+                  <button class="btn btn-ghost" (click)="enableStep = 'qr'" [disabled]="actionLoading">
+                    Back
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="enableStep === 'done'" class="success-banner">
+                2FA is now active. You'll be asked for a code on your next login.
+              </div>
+            </ng-container>
+
+            <!-- ────────── DISABLE FLOW ────────── -->
+            <ng-container *ngIf="twoFactorEnabled">
+              <div *ngIf="disableStep === 'idle'" class="action-area">
+                <button class="btn btn-danger" (click)="disableStep = 'confirming'; $event.stopPropagation()">
+                  Disable 2FA
                 </button>
               </div>
-            </div>
-          </ng-container>
+
+              <div *ngIf="disableStep === 'confirming'" class="confirm-area" (click)="$event.stopPropagation()">
+                <p class="confirm-desc">Enter your current 6-digit code to confirm disabling 2FA:</p>
+                <input
+                  type="text"
+                  class="otp-input"
+                  [(ngModel)]="disableCode"
+                  placeholder="000000"
+                  maxlength="6"
+                  inputmode="numeric"
+                />
+                <p *ngIf="actionError" class="error-msg">{{ actionError }}</p>
+                <div class="btn-row">
+                  <button class="btn btn-danger" (click)="confirmDisable()"
+                          [disabled]="actionLoading || disableCode.length !== 6">
+                    {{ actionLoading ? 'Disabling…' : 'Confirm Disable' }}
+                  </button>
+                  <button class="btn btn-ghost" (click)="cancelDisable()" [disabled]="actionLoading">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </ng-container>
+          </div>
         </section>
+
+        <!-- ── Face Recognition Section ── -->
+        <section class="section-card clickable" routerLink="/face-verify">
+          <div class="section-header">
+            <div class="section-icon">📷</div>
+            <div class="section-info">
+              <h3>Face Recognition</h3>
+              <p class="section-desc">Enroll or verify your face for quick passwordless login.</p>
+            </div>
+            <span class="arrow">→</span>
+          </div>
+        </section>
+
       </div>
     </div>
   `,
   styles: [`
     .page-container { max-width: 620px; margin: 40px auto; padding: 0 16px; }
-    .settings-card { padding: 32px; }
 
     h2 { margin: 0 0 24px; font-size: 22px; color: #111827; }
 
-    .section-2fa { border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; }
+    .sections { display: flex; flex-direction: column; gap: 16px; }
+
+    .section-card {
+      border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px;
+      background: #fff; transition: box-shadow .15s;
+    }
+    .section-card.clickable { cursor: pointer; }
+    .section-card.clickable:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .section-card.expanded { border-color: #3b82f6; }
 
     .section-header {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 18px; gap: 12px;
+      display: flex; align-items: center; gap: 14px;
     }
-    .section-header h3 { margin: 0 0 4px; font-size: 16px; color: #1f2937; }
+    .section-icon { font-size: 28px; flex-shrink: 0; }
+    .section-info { flex: 1; }
+    .section-info h3 { margin: 0 0 4px; font-size: 16px; color: #1f2937; }
     .section-desc { margin: 0; font-size: 13px; color: #6b7280; line-height: 1.5; }
+
+    .arrow { font-size: 20px; color: #9ca3af; flex-shrink: 0; }
 
     .badge {
       font-size: 11px; font-weight: 700; padding: 3px 8px;
@@ -145,6 +170,11 @@ type DisableStep = 'idle' | 'confirming';
     }
     .badge-on  { background: #d1fae5; color: #065f46; }
     .badge-off { background: #f3f4f6; color: #6b7280; }
+
+    .section-content {
+      margin-top: 18px; padding-top: 18px;
+      border-top: 1px solid #f3f4f6;
+    }
 
     .status-loading { padding: 40px; text-align: center; color: #9ca3af; }
 
@@ -205,6 +235,7 @@ type DisableStep = 'idle' | 'confirming';
 export class SettingsComponent implements OnInit {
   loading = true;
   twoFactorEnabled = false;
+  activeSection: '2fa' | 'face' | null = null;
 
   // Enable flow
   enableStep: SetupStep = 'idle';
