@@ -3,14 +3,18 @@ import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST || 'smtp-relay.brevo.com',
-    port: Number(process.env.MAIL_PORT) || 587,
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: process.env.MAIL_PASS,
-    },
-  });
+  private transporter: nodemailer.Transporter;
+
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST || 'smtp-relay.brevo.com',
+      port: Number(process.env.MAIL_PORT) || 587,
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+  }
 
   async sendVerificationEmail(email: string, token: string) {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';

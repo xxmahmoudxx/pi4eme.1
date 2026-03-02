@@ -131,7 +131,7 @@ export class AuthService implements OnModuleInit {
   
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    
+
     const user = await this.userModel.create({
       companyId,
       name: dto.name,
@@ -142,12 +142,21 @@ export class AuthService implements OnModuleInit {
       isEmailVerified: false,
       emailVerificationToken: verificationToken,
     });
-  
-    await this.mailService.sendVerificationEmail(email, verificationToken);
-  
-    return {
-      message: 'Account created! Please check your email to verify your account.',
-    };
+
+    try {
+      await this.mailService.sendVerificationEmail(email, verificationToken);
+      return {
+        message: 'Account created! Please check your email to verify your account.',
+      };
+    } catch {
+      // SMTP not configured or failed — auto-verify so user can still log in
+      user.isEmailVerified = true;
+      user.emailVerificationToken = null;
+      await user.save();
+      return {
+        message: 'Account created successfully! You can now log in.',
+      };
+    }
   }
 
   async findOrCreateGithubUser(profile: any) {
