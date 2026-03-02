@@ -9,6 +9,8 @@ import { UserRole } from './roles.enum';
 import { CompanyConfig, CompanyConfigDocument } from '../company/schemas/company-config.schema';
 import { Types } from 'mongoose';
 import { TwoFactorAuthService } from './two-factor-auth.service';
+import { MailService } from '../mail/mail.service';
+import * as crypto from 'crypto';
 
 export interface JwtPayload {
   sub: string;
@@ -20,13 +22,15 @@ export interface JwtPayload {
 
 @Injectable()
 export class AuthService implements OnModuleInit {
+  
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(CompanyConfig.name) private companyModel: Model<CompanyConfigDocument>,
     private jwtService: JwtService,
     private twoFactorAuthService: TwoFactorAuthService,
+    private mailService: MailService,
   ) { }
-
+ 
   async onModuleInit() {
     const adminExists = await this.userModel.exists({ role: UserRole.Admin });
     if (!adminExists) {
@@ -38,6 +42,7 @@ export class AuthService implements OnModuleInit {
         role: UserRole.Admin,
         companyId: 'SYSTEM',
         status: 'active',
+        isEmailVerified: true,
       });
     }
   }
@@ -52,12 +57,15 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException('Account is deactivated');
     }
 
+    if (!user.isEmailVerified && user.passwordHash !== 'GITHUB_AUTH') {
+      throw new UnauthorizedException('Please verify your email before logging in');
+    }
+
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // If 2FA is enabled, return a short-lived temp token instead of full JWT
     if (user.twoFactorEnabled) {
       const tempPayload: JwtPayload = {
         sub: user.id,
@@ -96,7 +104,7 @@ export class AuthService implements OnModuleInit {
     if (existing) {
       throw new BadRequestException('Email address is already registered');
     }
-
+  
     let companyId: string;
     if (dto.role === UserRole.CompanyOwner) {
       if (!dto.companyName || dto.taxRate === undefined || dto.currency === undefined) {
@@ -120,8 +128,10 @@ export class AuthService implements OnModuleInit {
       }
       companyId = dto.companyId;
     }
-
+  
     const passwordHash = await bcrypt.hash(dto.password, 10);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    
     const user = await this.userModel.create({
       companyId,
       name: dto.name,
@@ -129,15 +139,54 @@ export class AuthService implements OnModuleInit {
       passwordHash,
       role: dto.role,
       status: 'active',
+      isEmailVerified: false,
+      emailVerificationToken: verificationToken,
     });
+  
+    await this.mailService.sendVerificationEmail(email, verificationToken);
+  
+    return {
+      message: 'Account created! Please check your email to verify your account.',
+    };
+  }
 
+  async findOrCreateGithubUser(profile: any) {
+    const email = profile.emails[0].value.toLowerCase();
+    const name = profile.displayName || profile.username;
+  
+    let user = await this.userModel.findOne({ email });
+    if (user) return user;
+  
+    const companyId = new Types.ObjectId().toHexString();
+    await this.companyModel.create({
+      companyId,
+      companyName: `${name}'s Company`,
+      taxRate: 0,
+      currency: 'USD',
+      email,
+    });
+  
+    user = await this.userModel.create({
+      email,
+      name,
+      passwordHash: 'GITHUB_AUTH',
+      role: UserRole.CompanyOwner,
+      companyId,
+      status: 'active',
+      isEmailVerified: true,
+    });
+  
+    return user;
+  }
+  
+  async loginGithubUser(user: any) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
       companyId: user.companyId,
     };
-
+  
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: {
@@ -149,6 +198,21 @@ export class AuthService implements OnModuleInit {
         status: user.status,
       },
     };
+  }
+
+  // ── Email Verification ──────────────────────────────────────────────────────
+
+  async verifyEmail(token: string) {
+    const user = await this.userModel.findOne({ emailVerificationToken: token });
+    if (!user) {
+      throw new BadRequestException('Invalid or expired verification token');
+    }
+  
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    await user.save();
+  
+    return { message: 'Email verified successfully' };
   }
 
   // ── 2FA Methods ──────────────────────────────────────────────────────────────

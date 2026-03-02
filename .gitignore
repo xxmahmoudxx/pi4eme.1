@@ -1,15 +1,28 @@
-# Node
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# Node modules
 node_modules/
 
-# Angular cache
-frontend/.angular/
-frontend/node_modules/
+# Build outputs
+dist/
+build/
 
-# Build
-backend/dist/
+# Angular cache
+.angular/
 
 # Models (optional — big files)
 frontend/src/assets/models/
 
 # Logs
-*.logtmpclaude*
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+tmpclaude*

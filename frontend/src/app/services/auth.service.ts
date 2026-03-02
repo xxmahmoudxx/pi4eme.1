@@ -38,7 +38,6 @@ export class AuthService {
       .post<any>(`${this.apiBase}/auth/login`, { email, password })
       .pipe(
         tap((response) => {
-          // Only store token if 2FA is NOT required
           if (!response.requiresTwoFactor && response.access_token) {
             this.setToken(response.access_token);
           }
@@ -48,13 +47,10 @@ export class AuthService {
 
   verifyTwoFactor(tempToken: string, code: string) {
     return this.http
-      .post<{
-        access_token: string;
-      }>(`${this.apiBase}/auth/2fa/verify`, { tempToken, code })
+      .post<{ access_token: string }>(`${this.apiBase}/auth/2fa/verify`, { tempToken, code })
       .pipe(tap((response) => this.setToken(response.access_token)));
   }
 
-  /** Call this after receiving a token from any source (face login, etc.) */
   setToken(token: string) {
     localStorage.setItem(this.tokenKey, token);
     this.loggedIn.next(true);
@@ -73,42 +69,27 @@ export class AuthService {
 
   signup(payload: any) {
     return this.http
-      .post<{ access_token: string }>(`${this.apiBase}/auth/signup`, payload)
+      .post<{ message: string }>(`${this.apiBase}/auth/signup`, payload)
       .pipe(
-        tap((response) => {
-          localStorage.setItem(this.tokenKey, response.access_token);
-          this.loggedIn.next(true);
-          this.currentUserRole.next(this.getRoleFromToken());
+        tap(() => {
+          // no token saved — user must verify email first
         }),
       );
   }
 
-  // ── 2FA Methods ──────────────────────────────────────────────────────────────
-
   get2faStatus() {
-    return this.http.get<{ enabled: boolean }>(
-      `${this.apiBase}/auth/2fa/status`,
-    );
+    return this.http.get<{ enabled: boolean }>(`${this.apiBase}/auth/2fa/status`);
   }
 
   generate2fa() {
-    return this.http.post<{ qrCode: string; secret: string }>(
-      `${this.apiBase}/auth/2fa/generate`,
-      {},
-    );
+    return this.http.post<{ qrCode: string; secret: string }>(`${this.apiBase}/auth/2fa/generate`, {});
   }
 
   enable2fa(code: string) {
-    return this.http.post<{ message: string }>(
-      `${this.apiBase}/auth/2fa/enable`,
-      { code },
-    );
+    return this.http.post<{ message: string }>(`${this.apiBase}/auth/2fa/enable`, { code });
   }
 
   disable2fa(code: string) {
-    return this.http.post<{ message: string }>(
-      `${this.apiBase}/auth/2fa/disable`,
-      { code },
-    );
+    return this.http.post<{ message: string }>(`${this.apiBase}/auth/2fa/disable`, { code });
   }
 }

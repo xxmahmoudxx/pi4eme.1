@@ -11,11 +11,14 @@ import { TwoFactorAuthService } from './two-factor-auth.service';
 import { User, UserSchema } from './schemas/user.schema';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CompanyConfig, CompanyConfigSchema } from '../company/schemas/company-config.schema';
+import { GithubStrategy } from './strategies/github.strategy';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule,
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -30,7 +33,7 @@ import { CompanyConfig, CompanyConfigSchema } from '../company/schemas/company-c
     ]),
   ],
   controllers: [AuthController, UserController],
-  providers: [AuthService, FaceService, TwoFactorAuthService, JwtStrategy],
+  providers: [AuthService, FaceService, TwoFactorAuthService, JwtStrategy, GithubStrategy],
   exports: [AuthService, MongooseModule, JwtModule, PassportModule],
 })
 export class AuthModule { }

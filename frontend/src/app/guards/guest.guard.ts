@@ -9,7 +9,8 @@ export const guestGuard: CanActivateFn = (route, state) => {
     if (!authService.getToken()) {
         return true;
     }
-
+    
     router.navigate(['/sales']);
     return false;
+    
 };

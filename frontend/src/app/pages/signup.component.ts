@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { FaceRecognitionService } from '../services/face-recognition.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -12,11 +11,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   imports: [CommonModule, FormsModule, RouterModule, TranslateModule],
   template: `
     <div class="card signup-card">
+      <div *ngIf="submitted" class="success-box">
+        Account created! Please check your email to verify your account before logging in.
+      </div>
+
       <h2>{{ 'SIGNUP.TITLE' | translate }}</h2>
       <p>{{ 'SIGNUP.SUBTITLE' | translate }}</p>
 
-      <!-- ── Step 1: Registration Form ── -->
-      <form (ngSubmit)="submit()" *ngIf="step === 'form'">
+      <form *ngIf="!submitted" (ngSubmit)="submit()">
         <label>{{ 'SIGNUP.NAME' | translate }}</label>
         <input type="text" [(ngModel)]="name" name="name" required />
 
@@ -60,48 +62,6 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
           <a routerLink="/login">{{ 'SIGNUP.LOGIN' | translate }}</a>
         </p>
       </form>
-
-      <!-- ── Step 2: Face Enroll (after account created) ── -->
-      <div *ngIf="step === 'face'" class="face-section">
-        <h3>🔐 Face Enrollment <span class="badge">Optional</span></h3>
-        <p class="hint">Enroll your face for quick login. You can skip this and do it later.</p>
-
-        <!-- Live camera preview -->
-        <div class="camera-container" [class.hidden]="!cameraActive">
-          <video #videoEl autoplay playsinline class="camera-preview"></video>
-          <div class="camera-overlay">Look directly at the camera</div>
-        </div>
-
-        <!-- Status badge -->
-        <div class="status-badge" [ngClass]="faceStatus">
-          <span *ngIf="faceStatus === 'idle'">📷 Camera not started</span>
-          <span *ngIf="faceStatus === 'loading'">⚙️ Loading AI models…</span>
-          <span *ngIf="faceStatus === 'camera'">🎥 Position your face in frame</span>
-          <span *ngIf="faceStatus === 'scanning'">🔄 Generating face embedding…</span>
-          <span *ngIf="faceStatus === 'uploading'">☁️ Saving to server…</span>
-          <span *ngIf="faceStatus === 'enrolled'">✅ Face enrolled successfully!</span>
-          <span *ngIf="faceStatus === 'failed'">❌ {{ faceError }}</span>
-          <span *ngIf="faceStatus === 'no-face'">😕 No face detected — try again</span>
-        </div>
-
-        <div class="face-buttons">
-          <button class="btn-face" *ngIf="!cameraActive && faceStatus !== 'enrolled'"
-                  (click)="startCamera()" [disabled]="faceStatus === 'loading'">
-            📷 Open Camera
-          </button>
-          <button class="btn-face capture" *ngIf="cameraActive && faceStatus === 'camera'"
-                  (click)="captureAndEnroll()">
-            📸 Capture &amp; Enroll
-          </button>
-          <button class="btn-face retry" *ngIf="faceStatus === 'failed' || faceStatus === 'no-face'"
-                  (click)="startCamera()">
-            🔄 Retry
-          </button>
-          <button class="btn-skip" (click)="skip()">
-            {{ faceStatus === 'enrolled' ? '➡️ Continue to Dashboard' : 'Skip for now' }}
-          </button>
-        </div>
-      </div>
     </div>
   `,
   styles: [`
@@ -111,52 +71,19 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .role-row { display: flex; gap: 12px; }
     .hint { font-size: 12px; color: #6b7280; }
 
-    /* ── Face section ── */
-    .face-section { display: flex; flex-direction: column; gap: 12px; }
-    .face-section h3 { margin: 0 0 4px; font-size: 18px; }
-    .badge { font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 99px; vertical-align: middle; }
-
-    .camera-container { position: relative; border-radius: 12px; overflow: hidden; background: #000; }
-    .camera-container.hidden { display: none; }
-    .camera-preview { width: 100%; max-height: 260px; object-fit: cover; display: block; }
-    .camera-overlay {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 8px; background: rgba(0,0,0,.45); color: #fff;
-      font-size: 12px; text-align: center;
+    .success-box {
+      background-color: #d1fae5;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 12px;
     }
-
-    .status-badge {
-      padding: 8px 14px; border-radius: 8px;
-      background: #f3f4f6; color: #374151; font-size: 14px;
-    }
-    .status-badge.enrolled  { background: #d1fae5; color: #065f46; }
-    .status-badge.failed,
-    .status-badge.no-face   { background: #fee2e2; color: #991b1b; }
-    .status-badge.scanning,
-    .status-badge.uploading,
-    .status-badge.loading   { background: #fef3c7; color: #92400e; }
-    .status-badge.camera    { background: #eff6ff; color: #1e40af; }
-
-    .face-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-face {
-      padding: 9px 18px; border-radius: 8px; border: none;
-      background: #3b82f6; color: #fff; cursor: pointer;
-      font-weight: 500; font-size: 14px; transition: background .2s;
-    }
-    .btn-face:hover { background: #2563eb; }
-    .btn-face:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-face.capture { background: #10b981; }
-    .btn-face.capture:hover { background: #059669; }
-    .btn-face.retry { background: #f59e0b; }
-    .btn-skip {
-      padding: 9px 18px; border-radius: 8px; border: 1px solid #d1d5db;
-      background: #fff; cursor: pointer; font-size: 14px; color: #374151;
-    }
-    .btn-skip:hover { background: #f9fafb; }
   `],
 })
 export class SignupComponent {
-  // Form fields
   name = '';
   email = '';
   password = '';
@@ -166,25 +93,15 @@ export class SignupComponent {
   currency = 'USD';
   notificationEmail = '';
   companyId = '';
-
-  // UI state
-  step: 'form' | 'face' = 'form';
+  submitted = false;
   submitting = false;
-
-  // Face state
-  faceStatus: 'idle' | 'loading' | 'camera' | 'scanning' | 'uploading' | 'enrolled' | 'failed' | 'no-face' = 'idle';
-  faceError = '';
-  cameraActive = false;
-  private stream: MediaStream | null = null;
 
   constructor(
     private authService: AuthService,
-    private faceService: FaceRecognitionService,
     private router: Router,
     private translate: TranslateService,
   ) { }
 
-  // ── Step 1: Register ──────────────────────────────────────────────
   submit() {
     this.submitting = true;
     this.authService
@@ -202,78 +119,12 @@ export class SignupComponent {
       .subscribe({
         next: () => {
           this.submitting = false;
-          this.step = 'face'; // Move to face enroll step
+          this.submitted = true;
         },
         error: (err) => {
           this.submitting = false;
           alert(err?.error?.message || this.translate.instant('SIGNUP.FAILED'));
         },
       });
-  }
-
-  // ── Step 2: Face Enroll ───────────────────────────────────────────
-  async startCamera() {
-    this.faceStatus = 'loading';
-    try {
-      // Pre-load models while asking for camera (parallel)
-      const [stream] = await Promise.all([
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } }),
-        this.faceService.loadModels(),
-      ]);
-      this.stream = stream;
-      this.cameraActive = true;
-      this.faceStatus = 'camera';
-
-      // Attach stream to video element after Angular renders it
-      setTimeout(() => {
-        const video = document.querySelector<HTMLVideoElement>('video.camera-preview');
-        if (video) video.srcObject = this.stream;
-      }, 100);
-    } catch (err: any) {
-      console.error('Camera error:', err);
-      this.faceError = 'Camera access denied. Please allow camera permissions.';
-      this.faceStatus = 'failed';
-      this.cameraActive = false;
-    }
-  }
-
-  async captureAndEnroll() {
-    const video = document.querySelector<HTMLVideoElement>('video.camera-preview');
-    if (!video) return;
-
-    this.faceStatus = 'scanning';
-
-    // Get 128-float face embedding from the live video frame
-    const descriptor = await this.faceService.getEmbedding(video);
-
-    // Stop camera stream
-    this.stream?.getTracks().forEach(t => t.stop());
-    this.stream = null;
-    this.cameraActive = false;
-
-    if (!descriptor) {
-      this.faceStatus = 'no-face';
-      return;
-    }
-
-    // Upload embedding to backend
-    this.faceStatus = 'uploading';
-    try {
-      await this.faceService.enroll(descriptor);
-      this.faceStatus = 'enrolled';
-    } catch (err: any) {
-      console.error('Enroll error:', err);
-      this.faceError = 'Failed to save face. You can try again later.';
-      this.faceStatus = 'failed';
-    }
-  }
-
-  skip() {
-    this.stream?.getTracks().forEach(t => t.stop());
-    this.router.navigate(['/sales']);
-  }
-
-  ngOnDestroy() {
-    this.stream?.getTracks().forEach(t => t.stop());
   }
 }
