@@ -36,6 +36,9 @@ export class User {
 
   @Prop({ type: String, default: null })
   emailVerificationToken: string | null;
+
+  @Prop({ type: String, default: null })
+  photo: string | null;
 }
 
 export type UserDocument = User & Document;
