@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { FaceService } from './face.service';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdatePhotoDto } from './dto/update-photo.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -96,5 +98,25 @@ export class AuthController {
   async verifyEmail(@Query('token') token: string, @Res() res: any) {
     await this.authService.verifyEmail(token);
     res.redirect('http://localhost:4200/login?verified=true');
+  }
+
+  // ── Profile Endpoints ───────────────────────────────────────────────────────
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('profile')
+  async getProfile(@Req() req: any) {
+    return this.authService.getProfile(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('profile')
+  async updateProfile(@Req() req: any, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(req.user.userId, dto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('profile/photo')
+  async updatePhoto(@Req() req: any, @Body() dto: UpdatePhotoDto) {
+    return this.authService.updatePhoto(req.user.userId, dto.photo);
   }
 }

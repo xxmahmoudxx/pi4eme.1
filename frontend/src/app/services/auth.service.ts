@@ -92,4 +92,32 @@ export class AuthService {
   disable2fa(code: string) {
     return this.http.post<{ message: string }>(`${this.apiBase}/auth/2fa/disable`, { code });
   }
+
+  // ── Profile Methods ───────────────────────────────────────────────────────
+
+  getUserRole(): string | null {
+    return this.getRoleFromToken();
+  }
+
+  getProfile() {
+    return this.http.get<any>(`${this.apiBase}/auth/profile`);
+  }
+
+  updateProfile(data: { name?: string; email?: string }) {
+    return this.http.patch<any>(`${this.apiBase}/auth/profile`, data);
+  }
+
+  updatePhoto(photo: string) {
+    return this.http.patch<{ photo: string }>(`${this.apiBase}/auth/profile/photo`, { photo });
+  }
+
+  // ── Company Config Methods ────────────────────────────────────────────────
+
+  getCompanyConfig() {
+    return this.http.get<any>(`${this.apiBase}/company/config`);
+  }
+
+  updateCompanyConfig(data: { companyName: string; taxRate: number; currency: string; email: string }) {
+    return this.http.post<any>(`${this.apiBase}/company/config`, data);
+  }
 }

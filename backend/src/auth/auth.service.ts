@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserRole } from './roles.enum';
 import { CompanyConfig, CompanyConfigDocument } from '../company/schemas/company-config.schema';
 import { Types } from 'mongoose';
@@ -306,5 +307,46 @@ export class AuthService implements OnModuleInit {
     if (!isValid) throw new UnauthorizedException('Invalid OTP code');
 
     await this.userModel.updateOne({ _id: userId }, { twoFactorEnabled: false, twoFactorSecret: null });
+  }
+
+  // ── Profile Methods ─────────────────────────────────────────────────────────
+
+  async getProfile(userId: string) {
+    const user = await this.userModel.findById(userId, {
+      passwordHash: 0,
+      twoFactorSecret: 0,
+      faceDescriptor: 0,
+      emailVerificationToken: 0,
+    }).exec();
+    if (!user) throw new UnauthorizedException('User not found');
+    return user;
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    if (dto.email) {
+      const existing = await this.userModel.findOne({
+        email: dto.email.toLowerCase(),
+        _id: { $ne: userId },
+      });
+      if (existing) {
+        throw new BadRequestException('Email address is already in use');
+      }
+      dto.email = dto.email.toLowerCase();
+    }
+    const user = await this.userModel.findByIdAndUpdate(userId, dto, { new: true })
+      .select('-passwordHash -twoFactorSecret -faceDescriptor -emailVerificationToken')
+      .exec();
+    if (!user) throw new UnauthorizedException('User not found');
+    return user;
+  }
+
+  async updatePhoto(userId: string, photo: string) {
+    const user = await this.userModel.findByIdAndUpdate(
+      userId,
+      { photo },
+      { new: true },
+    ).select('-passwordHash -twoFactorSecret -faceDescriptor -emailVerificationToken').exec();
+    if (!user) throw new UnauthorizedException('User not found');
+    return { photo: user.photo };
   }
 }
