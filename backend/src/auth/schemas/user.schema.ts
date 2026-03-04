@@ -1,11 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { UserRole } from '../roles.enum';
+
 
 @Schema({ collection: 'users', timestamps: true })
 export class User {
-  @Prop({ required: true })
-  companyId: string;
+   // Reference to Company
+  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  companyId: Types.ObjectId;
 
   @Prop({ required: true })
   name: string;
@@ -39,6 +41,10 @@ export class User {
 
   @Prop({ type: String, default: null })
   photo: string | null;
+
+  // Client (1) ──places──► (*) Commande
+@Prop({ type: [{ type: Types.ObjectId, ref: 'Commande' }] })
+commandes: Types.ObjectId[];
 }
 
 export type UserDocument = User & Document;

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema({ collection: 'company_config', timestamps: true })
 export class CompanyConfig {
@@ -17,6 +17,10 @@ export class CompanyConfig {
 
   @Prop({ required: true })
   email: string;
+   // Company (1) ──owns──► (*) Product
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
+  products: Types.ObjectId[];
 }
 
 export type CompanyConfigDocument = CompanyConfig & Document;

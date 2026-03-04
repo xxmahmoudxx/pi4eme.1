@@ -1,14 +1,13 @@
 import { BadRequestException, Injectable, UnauthorizedException, OnModuleInit } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { SignupDto } from './dto/signup.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserRole } from './roles.enum';
 import { CompanyConfig, CompanyConfigDocument } from '../company/schemas/company-config.schema';
-import { Types } from 'mongoose';
 import { TwoFactorAuthService } from './two-factor-auth.service';
 import { MailService } from '../mail/mail.service';
 import * as crypto from 'crypto';
@@ -50,29 +49,21 @@ export class AuthService implements OnModuleInit {
 
   async login(email: string, password: string) {
     const user = await this.userModel.findOne({ email: email.toLowerCase() }).exec();
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    if (user.status !== 'active') {
-      throw new UnauthorizedException('Account is deactivated');
-    }
-
+    if (!user) throw new UnauthorizedException('Invalid email or password');
+    if (user.status !== 'active') throw new UnauthorizedException('Account is deactivated');
     if (!user.isEmailVerified && user.passwordHash !== 'GITHUB_AUTH') {
       throw new UnauthorizedException('Please verify your email before logging in');
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
+    if (!isValid) throw new UnauthorizedException('Invalid email or password');
 
     if (user.twoFactorEnabled) {
       const tempPayload: JwtPayload = {
         sub: user.id,
         email: user.email,
         role: user.role,
-        companyId: user.companyId,
+        companyId: user.companyId?.toString() ?? '',
         twoFactorPending: true,
       };
       const tempToken = await this.jwtService.signAsync(tempPayload, { expiresIn: '5m' });
@@ -83,7 +74,7 @@ export class AuthService implements OnModuleInit {
       sub: user.id,
       email: user.email,
       role: user.role,
-      companyId: user.companyId,
+      companyId: user.companyId?.toString() ?? '',
     };
 
     return {
@@ -93,7 +84,7 @@ export class AuthService implements OnModuleInit {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.companyId,
+        companyId: user.companyId?.toString() ?? '',
         status: user.status,
       },
     };
@@ -101,11 +92,10 @@ export class AuthService implements OnModuleInit {
 
   async signup(dto: SignupDto) {
     const email = dto.email.toLowerCase();
-    const existing = await this.userModel.exists({ email });
-    if (existing) {
+    if (await this.userModel.exists({ email })) {
       throw new BadRequestException('Email address is already registered');
     }
-  
+
     let companyId: string;
     if (dto.role === UserRole.CompanyOwner) {
       if (!dto.companyName || dto.taxRate === undefined || dto.currency === undefined) {
@@ -120,16 +110,13 @@ export class AuthService implements OnModuleInit {
         email: dto.notificationEmail || email,
       });
     } else {
-      if (!dto.companyId) {
-        throw new BadRequestException('companyId is required when role is Accountant');
-      }
-      const companyExists = await this.companyModel.exists({ companyId: dto.companyId });
-      if (!companyExists) {
+      if (!dto.companyId) throw new BadRequestException('companyId is required when role is Accountant');
+      if (!(await this.companyModel.exists({ companyId: dto.companyId }))) {
         throw new BadRequestException('Company with the given companyId was not found');
       }
       companyId = dto.companyId;
     }
-  
+
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
@@ -146,27 +133,21 @@ export class AuthService implements OnModuleInit {
 
     try {
       await this.mailService.sendVerificationEmail(email, verificationToken);
-      return {
-        message: 'Account created! Please check your email to verify your account.',
-      };
+      return { message: 'Account created! Please check your email to verify your account.' };
     } catch {
-      // SMTP not configured or failed — auto-verify so user can still log in
       user.isEmailVerified = true;
       user.emailVerificationToken = null;
       await user.save();
-      return {
-        message: 'Account created successfully! You can now log in.',
-      };
+      return { message: 'Account created successfully! You can now log in.' };
     }
   }
 
   async findOrCreateGithubUser(profile: any) {
     const email = profile.emails[0].value.toLowerCase();
     const name = profile.displayName || profile.username;
-  
     let user = await this.userModel.findOne({ email });
     if (user) return user;
-  
+
     const companyId = new Types.ObjectId().toHexString();
     await this.companyModel.create({
       companyId,
@@ -175,7 +156,7 @@ export class AuthService implements OnModuleInit {
       currency: 'USD',
       email,
     });
-  
+
     user = await this.userModel.create({
       email,
       name,
@@ -185,18 +166,18 @@ export class AuthService implements OnModuleInit {
       status: 'active',
       isEmailVerified: true,
     });
-  
+
     return user;
   }
-  
+
   async loginGithubUser(user: any) {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
-      companyId: user.companyId,
+      companyId: user.companyId?.toString() ?? '',
     };
-  
+
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: {
@@ -204,29 +185,22 @@ export class AuthService implements OnModuleInit {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.companyId,
+        companyId: user.companyId?.toString() ?? '',
         status: user.status,
       },
     };
   }
 
-  // ── Email Verification ──────────────────────────────────────────────────────
-
   async verifyEmail(token: string) {
     const user = await this.userModel.findOne({ emailVerificationToken: token });
-    if (!user) {
-      throw new BadRequestException('Invalid or expired verification token');
-    }
-  
+    if (!user) throw new BadRequestException('Invalid or expired verification token');
     user.isEmailVerified = true;
     user.emailVerificationToken = null;
     await user.save();
-  
     return { message: 'Email verified successfully' };
   }
 
   // ── 2FA Methods ──────────────────────────────────────────────────────────────
-
   async get2faStatus(userId: string): Promise<{ enabled: boolean }> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new UnauthorizedException();
@@ -236,25 +210,19 @@ export class AuthService implements OnModuleInit {
   async generate2fa(userId: string): Promise<{ qrCode: string; secret: string }> {
     const user = await this.userModel.findById(userId);
     if (!user) throw new UnauthorizedException();
-
     const secret = this.twoFactorAuthService.generateSecret(user.email);
     const encrypted = this.twoFactorAuthService.encrypt(secret.base32);
     await this.userModel.updateOne({ _id: userId }, { twoFactorSecret: encrypted });
-
     const qrCode = await this.twoFactorAuthService.generateQrCode(secret.otpauth_url!);
     return { qrCode, secret: secret.base32 };
   }
 
   async enable2fa(userId: string, code: string): Promise<void> {
     const user = await this.userModel.findById(userId);
-    if (!user || !user.twoFactorSecret) {
-      throw new BadRequestException('No 2FA secret generated. Call /auth/2fa/generate first.');
-    }
-
+    if (!user || !user.twoFactorSecret) throw new BadRequestException('No 2FA secret generated.');
     const decryptedSecret = this.twoFactorAuthService.decrypt(user.twoFactorSecret);
     const isValid = this.twoFactorAuthService.verifyOtp(decryptedSecret, code);
     if (!isValid) throw new UnauthorizedException('Invalid OTP code');
-
     await this.userModel.updateOne({ _id: userId }, { twoFactorEnabled: true });
   }
 
@@ -265,10 +233,7 @@ export class AuthService implements OnModuleInit {
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
-
-    if (!payload.twoFactorPending) {
-      throw new UnauthorizedException('Invalid token type');
-    }
+    if (!payload.twoFactorPending) throw new UnauthorizedException('Invalid token type');
 
     const user = await this.userModel.findById(payload.sub);
     if (!user || !user.twoFactorSecret) throw new UnauthorizedException();
@@ -281,7 +246,7 @@ export class AuthService implements OnModuleInit {
       sub: user.id,
       email: user.email,
       role: user.role,
-      companyId: user.companyId,
+      companyId: user.companyId?.toString() ?? '',
     };
     return {
       access_token: await this.jwtService.signAsync(fullPayload),
@@ -290,7 +255,7 @@ export class AuthService implements OnModuleInit {
         name: user.name,
         email: user.email,
         role: user.role,
-        companyId: user.companyId,
+        companyId: user.companyId?.toString() ?? '',
         status: user.status,
       },
     };
@@ -298,19 +263,14 @@ export class AuthService implements OnModuleInit {
 
   async disable2fa(userId: string, code: string): Promise<void> {
     const user = await this.userModel.findById(userId);
-    if (!user || !user.twoFactorEnabled) {
-      throw new BadRequestException('2FA is not enabled');
-    }
-
+    if (!user || !user.twoFactorEnabled) throw new BadRequestException('2FA is not enabled');
     const decryptedSecret = this.twoFactorAuthService.decrypt(user.twoFactorSecret!);
     const isValid = this.twoFactorAuthService.verifyOtp(decryptedSecret, code);
     if (!isValid) throw new UnauthorizedException('Invalid OTP code');
-
     await this.userModel.updateOne({ _id: userId }, { twoFactorEnabled: false, twoFactorSecret: null });
   }
 
   // ── Profile Methods ─────────────────────────────────────────────────────────
-
   async getProfile(userId: string) {
     const user = await this.userModel.findById(userId, {
       passwordHash: 0,
@@ -328,9 +288,7 @@ export class AuthService implements OnModuleInit {
         email: dto.email.toLowerCase(),
         _id: { $ne: userId },
       });
-      if (existing) {
-        throw new BadRequestException('Email address is already in use');
-      }
+      if (existing) throw new BadRequestException('Email address is already in use');
       dto.email = dto.email.toLowerCase();
     }
     const user = await this.userModel.findByIdAndUpdate(userId, dto, { new: true })
@@ -341,11 +299,9 @@ export class AuthService implements OnModuleInit {
   }
 
   async updatePhoto(userId: string, photo: string) {
-    const user = await this.userModel.findByIdAndUpdate(
-      userId,
-      { photo },
-      { new: true },
-    ).select('-passwordHash -twoFactorSecret -faceDescriptor -emailVerificationToken').exec();
+    const user = await this.userModel.findByIdAndUpdate(userId, { photo }, { new: true })
+      .select('-passwordHash -twoFactorSecret -faceDescriptor -emailVerificationToken')
+      .exec();
     if (!user) throw new UnauthorizedException('User not found');
     return { photo: user.photo };
   }
