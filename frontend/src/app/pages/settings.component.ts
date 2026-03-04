@@ -284,57 +284,60 @@ type DisableStep = 'idle' | 'confirming';
   styles: [`
     .page-container { max-width: 620px; margin: 40px auto; padding: 0 16px; }
 
-    h2 { margin: 0 0 24px; font-size: 22px; color: #111827; }
+    h2 { margin: 0 0 24px; font-size: 24px; font-weight: 800; color: #021024; }
 
     .sections { display: flex; flex-direction: column; gap: 16px; }
 
     .section-card {
-      border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px;
-      background: #fff; transition: box-shadow .15s;
+      border: 1.5px solid rgba(84,131,179,0.2); border-radius: 14px; padding: 22px;
+      background: #fff; transition: all 0.2s;
+      box-shadow: 0 1px 4px rgba(2,16,36,0.06);
     }
     .section-card.clickable { cursor: pointer; }
-    .section-card.clickable:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-    .section-card.expanded { border-color: #3b82f6; }
+    .section-card.clickable:hover { box-shadow: 0 4px 16px rgba(2,16,36,0.1); border-color: #7DA0CA; }
+    .section-card.expanded { border-color: #5483B3; box-shadow: 0 4px 20px rgba(84,131,179,0.15); }
 
     .section-header {
       display: flex; align-items: center; gap: 14px;
     }
     .section-icon { font-size: 28px; flex-shrink: 0; }
     .section-info { flex: 1; }
-    .section-info h3 { margin: 0 0 4px; font-size: 16px; color: #1f2937; }
-    .section-desc { margin: 0; font-size: 13px; color: #6b7280; line-height: 1.5; }
+    .section-info h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #021024; }
+    .section-desc { margin: 0; font-size: 13px; color: #5483B3; line-height: 1.5; }
 
-    .arrow { font-size: 20px; color: #9ca3af; flex-shrink: 0; }
+    .arrow { font-size: 20px; color: #7DA0CA; flex-shrink: 0; }
 
     .badge {
-      font-size: 11px; font-weight: 700; padding: 3px 8px;
+      font-size: 11px; font-weight: 700; padding: 4px 10px;
       border-radius: 99px; white-space: nowrap; flex-shrink: 0;
+      letter-spacing: 0.4px; text-transform: uppercase;
     }
-    .badge-on  { background: #d1fae5; color: #065f46; }
-    .badge-off { background: #f3f4f6; color: #6b7280; }
+    .badge-on  { background: #d1fae5; color: #059669; border: 1px solid #a9dfbf; }
+    .badge-off { background: #f0f6ff; color: #5483B3; border: 1px solid #C1E8FF; }
 
     .section-content {
       margin-top: 18px; padding-top: 18px;
-      border-top: 1px solid #f3f4f6;
+      border-top: 1px solid rgba(193,232,255,0.6);
     }
 
-    .status-loading { padding: 40px; text-align: center; color: #9ca3af; }
+    .status-loading { padding: 40px; text-align: center; color: #7DA0CA; font-weight: 500; }
 
     /* ── Buttons ── */
     .btn {
-      padding: 9px 18px; border-radius: 7px; border: none;
+      padding: 10px 20px; border-radius: 8px; border: none;
       font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: background .15s, opacity .15s;
+      font-family: inherit;
+      transition: all 0.18s ease;
     }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-primary { background: #3b82f6; color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: #2563eb; }
-    .btn-success { background: #10b981; color: #fff; }
-    .btn-success:hover:not(:disabled) { background: #059669; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .btn-danger:hover:not(:disabled) { background: #dc2626; }
-    .btn-ghost { background: #f3f4f6; color: #374151; }
-    .btn-ghost:hover:not(:disabled) { background: #e5e7eb; }
+    .btn-primary { background: linear-gradient(135deg, #052659, #5483B3); color: #fff; box-shadow: 0 2px 8px rgba(5,38,89,0.25); }
+    .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, #021024, #052659); box-shadow: 0 4px 14px rgba(5,38,89,0.35); transform: translateY(-1px); }
+    .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
+    .btn-success:hover:not(:disabled) { background: linear-gradient(135deg, #047857, #059669); transform: translateY(-1px); }
+    .btn-danger { background: linear-gradient(135deg, #c0392b, #ef4444); color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,0.25); }
+    .btn-danger:hover:not(:disabled) { background: linear-gradient(135deg, #922b21, #c0392b); transform: translateY(-1px); }
+    .btn-ghost { background: #f0f6ff; color: #052659; border: 1.5px solid #C1E8FF; }
+    .btn-ghost:hover:not(:disabled) { background: #C1E8FF; border-color: #7DA0CA; }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-sm { padding: 5px 12px; font-size: 12px; }
 
@@ -343,34 +346,38 @@ type DisableStep = 'idle' | 'confirming';
     .qr-instructions { margin: 0; font-size: 13px; color: #374151; line-height: 1.7; }
     .qr-wrapper {
       display: flex; justify-content: center;
-      background: #fff; border: 1px solid #e5e7eb;
-      border-radius: 8px; padding: 12px; width: fit-content;
+      background: #fff; border: 1.5px solid #C1E8FF;
+      border-radius: 12px; padding: 16px; width: fit-content;
+      box-shadow: 0 4px 16px rgba(2,16,36,0.08);
     }
     .qr-image { width: 200px; height: 200px; display: block; }
     .manual-key {
-      font-size: 12px; color: #6b7280; margin: 0;
-      background: #f9fafb; padding: 10px; border-radius: 6px;
+      font-size: 12px; color: #5483B3; margin: 0;
+      background: #f0f6ff; padding: 12px; border-radius: 8px;
+      border: 1px solid #C1E8FF;
     }
-    .manual-key code { font-family: monospace; letter-spacing: 1px; color: #1f2937; font-size: 13px; }
+    .manual-key code { font-family: monospace; letter-spacing: 1px; color: #021024; font-size: 13px; font-weight: 700; }
 
     /* ── Confirm area ── */
     .confirm-area { display: flex; flex-direction: column; gap: 12px; }
-    .confirm-desc { margin: 0; font-size: 13px; color: #374151; }
+    .confirm-desc { margin: 0; font-size: 13px; color: #5483B3; }
 
     .otp-input {
-      width: 140px; text-align: center; font-size: 26px; letter-spacing: 6px;
-      padding: 10px; border-radius: 8px; border: 2px solid #3b82f6;
-      font-weight: 700; color: #1d4ed8;
+      width: 150px; text-align: center; font-size: 26px; letter-spacing: 6px;
+      padding: 12px; border-radius: 10px; border: 2px solid #5483B3;
+      font-weight: 700; color: #052659; font-family: monospace;
+      background: #f0f6ff;
     }
-    .otp-input:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+    .otp-input:focus { outline: none; border-color: #052659; box-shadow: 0 0 0 3px rgba(84,131,179,0.2); }
 
-    .error-msg { color: #dc2626; font-size: 13px; margin: 0; }
+    .error-msg { color: #c0392b; font-size: 13px; margin: 0; }
 
     .action-area { padding: 4px 0; }
 
     .success-banner {
-      background: #d1fae5; color: #065f46;
-      border-radius: 8px; padding: 12px 16px;
+      background: #e9f7ef; color: #059669;
+      border: 1px solid #a9dfbf;
+      border-radius: 10px; padding: 14px 18px;
       font-size: 14px; font-weight: 600;
     }
 
@@ -378,11 +385,11 @@ type DisableStep = 'idle' | 'confirming';
     .avatar-small-wrapper { width: 40px; height: 40px; flex-shrink: 0; }
     .avatar-small {
       width: 40px; height: 40px; border-radius: 50%;
-      object-fit: cover; border: 2px solid #e5e7eb;
+      object-fit: cover; border: 2px solid #C1E8FF;
     }
     .avatar-small-placeholder {
       width: 40px; height: 40px; border-radius: 50%;
-      background: #3b82f6; color: #fff;
+      background: linear-gradient(135deg, #052659, #5483B3); color: #fff;
       display: flex; align-items: center; justify-content: center;
       font-size: 16px; font-weight: 700;
     }
@@ -398,28 +405,28 @@ type DisableStep = 'idle' | 'confirming';
     }
     .avatar-img {
       width: 72px; height: 72px; border-radius: 50%;
-      object-fit: cover; border: 2px solid #e5e7eb;
+      object-fit: cover; border: 3px solid #C1E8FF;
     }
     .avatar-placeholder {
       width: 72px; height: 72px; border-radius: 50%;
-      background: #3b82f6; color: #fff;
+      background: linear-gradient(135deg, #052659, #5483B3); color: #fff;
       display: flex; align-items: center; justify-content: center;
       font-size: 28px; font-weight: 700;
     }
     .avatar-saving {
       position: absolute; inset: 0; border-radius: 50%;
-      background: rgba(0,0,0,.45); color: #fff;
+      background: rgba(2,16,36,.6); color: #C1E8FF;
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 600;
     }
-    .photo-actions { display: flex; flex-direction: column; gap: 4px; }
+    .photo-actions { display: flex; flex-direction: column; gap: 6px; }
     .upload-btn { cursor: pointer; }
-    .photo-hint { font-size: 11px; color: #9ca3af; }
+    .photo-hint { font-size: 11px; color: #7DA0CA; }
 
     /* ── Account: Info blocks ── */
     .info-block {
       margin-top: 18px; padding-top: 18px;
-      border-top: 1px solid #f3f4f6;
+      border-top: 1px solid rgba(193,232,255,0.5);
     }
     .info-block:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
     .info-block-header {
@@ -427,33 +434,38 @@ type DisableStep = 'idle' | 'confirming';
       margin-bottom: 12px;
     }
     .info-block-header h4 {
-      margin: 0; font-size: 14px; font-weight: 600; color: #1f2937;
+      margin: 0; font-size: 14px; font-weight: 700; color: #021024;
     }
 
-    .info-rows { display: flex; flex-direction: column; gap: 8px; }
+    .info-rows { display: flex; flex-direction: column; gap: 4px; }
     .info-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 0;
+      padding: 9px 12px; border-radius: 8px;
+      transition: background 0.15s;
     }
-    .info-label { font-size: 13px; color: #6b7280; }
-    .info-value { font-size: 13px; color: #1f2937; font-weight: 500; }
+    .info-row:hover { background: #f0f6ff; }
+    .info-label { font-size: 13px; color: #5483B3; font-weight: 500; }
+    .info-value { font-size: 13px; color: #021024; font-weight: 600; }
 
     /* ── Account: Edit form ── */
-    .edit-form { display: flex; flex-direction: column; gap: 12px; }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    .form-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+    .edit-form { display: flex; flex-direction: column; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11.5px; color: #5483B3; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
     .form-input {
-      padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;
-      font-size: 14px; color: #1f2937;
+      padding: 10px 14px; border: 1.5px solid #C1E8FF; border-radius: 8px;
+      font-size: 14px; color: #021024; font-family: inherit;
+      background: #f9fdff; outline: none; transition: all 0.18s;
     }
     .form-input:focus {
-      outline: none; border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+      border-color: #5483B3;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(84,131,179,0.15);
     }
 
     .success-msg {
-      color: #065f46; font-size: 13px; margin: 8px 0 0;
-      background: #d1fae5; padding: 8px 12px; border-radius: 6px;
+      color: #059669; font-size: 13px; margin: 8px 0 0;
+      background: #e9f7ef; padding: 10px 14px; border-radius: 8px;
+      border: 1px solid #a9dfbf; font-weight: 500;
     }
   `],
 })
@@ -498,7 +510,7 @@ export class SettingsComponent implements OnInit {
   actionLoading = false;
   actionError = '';
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   ngOnInit() {
     this.isCompanyOwner = this.authService.getUserRole() === 'CompanyOwner';
@@ -509,14 +521,14 @@ export class SettingsComponent implements OnInit {
         this.userProfile = profile;
         this.photoPreview = profile.photo || null;
       },
-      error: () => {},
+      error: () => { },
     });
 
     // Load company config (CompanyOwner only)
     if (this.isCompanyOwner) {
       this.authService.getCompanyConfig().subscribe({
         next: (config: any) => { this.companyConfig = config; },
-        error: () => {},
+        error: () => { },
       });
     }
 

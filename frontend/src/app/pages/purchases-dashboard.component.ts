@@ -9,18 +9,27 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, CsvUploadComponent, TranslateModule],
   template: `
+    <div class="page-header">
+      <h1>{{ 'PURCHASES.UPLOAD_CSV' | translate }}</h1>
+      <p class="page-subtitle">Track inventory, purchases, and stock alerts</p>
+    </div>
+
     <div class="grid grid-2">
       <div class="card">
+        <div class="card-icon">📤</div>
         <h2>{{ 'PURCHASES.UPLOAD_CSV' | translate }}</h2>
         <app-csv-upload (fileSelected)="upload($event)"></app-csv-upload>
-        <p *ngIf="message">{{ message }}</p>
+        <p *ngIf="message" class="status-msg">{{ message }}</p>
       </div>
       <div class="card">
+        <div class="card-icon">🚨</div>
         <h2>{{ 'PURCHASES.ALERTS' | translate }}</h2>
-        <div *ngIf="alerts.length === 0">{{ 'PURCHASES.NO_ALERTS' | translate }}</div>
-        <div *ngFor="let alert of alerts" class="alert">
+        <div *ngIf="alerts.length === 0" class="no-alerts">
+          ✅ {{ 'PURCHASES.NO_ALERTS' | translate }}
+        </div>
+        <div *ngFor="let alert of alerts" class="alert-row">
           <span class="badge badge-high">High</span>
-          {{ alert.item }} - {{ 'PURCHASES.STOCKOUT_IN' | translate }} {{ alert.predicted_stockout_days }} {{ 'PURCHASES.DAYS' | translate }}
+          <span class="alert-text">{{ alert.item }} — {{ 'PURCHASES.STOCKOUT_IN' | translate }} <strong>{{ alert.predicted_stockout_days }}</strong> {{ 'PURCHASES.DAYS' | translate }}</span>
         </div>
       </div>
     </div>
@@ -42,9 +51,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
             <tr *ngFor="let row of purchases">
               <td>{{ row.date | date: 'yyyy-MM-dd' }}</td>
               <td>{{ row.item }}</td>
-              <td>{{ row.type }}</td>
+              <td><span class="type-badge">{{ row.type }}</span></td>
               <td>{{ row.quantity }}</td>
-              <td>{{ row.totalCost }}</td>
+              <td><strong>{{ row.totalCost }}</strong></td>
             </tr>
           </tbody>
         </table>
@@ -62,7 +71,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
           <tbody>
             <tr *ngFor="let row of stock">
               <td>{{ row.item }}</td>
-              <td>{{ row.currentStock }}</td>
+              <td>
+                <span class="stock-num" [class.low]="row.currentStock < 20">
+                  {{ row.currentStock }}
+                </span>
+              </td>
               <td>{{ row.lastUpdated | date: 'yyyy-MM-dd' }}</td>
             </tr>
           </tbody>
@@ -70,13 +83,38 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       </div>
     </div>
   `,
-  styles: [
-    `
-      .alert {
-        margin-top: 8px;
-      }
-    `,
-  ],
+  styles: [`
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: #021024; margin: 0 0 6px; }
+    .page-subtitle { color: #5483B3; font-size: 14px; margin: 0; }
+    .card-icon { font-size: 28px; margin-bottom: 4px; }
+    .status-msg {
+      margin-top: 10px; padding: 10px 14px;
+      background: #C1E8FF; color: #052659;
+      border-radius: 8px; font-size: 13px; font-weight: 500;
+      border: 1px solid #7DA0CA;
+    }
+    .no-alerts {
+      background: #e9f7ef; color: #1e8449;
+      border: 1px solid #a9dfbf; border-radius: 8px;
+      padding: 12px 16px; font-size: 13.5px; font-weight: 500;
+      margin-top: 8px;
+    }
+    .alert-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 8px;
+      margin-top: 8px;
+      background: #fce7e7; border: 1px solid #f5b7b1;
+    }
+    .alert-text { font-size: 13px; color: #021024; }
+    .type-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 6px;
+      background: #C1E8FF; color: #052659;
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+    }
+    .stock-num { font-weight: 700; color: #052659; }
+    .stock-num.low { color: #c0392b; }
+  `],
 })
 export class PurchasesDashboardComponent implements OnInit {
   message = '';

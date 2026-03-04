@@ -41,4 +41,32 @@ export class MailService {
 
     console.log('Email sent:', info.messageId);
   }
+
+  async sendPasswordResetEmail(email: string, token: string) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+
+    const info = await this.transporter.sendMail({
+      from: `"BI Platform" <${process.env.MAIL_FROM || 'noreply@biplatform.com'}>`,
+      to: email,
+      subject: 'Reset Your Password',
+      html: `
+  <h2>Password Reset Request</h2>
+  <p>You requested to reset your password. Click the button below to choose a new password:</p>
+  <a href="${resetUrl}" style="
+    background-color: #4f46e5;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 10px;
+  ">Reset Password</a>
+  <p style="margin-top: 20px; font-size: 12px; color: #666;">If you didn't request this, you can safely ignore this email. This link expires in 1 hour.</p>
+`,
+    });
+
+    console.log('Password reset email sent:', info.messageId);
+  }
 }

@@ -6,6 +6,8 @@ import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -82,7 +84,7 @@ export class AuthController {
 
   @Get('github')
   @UseGuards(AuthGuard('github'))
-  githubLogin() {}
+  githubLogin() { }
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
@@ -118,5 +120,21 @@ export class AuthController {
   @Patch('profile/photo')
   async updatePhoto(@Req() req: any, @Body() dto: UpdatePhotoDto) {
     return this.authService.updatePhoto(req.user.userId, dto.photo);
+  }
+  // ── Password Reset ────────────────────────────────────────────────────────
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.requestPasswordReset(dto.email);
+    return {
+      message:
+        'If an account exists for this email, a password reset link has been sent.',
+    };
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { message: 'Password has been updated successfully.' };
   }
 }

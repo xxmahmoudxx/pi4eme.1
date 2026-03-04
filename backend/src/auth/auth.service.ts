@@ -22,7 +22,7 @@ export interface JwtPayload {
 
 @Injectable()
 export class AuthService implements OnModuleInit {
-  
+
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(CompanyConfig.name) private companyModel: Model<CompanyConfigDocument>,
@@ -30,7 +30,7 @@ export class AuthService implements OnModuleInit {
     private twoFactorAuthService: TwoFactorAuthService,
     private mailService: MailService,
   ) { }
- 
+
   async onModuleInit() {
     const adminExists = await this.userModel.exists({ role: UserRole.Admin });
     if (!adminExists) {
@@ -145,6 +145,7 @@ export class AuthService implements OnModuleInit {
   async findOrCreateGithubUser(profile: any) {
     const email = profile.emails[0].value.toLowerCase();
     const name = profile.displayName || profile.username;
+
     let user = await this.userModel.findOne({ email });
     if (user) return user;
 
@@ -193,11 +194,47 @@ export class AuthService implements OnModuleInit {
 
   async verifyEmail(token: string) {
     const user = await this.userModel.findOne({ emailVerificationToken: token });
+
     if (!user) throw new BadRequestException('Invalid or expired verification token');
     user.isEmailVerified = true;
     user.emailVerificationToken = null;
     await user.save();
     return { message: 'Email verified successfully' };
+  }
+
+  // ── Password Reset ──────────────────────────────────────────────────────────
+
+  async requestPasswordReset(email: string) {
+    const user = await this.userModel.findOne({ email: email.toLowerCase(), status: 'active' });
+    if (!user || user.passwordHash === 'GITHUB_AUTH') return;
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpiry = new Date();
+    resetExpiry.setHours(resetExpiry.getHours() + 1);
+
+    await this.userModel.updateOne(
+      { _id: user._id },
+      { $set: { passwordResetToken: resetToken, passwordResetExpiry: resetExpiry } },
+    );
+
+    await this.mailService.sendPasswordResetEmail(user.email, resetToken);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.userModel.findOne({
+      passwordResetToken: token,
+      passwordResetExpiry: { $gt: new Date() },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await this.userModel.updateOne(
+      { _id: user._id },
+      { $set: { passwordHash: newHash, passwordResetToken: null, passwordResetExpiry: null } },
+    );
   }
 
   // ── 2FA Methods ──────────────────────────────────────────────────────────────

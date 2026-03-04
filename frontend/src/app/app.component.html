@@ -1,30 +1,29 @@
 <div class="app-shell">
   <header class="app-header">
     <div class="brand">
-      <span class="brand-title">BI Platform</span>
-      <span class="brand-sub">{{ "NAV.BRAND_SUB" | translate }}</span>
+      <img class="brand-logo" src="assets/tenexa-logo.png" alt="Tenexa Logo" />
+      <div class="brand-text">
+        <span class="brand-title">Tenexa</span>
+        <span class="brand-sub">{{ "NAV.BRAND_SUB" | translate }}</span>
+      </div>
     </div>
     <nav class="nav" *ngIf="showNavigation">
       <ng-container *ngIf="!(isAdmin$ | async)">
-        <a routerLink="/sales">{{ "NAV.SALES" | translate }}</a>
-        <a routerLink="/purchases">{{ "NAV.PURCHASES" | translate }}</a>
-        <a routerLink="/report">{{ "NAV.REPORT" | translate }}</a>
-        <a routerLink="/assistant">{{ "NAV.ASSISTANT" | translate }}</a>
+        <a routerLink="/sales" routerLinkActive="active-link">{{ "NAV.SALES" | translate }}</a>
+        <a routerLink="/purchases" routerLinkActive="active-link">{{ "NAV.PURCHASES" | translate }}</a>
+        <a routerLink="/report" routerLinkActive="active-link">{{ "NAV.REPORT" | translate }}</a>
+        <a routerLink="/assistant" routerLinkActive="active-link">{{ "NAV.ASSISTANT" | translate }}</a>
       </ng-container>
-      <a routerLink="/admin" *ngIf="isAdmin$ | async">{{
+      <a routerLink="/admin" routerLinkActive="active-link" *ngIf="isAdmin$ | async">{{
         "NAV.ADMIN" | translate
-      }}</a>
-      <a routerLink="/settings">Settings</a>
+        }}</a>
+      <a routerLink="/settings" routerLinkActive="active-link">Settings</a>
       <a routerLink="/login" (click)="logout()">{{
         "NAV.LOGOUT" | translate
-      }}</a>
+        }}</a>
     </nav>
     <div class="lang-selector">
-      <select
-        #langSelect
-        (change)="changeLang(langSelect.value)"
-        [value]="currentLang"
-      >
+      <select #langSelect (change)="changeLang(langSelect.value)" [value]="currentLang">
         <option value="en">EN</option>
         <option value="fr">FR</option>
         <option value="ar">AR</option>

@@ -11,16 +11,31 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, CsvUploadComponent, NgChartsModule, TranslateModule],
   template: `
+    <div class="page-header">
+      <h1>{{ 'SALES.UPLOAD_CSV' | translate }}</h1>
+      <p class="page-subtitle">Monitor your sales performance and AI-driven insights</p>
+    </div>
+
     <div class="grid grid-2">
-      <div class="card">
+      <div class="card upload-card">
+        <div class="card-icon">📤</div>
         <h2>{{ 'SALES.UPLOAD_CSV' | translate }}</h2>
         <app-csv-upload (fileSelected)="upload($event)"></app-csv-upload>
-        <p *ngIf="message">{{ message }}</p>
+        <p *ngIf="message" class="status-msg">{{ message }}</p>
       </div>
-      <div class="card">
+      <div class="card insight-card">
+        <div class="card-icon">🤖</div>
         <h2>{{ 'SALES.AI_INSIGHTS' | translate }}</h2>
-        <p><strong>{{ 'SALES.BEST_PRODUCT' | translate }}:</strong> {{ bestProduct }}</p>
-        <p><strong>{{ 'SALES.WORST_PRODUCT' | translate }}:</strong> {{ worstProduct }}</p>
+        <div class="insight-row">
+          <div class="insight-item best">
+            <span class="insight-label">{{ 'SALES.BEST_PRODUCT' | translate }}</span>
+            <span class="insight-value">{{ bestProduct }}</span>
+          </div>
+          <div class="insight-item worst">
+            <span class="insight-label">{{ 'SALES.WORST_PRODUCT' | translate }}</span>
+            <span class="insight-value">{{ worstProduct }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -35,6 +50,32 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       </div>
     </div>
   `,
+  styles: [`
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: #021024; margin: 0 0 6px; }
+    .page-subtitle { color: #5483B3; font-size: 14px; margin: 0; }
+
+    .card-icon { font-size: 28px; margin-bottom: 4px; }
+
+    .insight-row { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+    .insight-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; border-radius: 10px;
+    }
+    .insight-item.best  { background: linear-gradient(135deg, #e9f7ef, #C1E8FF); border: 1px solid #a9dfbf; }
+    .insight-item.worst { background: linear-gradient(135deg, #fce7e7, #fef9e7); border: 1px solid #f5b7b1; }
+    .insight-label { font-size: 12px; font-weight: 700; color: #5483B3; text-transform: uppercase; letter-spacing: 0.5px; }
+    .insight-value { font-size: 15px; font-weight: 700; color: #021024; }
+
+    .status-msg {
+      margin-top: 10px; padding: 10px 14px;
+      background: #C1E8FF; color: #052659;
+      border-radius: 8px; font-size: 13px; font-weight: 500;
+      border: 1px solid #7DA0CA;
+    }
+
+    .upload-card, .insight-card { cursor: default; }
+  `],
 })
 export class SalesDashboardComponent implements OnInit {
   message = '';
@@ -43,12 +84,12 @@ export class SalesDashboardComponent implements OnInit {
 
   lineChartData: ChartData<'line'> = {
     labels: [],
-    datasets: [{ data: [], label: 'Revenue', borderColor: '#2563eb', backgroundColor: '#93c5fd' }],
+    datasets: [{ data: [], label: 'Revenue', borderColor: '#052659', backgroundColor: 'rgba(84,131,179,0.15)', tension: 0.4, fill: true }],
   };
 
   barChartData: ChartData<'bar'> = {
     labels: [],
-    datasets: [{ data: [], label: 'Revenue', backgroundColor: '#10b981' }],
+    datasets: [{ data: [], label: 'Revenue', backgroundColor: 'rgba(84,131,179,0.7)', borderColor: '#052659', borderWidth: 1, borderRadius: 6 }],
   };
 
   constructor(private api: ApiService, private translate: TranslateService) { }
