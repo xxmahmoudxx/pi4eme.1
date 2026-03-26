@@ -1,0 +1,19 @@
+date,customer,product,category,quantity,unitPrice,status,notes
+2026-01-03,Alice Martin,Premium Widget,Electronics,5,49.99,confirmed,Online order
+2026-01-07,Bob Johnson,Basic Widget,Electronics,10,24.99,delivered,Bulk discount applied
+2026-01-10,Claire Dupont,Office Chair Pro,Furniture,2,189.00,delivered,Corporate account
+2026-01-14,David Lee,Premium Widget,Electronics,3,49.99,confirmed,Repeat customer
+2026-01-18,Emma Wilson,Desk Lamp LED,Furniture,8,35.50,shipped,New office setup
+2026-01-25,Alice Martin,Wireless Keyboard,Electronics,4,64.99,delivered,Accessory bundle
+2026-02-01,Frank Brown,Office Chair Pro,Furniture,1,189.00,confirmed,Individual order
+2026-02-05,Grace Kim,Basic Widget,Electronics,15,24.99,delivered,Reseller purchase
+2026-02-10,Bob Johnson,Standing Desk Mat,Furniture,6,42.00,delivered,Ergonomic upgrade
+2026-02-15,Claire Dupont,Premium Widget,Electronics,7,49.99,confirmed,Additional units
+2026-02-20,David Lee,Desk Lamp LED,Furniture,3,35.50,shipped,Extra lighting
+2026-02-28,Emma Wilson,Wireless Keyboard,Electronics,5,64.99,delivered,Team equipment
+2026-03-02,Henry Park,Basic Widget,Electronics,20,24.99,confirmed,Large order
+2026-03-08,Alice Martin,Standing Desk Mat,Furniture,2,42.00,delivered,Home office
+2026-03-12,Grace Kim,Premium Widget,Electronics,10,49.99,confirmed,Wholesale
+2026-03-15,Frank Brown,Desk Lamp LED,Furniture,4,35.50,shipped,Store display
+2026-03-20,Bob Johnson,Wireless Keyboard,Electronics,8,64.99,delivered,Office refresh
+2026-03-24,Claire Dupont,Office Chair Pro,Furniture,3,189.00,pending,Pending delivery
