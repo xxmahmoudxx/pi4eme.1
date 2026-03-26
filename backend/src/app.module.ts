@@ -12,6 +12,8 @@ import { CommandeModule } from './module/Commande.module';
 import { OrderItemModule } from './module/Orderitem.module ';  // ✅ espace supprimé
 import { AchatModule } from './module/Achat.module';
 import { PurchaseItemModule } from './module/Purchaseitem.module';
+import { PurchasesModule } from './purchases/purchases.module';
+import { SalesModule } from './sales/sales.module';
 
 @Module({
   imports: [
@@ -27,7 +29,9 @@ import { PurchaseItemModule } from './module/Purchaseitem.module';
     OrderItemModule,
     AchatModule,
     PurchaseItemModule,
+    PurchasesModule,
+    SalesModule,
   ],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }
