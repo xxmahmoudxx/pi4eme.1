@@ -77,6 +77,23 @@ export class ApiService {
     return this.http.delete(`${this.apiBase}/sales/${id}`);
   }
 
+  // ── Analytics / AI ──────────────────────────────────────────
+  getStockoutRisks() {
+    return this.http.get<any[]>(`${this.apiBase}/analytics/stockout-risks`);
+  }
+
+  getHealthScore() {
+    return this.http.get<any>(`${this.apiBase}/analytics/health-score`);
+  }
+
+  getSalesForecast() {
+    return this.http.get<any>(`${this.apiBase}/analytics/sales-forecast`);
+  }
+
+  getProductPerformance() {
+    return this.http.get<any[]>(`${this.apiBase}/analytics/product-performance`);
+  }
+
   // ── Stock / Inventory ────────────────────────────────────────
   getStock() {
     return this.http.get<any[]>(`${this.apiBase}/inventory/stock`);
@@ -84,24 +101,6 @@ export class ApiService {
 
   getInventoryAlerts() {
     return this.http.get<any[]>(`${this.apiBase}/inventory/alerts`);
-  }
-
-  // ── Report ───────────────────────────────────────────────────
-  getReportKpis() {
-    return this.http.get<any>(`${this.apiBase}/report/kpis?ts=${Date.now()}`);
-  }
-
-  getReportAi() {
-    return this.http.get<any>(`${this.apiBase}/report/ai?ts=${Date.now()}`);
-  }
-
-  // ── AI ───────────────────────────────────────────────────────
-  getAiInsights(module: string) {
-    return this.http.get<any[]>(`${this.apiBase}/ai/insights?module=${module}&ts=${Date.now()}`);
-  }
-
-  triggerAgent() {
-    return this.http.post(`${this.apiBase}/ai-agent/trigger`, {});
   }
 
   // ── Admin ────────────────────────────────────────────────────

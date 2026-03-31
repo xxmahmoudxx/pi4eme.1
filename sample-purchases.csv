@@ -1,19 +1,21 @@
 date,supplier,item,category,quantity,unitCost,status,notes
-2026-01-05,Acme Office Supplies,A4 Paper Ream,Office Supplies,50,4.50,received,Monthly paper order
-2026-01-08,TechParts Inc,USB-C Cable,Electronics,100,3.25,received,Bulk cable purchase
-2026-01-12,Acme Office Supplies,Ink Cartridge Black,Office Supplies,30,18.75,received,Printer ink refill
-2026-01-15,Global Foods Ltd,Coffee Beans 1kg,Pantry,20,12.00,received,Break room supply
-2026-01-20,TechParts Inc,Wireless Mouse,Electronics,40,15.50,received,New employee equipment
-2026-02-02,Steel & Metal Co,Steel Sheets 4x8,Raw Materials,15,85.00,received,Production material
-2026-02-05,Acme Office Supplies,Sticky Notes Pack,Office Supplies,60,2.25,received,Team supplies
-2026-02-10,Global Foods Ltd,Tea Bags Box 100,Pantry,25,6.50,received,Break room supply
-2026-02-14,TechParts Inc,HDMI Cable 2m,Electronics,35,7.80,received,Meeting rooms
+2026-01-03,TechParts Inc,Premium Widget,Electronics,30,35.00,received,Initial stock
+2026-01-05,TechParts Inc,Basic Widget,Electronics,50,15.00,received,Initial stock
+2026-01-06,FurniturePro,Office Chair Pro,Furniture,10,120.00,received,Bulk order
+2026-01-07,TechParts Inc,Wireless Keyboard,Electronics,25,40.00,received,Initial stock
+2026-01-08,FurniturePro,Desk Lamp LED,Furniture,20,22.00,received,Showroom stock
+2026-01-10,FurniturePro,Standing Desk Mat,Furniture,15,28.00,received,New product
+2026-01-15,Acme Office Supplies,A4 Paper Ream,Office Supplies,50,4.50,received,Monthly order
+2026-01-20,Acme Office Supplies,Ink Cartridge Black,Office Supplies,30,18.75,received,Printer ink
+2026-02-01,TechParts Inc,Premium Widget,Electronics,20,35.00,received,Restock
+2026-02-05,TechParts Inc,Basic Widget,Electronics,30,15.00,received,Restock
+2026-02-08,FurniturePro,Office Chair Pro,Furniture,5,120.00,received,Additional
+2026-02-10,TechParts Inc,Wireless Keyboard,Electronics,15,40.00,received,Restock
+2026-02-12,FurniturePro,Desk Lamp LED,Furniture,10,22.00,received,Restock
+2026-02-15,Acme Office Supplies,A4 Paper Ream,Office Supplies,40,4.50,received,Monthly order
 2026-02-20,PackRight Solutions,Cardboard Box Medium,Packaging,200,1.15,received,Shipping supplies
-2026-03-01,Steel & Metal Co,Aluminum Bars,Raw Materials,10,45.00,received,Production material
-2026-03-05,Acme Office Supplies,Whiteboard Markers,Office Supplies,80,1.80,received,Meeting supplies
-2026-03-10,Global Foods Ltd,Bottled Water Case,Pantry,30,8.50,received,Office hydration
-2026-03-12,TechParts Inc,Laptop Stand,Electronics,25,28.00,pending,Ergonomic upgrade
-2026-03-18,PackRight Solutions,Bubble Wrap Roll,Packaging,50,6.75,received,Shipping protection
-2026-03-20,Steel & Metal Co,Copper Wire 100m,Raw Materials,5,120.00,received,Electrical work
-2026-03-22,Acme Office Supplies,Binder Clips Box,Office Supplies,40,3.50,received,Document organization
-2026-03-25,Global Foods Ltd,Snack Mix Variety,Pantry,15,14.00,pending,Employee appreciation
+2026-03-01,TechParts Inc,Premium Widget,Electronics,10,35.00,received,Small restock
+2026-03-05,TechParts Inc,Basic Widget,Electronics,15,15.00,received,Small restock
+2026-03-10,FurniturePro,Standing Desk Mat,Furniture,8,28.00,received,Restock
+2026-03-15,Steel & Metal Co,Copper Wire 100m,Raw Materials,5,120.00,received,Electrical work
+2026-03-20,Acme Office Supplies,Whiteboard Markers,Office Supplies,80,1.80,received,Meeting supplies

@@ -14,6 +14,7 @@ import { AchatModule } from './module/Achat.module';
 import { PurchaseItemModule } from './module/Purchaseitem.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { SalesModule } from './sales/sales.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SalesModule } from './sales/sales.module';
     PurchaseItemModule,
     PurchasesModule,
     SalesModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
 })

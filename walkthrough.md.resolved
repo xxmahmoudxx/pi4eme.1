@@ -1,0 +1,215 @@
+# AI/ML Features — Walkthrough & Testing Guide
+
+## Architecture
+
+```
+┌─────────────────┐     HTTP/JSON      ┌──────────────────┐     HTTP/JSON     ┌─────────────────┐
+│  Angular SPA    │ ──────────────────▶ │  NestJS Backend  │ ────────────────▶ │  Python Flask   │
+│  (port 4200)    │                     │  (port 3000)     │                   │  ML Service     │
+│                 │ ◀────────────────── │                  │ ◀──────────────── │  (port 5000)    │
+└─────────────────┘    AI results       └──────────────────┘   ML predictions  └─────────────────┘
+                                              │                                       │
+                                              ▼                                       │
+                                        ┌──────────┐                                  │
+                                        │ MongoDB  │   NestJS fetches data,            │
+                                        │ (scoped  │   sends to Python,               │
+                                        │ by user) │   Python computes,               │
+                                        └──────────┘   returns results                │
+```
+
+**Communication flow:**
+1. Frontend calls NestJS endpoint (e.g. `GET /analytics/stockout-risks`)
+2. NestJS fetches purchases + sales from MongoDB (scoped by `companyId` from JWT)
+3. NestJS sends data as JSON POST to Python Flask (e.g. `POST http://localhost:5000/ml/stockout`)
+4. Python runs ML algorithm, returns JSON result
+5. NestJS returns result to frontend
+
+> [!IMPORTANT]
+> Python never accesses MongoDB directly. All data isolation is enforced by NestJS.
+
+---
+
+## What Was Built
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| [app.py](file:///d:/0hachewet/Pi4eme/ml-service/app.py) | Python Flask ML service (4 AI endpoints) |
+| [requirements.txt](file:///d:/0hachewet/Pi4eme/ml-service/requirements.txt) | Python dependencies |
+| [analytics.service.ts](file:///d:/0hachewet/Pi4eme/backend/src/analytics/analytics.service.ts) | NestJS service — fetches data, proxies to Python |
+| [analytics.controller.ts](file:///d:/0hachewet/Pi4eme/backend/src/analytics/analytics.controller.ts) | 4 JWT-protected endpoints |
+| [analytics.module.ts](file:///d:/0hachewet/Pi4eme/backend/src/analytics/analytics.module.ts) | NestJS module registration |
+
+### Modified Files
+
+| File | Change |
+|------|--------|
+| [app.module.ts](file:///d:/0hachewet/Pi4eme/backend/src/app.module.ts) | Registered [AnalyticsModule](file:///d:/0hachewet/Pi4eme/backend/src/analytics/analytics.module.ts#8-19) |
+| [api.service.ts](file:///d:/0hachewet/Pi4eme/frontend/src/app/services/api.service.ts) | Added 4 analytics endpoints |
+| [purchases-dashboard.component.ts](file:///d:/0hachewet/Pi4eme/frontend/src/app/pages/purchases-dashboard.component.ts) | Added Inventory Alerts AI section |
+| [sales-dashboard.component.ts](file:///d:/0hachewet/Pi4eme/frontend/src/app/pages/sales-dashboard.component.ts) | Added Product Performance AI section |
+| [report-dashboard.component.ts](file:///d:/0hachewet/Pi4eme/frontend/src/app/pages/report-dashboard.component.ts) | Full rewrite: health score + forecast chart |
+| [assistant.component.ts](file:///d:/0hachewet/Pi4eme/frontend/src/app/pages/assistant.component.ts) | Rewired to use analytics endpoints |
+| [sample-purchases.csv](file:///d:/0hachewet/Pi4eme/sample-purchases.csv) | Products now match sales CSV names |
+
+### Schema Changes
+**None.** No schema modifications were needed. The existing [Purchase](file:///d:/0hachewet/Pi4eme/backend/src/purchases/schemas/purchase.schema.ts#6-42) and [Sale](file:///d:/0hachewet/Pi4eme/backend/src/sales/schemas/sale.schema.ts#6-42) flat schemas contain all fields required for the AI computations.
+
+### Compilation
+- ✅ Backend: `nest build` — success
+- ✅ Frontend: `ng build` — success
+
+---
+
+## Complete Testing Guide
+
+### 1. Install Python Dependencies
+```bash
+cd d:\0hachewet\Pi4eme\ml-service
+pip install -r requirements.txt
+```
+
+### 2. Start All 3 Services
+
+```bash
+# Terminal 1 — Python ML Service
+cd d:\0hachewet\Pi4eme\ml-service
+python app.py
+# → 🧠 Tenexa ML Service running on http://localhost:5000
+
+# Terminal 2 — NestJS Backend
+cd d:\0hachewet\Pi4eme\backend
+npm run start:dev
+# → Running on http://localhost:3000
+
+# Terminal 3 — Angular Frontend
+cd d:\0hachewet\Pi4eme\frontend
+npx ng serve
+# → Running on http://localhost:4200
+```
+
+### 3. Login
+Go to `http://localhost:4200/login` and sign in.
+
+### 4. Upload Sample Purchases CSV
+Go to `/purchases` → Use "Import Purchases CSV" → Upload [sample-purchases.csv](file:///d:/0hachewet/Pi4eme/sample-purchases.csv) → Verify 19 rows imported.
+
+### 5. Upload Sample Sales CSV
+Go to `/sales` → Use "Import Sales CSV" → Upload [sample-sales.csv](file:///d:/0hachewet/Pi4eme/sample-sales.csv) → Verify 18 rows imported.
+
+### 6. Manually Add Records
+Test the manual entry forms on both dashboards. Add a purchase or sale and verify it appears in the table.
+
+### 7. Test Stockout Prediction (Purchases Dashboard)
+After uploading both CSVs, check the `/purchases` page for the **"🚨 Inventory Alerts & Reorder Recommendations"** section. You should see:
+- Product cards with risk badges (High/Medium/Low)
+- Estimated stock, daily sales velocity, days until stockout
+- Products like "Premium Widget" and "Basic Widget" should show Medium/High risk (they're being sold out)
+- Products like "A4 Paper Ream" should show Low risk (purchased but not sold through this system)
+
+### 8. Test Reorder Recommendation
+In the same section, High/Medium risk products show a blue reorder box with:
+- Recommended quantity (e.g. "Reorder 45 units")
+- Urgency level (Urgent / Soon)
+- Plain English explanation
+
+### 9. Test Company Health Score (Financial Report)
+Go to `/report`. You should see:
+- Revenue, Costs, Profit KPI cards
+- Company Health Score (number/100) with status badge (Healthy/Warning/Critical)
+- Gauge bar colored by status
+- Factor breakdown (Profit Margin, Revenue Trend, Cost Efficiency, Sales Consistency, Inventory Coverage, Growth Rate) each with score bars
+
+### 10. Test Revenue Forecast (Financial Report)
+On the same `/report` page, below the health score:
+- "📈 Revenue Forecast" card with trend direction (Increasing/Stable/Decreasing)
+- Next 7-day forecast total
+- Chart with solid blue line (actual) and dashed green line (ML forecast)
+- Confidence percentage
+
+### 11. Test Product Performance (Sales Dashboard)
+Go to `/sales`. Below the KPI cards:
+- "🏆 Product Performance Insights" section
+- Each product classified: Top Performer 🏆, Rising Star 🚀, Stable ✅, Declining 📉, Low Demand ⚠️
+- Revenue, quantity, orders, growth percentage, trend arrow
+- Human-readable explanation
+
+### 12. Verify User Isolation
+1. Log out, create a **second account**
+2. Navigate to `/purchases`, `/sales`, `/report`
+3. All pages show empty states — **no data from the first user appears**
+4. Upload different CSV data → only that user's data shows in AI computations
+
+### 13. Pages & AI Sections Summary
+
+| Page | AI Section |
+|------|------------|
+| `/purchases` | 🚨 Inventory Alerts & Reorder Recommendations |
+| `/sales` | 🏆 Product Performance Insights |
+| `/report` | 🧠 Company Health Score + 📈 Revenue Forecast |
+| `/assistant` | Summary cards from all 3 AI features |
+
+### 14. Expected Results After Importing Sample Data
+
+| Metric | Expected Value (approximate) |
+|--------|------------------------------|
+| Health Score | ~50-70 (Warning or Healthy range) |
+| Revenue Trend | Increasing (sales grow over Jan→Mar) |
+| Top Product | Premium Widget (highest revenue) |
+| Highest Risk Product | Office Chair Pro or Wireless Keyboard |
+| Forecast Trend | Stable or Increasing |
+
+---
+
+## ML Feature Explanations (Academic Format)
+
+### Feature 1: Stockout Risk Prediction
+
+- **Besoin:** Prédire quels produits risquent une rupture de stock en analysant les mouvements d'achat et de vente.
+- **Input:** Historique des achats (quantités achetées par produit) + Historique des ventes (quantités vendues par produit, dates).
+- **Output:** Niveau de risque (Low/Medium/High), stock estimé, jours avant rupture, vitesse de vente journalière.
+- **Méthode utilisée:** Estimation de la demande (demand estimation) — calcul du taux de consommation moyen (daily sales velocity) et projection linéaire du stock restant.
+- **Type:** Prediction / Scoring
+- **Pourquoi ce choix:** Simple, explicable, adapté aux petits datasets. Les modèles complexes (LSTM, ARIMA) nécessitent beaucoup plus de données historiques.
+- **Mots techniques:** demand estimation, stock consumption rate, safety stock, prediction, time-based analysis
+
+### Feature 2: Reorder Recommendation
+
+- **Besoin:** Recommander une quantité de réapprovisionnement pour les produits à risque.
+- **Input:** Vitesse de vente journalière, stock estimé, seuil de sécurité (25% de marge).
+- **Output:** Quantité recommandée, niveau d'urgence, explication en langage naturel.
+- **Méthode utilisée:** Modèle de recommandation basé sur la formule : `reorder_qty = ceil(daily_velocity × 30 × 1.25)` (couverture 30 jours + 25% stock de sécurité).
+- **Type:** Recommendation
+- **Pourquoi ce choix:** Approche standard en gestion des stocks (EOQ simplifié). Facile à comprendre et à justifier.
+- **Mots techniques:** recommendation system, safety stock, reorder point, demand forecasting
+
+### Feature 3: Company Health Score
+
+- **Besoin:** Évaluer la santé financière globale de l'entreprise avec un score unique.
+- **Input:** Revenus, coûts, marges, tendances mensuelles, volatilité des ventes, couverture d'inventaire.
+- **Output:** Score 0-100, statut (Healthy/Warning/Critical), détail par facteur.
+- **Méthode utilisée:** Modèle de scoring pondéré (weighted scoring model) — 6 facteurs avec des poids définis (marge: 25%, tendance: 20%, efficacité: 15%, consistance: 15%, inventaire: 15%, croissance: 10%).
+- **Type:** Scoring / Classification
+- **Pourquoi ce choix:** Modèle transparent et interprétable. Chaque facteur contribue de manière compréhensible au score final.
+- **Mots techniques:** scoring model, feature engineering, weighted aggregation, classification, financial analysis
+
+### Feature 4: Revenue Forecast
+
+- **Besoin:** Prédire les revenus futurs pour aider à la planification.
+- **Input:** Série temporelle des revenus journaliers.
+- **Output:** Prévision des 7 prochains jours, direction de tendance (Increasing/Stable/Decreasing), score de confiance (R²).
+- **Méthode utilisée:** Régression linéaire (scikit-learn `LinearRegression`) sur la série temporelle des revenus.
+- **Type:** Forecasting (Time Series)
+- **Pourquoi ce choix:** La régression linéaire est robuste pour les petits datasets et donne un score R² interprétable. Pour des datasets plus grands, on pourrait évoluer vers ARIMA ou Prophet.
+- **Mots techniques:** time series forecasting, linear regression, supervised learning, regression, scikit-learn, R² score, trend analysis
+
+### Feature 5: Product Performance Classification
+
+- **Besoin:** Classer les produits selon leur performance commerciale pour identifier les points forts et faibles.
+- **Input:** Données de ventes agrégées par produit (revenus, quantités, nombre de commandes, croissance 1ère moitié vs 2ème moitié).
+- **Output:** Classification (Top Performer / Rising Star / Stable / Declining / Low Demand), croissance %, explication.
+- **Méthode utilisée:** Classification basée sur des règles (rule-based classification) utilisant des seuils statistiques (percentiles P20/P80) et analyse de tendance (growth rate).
+- **Type:** Classification
+- **Pourquoi ce choix:** Les règles métier sont transparentes et justifiables. Pour un modèle non-supervisé, on pourrait utiliser K-Means clustering, mais les labels ne seraient pas aussi explicables.
+- **Mots techniques:** classification, rule-based model, trend analysis, feature engineering, percentile thresholds, segmentation
