@@ -47,9 +47,6 @@ export class User {
 
   @Prop({ type: Date, default: null })
   passwordResetExpiry: Date | null;
-  // Client (1) ──places──► (*) Commande
-@Prop({ type: [{ type: Types.ObjectId, ref: 'Commande' }] })
-commandes: Types.ObjectId[];
 }
 
 export type UserDocument = User & Document;

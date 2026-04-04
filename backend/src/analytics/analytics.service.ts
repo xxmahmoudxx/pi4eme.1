@@ -16,14 +16,41 @@ export class AnalyticsService {
         private readonly saleModel: Model<SaleDocument>,
     ) { }
 
-    /** Fetch purchases + sales for a company, POST to Python ML, return result */
+    /**
+     * Fetch purchases + sales for a company,
+     * FILTER out invalid rows before sending to ML,
+     * POST to Python ML, return result.
+     */
     private async callMl(companyId: string, endpoint: string): Promise<any> {
         const cid = new Types.ObjectId(companyId);
 
-        const [purchases, sales] = await Promise.all([
+        const [rawPurchases, rawSales] = await Promise.all([
             this.purchaseModel.find({ companyId: cid }).lean().exec(),
             this.saleModel.find({ companyId: cid }).lean().exec(),
         ]);
+
+        // ── ML Protection: filter out rows that would break ML ──
+        const purchases = rawPurchases.filter(p =>
+            p.item &&
+            p.quantity != null && p.quantity >= 0 &&
+            p.date &&
+            p.totalCost != null && p.totalCost >= 0
+        );
+
+        const sales = rawSales.filter(s =>
+            s.product &&
+            s.quantity != null && s.quantity >= 0 &&
+            s.date &&
+            s.totalAmount != null && s.totalAmount >= 0
+        );
+
+        const filteredOutPurchases = rawPurchases.length - purchases.length;
+        const filteredOutSales = rawSales.length - sales.length;
+        if (filteredOutPurchases > 0 || filteredOutSales > 0) {
+            this.logger.warn(
+                `ML data filter: excluded ${filteredOutPurchases} purchases and ${filteredOutSales} sales with incomplete data`,
+            );
+        }
 
         const url = `${this.mlBaseUrl}${endpoint}`;
         this.logger.log(`Calling ML service: ${url} (${purchases.length} purchases, ${sales.length} sales)`);

@@ -13,6 +13,9 @@ Endpoints:
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import numpy as np
+import re
+import os
+import tempfile
 from datetime import datetime, timedelta
 from sklearn.linear_model import LinearRegression
 
@@ -532,6 +535,99 @@ def health_check():
     return jsonify({'status': 'ok', 'service': 'Tenexa ML Service'})
 
 
+# ════════════════════════════════════════════════════════════════
+# FEATURE 6: OCR — INVOICE IMAGE TEXT EXTRACTION (OPTIONAL)
+# Requires: pip install pytesseract Pillow
+# Also requires Tesseract-OCR installed on the system.
+# On Windows: download from https://github.com/UB-Mannheim/tesseract/wiki
+# On Ubuntu: sudo apt install tesseract-ocr
+# ════════════════════════════════════════════════════════════════
+
+@app.route('/ocr/extract', methods=['POST'])
+def ocr_extract():
+    """
+    Accepts an image file upload, runs Tesseract OCR to extract text,
+    then attempts to parse structured data (rows with product, qty, price, date).
+    Returns { text: string, parsedRows: [{...}] }
+    """
+    if 'file' not in request.files:
+        return jsonify({'text': '', 'parsedRows': [], 'error': 'No file uploaded'}), 400
+
+    file = request.files['file']
+
+    try:
+        import pytesseract
+        from PIL import Image
+    except ImportError:
+        return jsonify({
+            'text': '',
+            'parsedRows': [],
+            'error': 'OCR dependencies not installed. Run: pip install pytesseract Pillow'
+        }), 500
+
+    # Save to temp file and run OCR
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as tmp:
+            file.save(tmp)
+            tmp_path = tmp.name
+
+        image = Image.open(tmp_path)
+        text = pytesseract.image_to_string(image)
+        os.unlink(tmp_path)
+    except Exception as e:
+        return jsonify({'text': '', 'parsedRows': [], 'error': f'OCR failed: {str(e)}'}), 500
+
+    # Attempt to parse structured data from the extracted text
+    parsed_rows = parse_invoice_text(text)
+
+    return jsonify({
+        'text': text,
+        'parsedRows': parsed_rows,
+    })
+
+
+def parse_invoice_text(text):
+    """
+    Simple heuristic parser for invoice text.
+    Looks for lines with: product name, quantity, price patterns.
+    """
+    rows = []
+    lines = text.strip().split('\n')
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        # Try to find numbers in the line (potential qty and price)
+        numbers = re.findall(r'[\d]+(?:[\.,]\d+)?', line)
+        if len(numbers) >= 2:
+            # Remove numbers from line to get the text part (product name)
+            text_part = re.sub(r'[\d]+(?:[\.,]\d+)?', '', line).strip()
+            text_part = re.sub(r'[|$€£]', '', text_part).strip()
+            text_part = re.sub(r'\s+', ' ', text_part).strip(' -:,.')
+
+            if text_part and len(text_part) > 1:
+                # Last two numbers are likely quantity and price
+                qty_str = numbers[-2].replace(',', '.')
+                price_str = numbers[-1].replace(',', '.')
+
+                try:
+                    qty = float(qty_str)
+                    price = float(price_str)
+                    if qty > 0 and price > 0:
+                        rows.append({
+                            'item': text_part,
+                            'quantity': qty,
+                            'unitPrice': price,
+                            'totalAmount': round(qty * price, 2),
+                        })
+                except ValueError:
+                    continue
+
+    return rows
+
+
 if __name__ == '__main__':
-    print("🧠 Tenexa ML Service running on http://localhost:5000")
+    print("Tenexa ML Service running on http://localhost:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)

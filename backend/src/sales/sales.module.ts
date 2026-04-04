@@ -4,11 +4,13 @@ import { MulterModule } from '@nestjs/platform-express';
 import { Sale, SaleSchema } from './schemas/sale.schema';
 import { SalesService } from './sales.service';
 import { SalesController } from './sales.controller';
+import { EtlModule } from '../etl/etl.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Sale.name, schema: SaleSchema }]),
-        MulterModule.register({ storage: undefined }), // memory storage (buffer)
+        MulterModule.register({ storage: undefined }),
+        EtlModule,
     ],
     controllers: [SalesController],
     providers: [SalesService],

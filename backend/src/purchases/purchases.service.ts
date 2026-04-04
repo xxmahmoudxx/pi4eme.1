@@ -2,81 +2,145 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Purchase, PurchaseDocument } from './schemas/purchase.schema';
+import { EtlService, ColumnMapping } from '../etl/etl.service';
 
 @Injectable()
 export class PurchasesService {
     constructor(
         @InjectModel(Purchase.name)
         private readonly purchaseModel: Model<PurchaseDocument>,
+        private readonly etl: EtlService,
     ) { }
 
     // ── Create single purchase (manual entry) ────────────────────
     async create(companyId: string, data: any): Promise<Purchase> {
-        const totalCost = (data.quantity || 0) * (data.unitCost || 0);
+        // Smart: compute whichever is missing
+        let unitCost = data.unitCost ?? 0;
+        let totalCost = data.totalCost ?? 0;
+        const quantity = data.quantity || 0;
+
+        if (totalCost && !unitCost && quantity > 0) {
+            unitCost = totalCost / quantity;
+        } else if (unitCost && !totalCost) {
+            totalCost = quantity * unitCost;
+        } else if (!totalCost) {
+            totalCost = quantity * unitCost;
+        }
+
         return this.purchaseModel.create({
             companyId: new Types.ObjectId(companyId),
             date: data.date ? new Date(data.date) : new Date(),
-            supplier: data.supplier,
+            supplier: data.supplier || 'Unknown',
             category: data.category || '',
             item: data.item,
-            quantity: data.quantity,
-            unitCost: data.unitCost,
+            quantity,
+            unitCost,
             totalCost,
             status: data.status || 'received',
             notes: data.notes || '',
         });
     }
 
-    // ── CSV import ───────────────────────────────────────────────
-    async importCsv(companyId: string, csvContent: string): Promise<{ imported: number; errors: string[] }> {
-        const lines = csvContent.split(/\r?\n/).filter((l) => l.trim());
-        if (lines.length < 2) throw new BadRequestException('CSV must have a header row and at least one data row');
+    // ── CSV Preview: parse headers + auto-suggest mapping ────────
+    previewCsv(csvContent: string) {
+        const { headers, rows } = this.etl.parseCsv(csvContent);
+        const suggestedMapping = this.etl.autoSuggestMapping(headers, 'purchase');
+        const sampleRows = rows.slice(0, 5).map((values) => {
+            const row: Record<string, string> = {};
+            headers.forEach((h, i) => (row[h] = values[i] || ''));
+            return row;
+        });
 
-        const header = lines[0].split(',').map((h) => h.trim().toLowerCase());
-        const required = ['date', 'supplier', 'item', 'quantity', 'unitcost'];
-        const missing = required.filter((r) => !header.includes(r));
-        if (missing.length) throw new BadRequestException(`Missing required columns: ${missing.join(', ')}`);
+        // Smart hints for UX
+        const hints = this.etl.detectSmartHints(suggestedMapping, headers, 'purchase');
+        const fieldInfo = this.etl.getFieldRequirements('purchase');
 
-        const errors: string[] = [];
-        const docs: any[] = [];
+        // Dry-run transform to get quality preview
+        const dryRun = this.etl.transformPurchases(headers, rows, suggestedMapping);
 
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map((v) => v.trim());
-            const row: any = {};
-            header.forEach((h, idx) => (row[h] = values[idx] || ''));
+        return {
+            headers,
+            suggestedMapping,
+            sampleRows,
+            totalRows: rows.length,
+            standardFields: ['date', 'supplier', 'item', 'category', 'quantity', 'unitCost', 'totalCost', 'status', 'notes'],
+            fieldInfo,
+            hints,
+            quality: dryRun.quality,
+            previewErrors: dryRun.errors.slice(0, 5),
+            previewWarnings: dryRun.warnings.slice(0, 5),
+            smartFixes: dryRun.smartFixes.slice(0, 5),
+        };
+    }
 
-            const qty = parseFloat(row.quantity);
-            const cost = parseFloat(row.unitcost);
+    // ── CSV Import with user-confirmed mapping ───────────────────
+    async importCsvWithMapping(companyId: string, csvContent: string, mapping: ColumnMapping): Promise<{
+        imported: number;
+        errors: string[];
+        warnings: string[];
+        skipped: number;
+        quality: any;
+        smartFixes: string[];
+    }> {
+        const { headers, rows } = this.etl.parseCsv(csvContent);
+        if (rows.length === 0) throw new BadRequestException('CSV has no data rows');
 
-            if (!row.date || !row.supplier || !row.item) {
-                errors.push(`Row ${i + 1}: missing required field (date, supplier, or item)`);
-                continue;
-            }
-            if (isNaN(qty) || qty < 0) {
-                errors.push(`Row ${i + 1}: invalid quantity "${row.quantity}"`);
-                continue;
-            }
-            if (isNaN(cost) || cost < 0) {
-                errors.push(`Row ${i + 1}: invalid unitCost "${row.unitcost}"`);
-                continue;
-            }
+        const result = this.etl.transformPurchases(headers, rows, mapping);
 
-            docs.push({
-                companyId: new Types.ObjectId(companyId),
-                date: new Date(row.date),
-                supplier: row.supplier,
-                category: row.category || '',
-                item: row.item,
-                quantity: qty,
-                unitCost: cost,
-                totalCost: qty * cost,
-                status: row.status || 'received',
-                notes: row.notes || '',
-            });
+        // Block import only if quality is dangerously poor
+        if (result.quality.qualityPercent < 10 && result.rows.length === 0) {
+            throw new BadRequestException(
+                `No valid rows found. ${result.errors.length} errors detected. Please check your CSV format.`,
+            );
         }
 
+        const docs = result.rows.map((row) => ({
+            companyId: new Types.ObjectId(companyId),
+            date: row.date,
+            supplier: row.supplier,
+            category: row.category,
+            item: row.item,
+            quantity: row.quantity,
+            unitCost: row.unitCost,
+            totalCost: row.totalCost,
+            status: row.status,
+            notes: row.notes,
+        }));
+
         if (docs.length) await this.purchaseModel.insertMany(docs);
-        return { imported: docs.length, errors };
+
+        return {
+            imported: docs.length,
+            errors: result.errors,
+            warnings: result.warnings,
+            skipped: result.skippedRows,
+            quality: result.quality,
+            smartFixes: result.smartFixes,
+        };
+    }
+
+    // ── Legacy CSV import (backward compatible) ──────────────────
+    async importCsv(companyId: string, csvContent: string): Promise<{ imported: number; errors: string[] }> {
+        const { headers } = this.etl.parseCsv(csvContent);
+        const mapping = this.etl.autoSuggestMapping(headers, 'purchase');
+
+        // Only truly required fields
+        const requiredFields = ['date', 'item', 'quantity'];
+        const mappedFields = Object.values(mapping);
+        const missing = requiredFields.filter((f) => !mappedFields.includes(f));
+
+        // Also need at least one cost field
+        const hasCostField = mappedFields.includes('unitCost') || mappedFields.includes('totalCost');
+
+        if (missing.length) {
+            throw new BadRequestException(`Cannot auto-map required columns: ${missing.join(', ')}. Use the column mapping UI.`);
+        }
+        if (!hasCostField) {
+            throw new BadRequestException('Cannot find a cost column (unitCost or totalCost). Use the column mapping UI.');
+        }
+
+        const result = await this.importCsvWithMapping(companyId, csvContent, mapping);
+        return { imported: result.imported, errors: result.errors };
     }
 
     // ── Read ─────────────────────────────────────────────────────
@@ -105,7 +169,6 @@ export class PurchasesService {
             },
         ]);
 
-        // Top supplier
         const [topSupplier] = await this.purchaseModel.aggregate([
             { $match: { companyId: cid } },
             { $group: { _id: '$supplier', total: { $sum: '$totalCost' } } },
