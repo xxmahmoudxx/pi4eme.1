@@ -8,6 +8,19 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
   // ── Purchases ────────────────────────────────────────────────
+  previewPurchasesCsv(file: File) {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<any>(`${this.apiBase}/purchases/upload/preview`, fd);
+  }
+
+  confirmPurchasesCsv(file: File, mapping: Record<string, string>) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('mapping', JSON.stringify(mapping));
+    return this.http.post<any>(`${this.apiBase}/purchases/upload/confirm`, fd);
+  }
+
   uploadPurchases(file: File) {
     const formData = new FormData();
     formData.append('file', file);
@@ -43,6 +56,19 @@ export class ApiService {
   }
 
   // ── Sales ────────────────────────────────────────────────────
+  previewSalesCsv(file: File) {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<any>(`${this.apiBase}/sales/upload/preview`, fd);
+  }
+
+  confirmSalesCsv(file: File, mapping: Record<string, string>) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('mapping', JSON.stringify(mapping));
+    return this.http.post<any>(`${this.apiBase}/sales/upload/confirm`, fd);
+  }
+
   uploadSales(file: File) {
     const formData = new FormData();
     formData.append('file', file);
@@ -75,6 +101,13 @@ export class ApiService {
 
   deleteSale(id: string) {
     return this.http.delete(`${this.apiBase}/sales/${id}`);
+  }
+
+  // ── OCR ──────────────────────────────────────────────────────
+  ocrInvoice(file: File) {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<any>(`${this.apiBase}/ocr/extract`, fd);
   }
 
   // ── Analytics / AI ──────────────────────────────────────────

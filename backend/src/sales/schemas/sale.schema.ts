@@ -11,7 +11,7 @@ export class Sale {
     @Prop({ required: true })
     date: Date;
 
-    @Prop({ required: true })
+    @Prop({ default: 'Unknown' })
     customer: string;
 
     @Prop({ required: true })
@@ -23,7 +23,7 @@ export class Sale {
     @Prop({ required: true, min: 0 })
     quantity: number;
 
-    @Prop({ required: true, min: 0 })
+    @Prop({ default: 0, min: 0 })
     unitPrice: number;
 
     @Prop({ required: true, min: 0 })

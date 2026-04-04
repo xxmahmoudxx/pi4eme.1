@@ -4,11 +4,13 @@ import { MulterModule } from '@nestjs/platform-express';
 import { Purchase, PurchaseSchema } from './schemas/purchase.schema';
 import { PurchasesService } from './purchases.service';
 import { PurchasesController } from './purchases.controller';
+import { EtlModule } from '../etl/etl.module';
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Purchase.name, schema: PurchaseSchema }]),
-        MulterModule.register({ storage: undefined }), // memory storage (buffer)
+        MulterModule.register({ storage: undefined }),
+        EtlModule,
     ],
     controllers: [PurchasesController],
     providers: [PurchasesService],

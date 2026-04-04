@@ -11,7 +11,28 @@ import { SalesService } from './sales.service';
 export class SalesController {
     constructor(private readonly svc: SalesService) { }
 
-    // POST /sales/upload — CSV upload
+    // POST /sales/upload/preview — Parse CSV, return headers + suggested mapping
+    @Post('upload/preview')
+    @UseInterceptors(FileInterceptor('file'))
+    preview(@UploadedFile() file: Express.Multer.File) {
+        const csvContent = file.buffer.toString('utf-8');
+        return this.svc.previewCsv(csvContent);
+    }
+
+    // POST /sales/upload/confirm — Import with user-confirmed mapping
+    @Post('upload/confirm')
+    @UseInterceptors(FileInterceptor('file'))
+    async confirm(
+        @UploadedFile() file: Express.Multer.File,
+        @Body('mapping') mappingJson: string,
+        @Req() req: any,
+    ) {
+        const csvContent = file.buffer.toString('utf-8');
+        const mapping = JSON.parse(mappingJson);
+        return this.svc.importCsvWithMapping(req.user.companyId, csvContent, mapping);
+    }
+
+    // POST /sales/upload — Legacy CSV upload (auto-mapping)
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
     async upload(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
