@@ -8,29 +8,38 @@
       </div>
     </div>
     <nav class="nav" *ngIf="showNavigation">
-      <ng-container *ngIf="!(isAdmin$ | async)">
-        <a routerLink="/sales" routerLinkActive="active-link">{{ "NAV.SALES" | translate }}</a>
-        <a routerLink="/purchases" routerLinkActive="active-link">{{ "NAV.PURCHASES" | translate }}</a>
-        <a routerLink="/report" routerLinkActive="active-link">{{ "NAV.REPORT" | translate }}</a>
-        <a routerLink="/assistant" routerLinkActive="active-link">{{ "NAV.ASSISTANT" | translate }}</a>
-      </ng-container>
-      <a routerLink="/admin" routerLinkActive="active-link" *ngIf="isAdmin$ | async">{{
-        "NAV.ADMIN" | translate
-        }}</a>
-      <a routerLink="/settings" routerLinkActive="active-link">Settings</a>
-      <a routerLink="/login" (click)="logout()">{{
-        "NAV.LOGOUT" | translate
-        }}</a>
+      <div class="nav-center">
+        <ng-container *ngIf="!(isAdmin$ | async)">
+          <a routerLink="/sales" routerLinkActive="active-link">{{ "NAV.SALES" | translate }}</a>
+          <a routerLink="/purchases" routerLinkActive="active-link">{{ "NAV.PURCHASES" | translate }}</a>
+          <a routerLink="/report" routerLinkActive="active-link">{{ "NAV.REPORT" | translate }}</a>
+          <a routerLink="/assistant" routerLinkActive="active-link">{{ "NAV.ASSISTANT" | translate }}</a>
+        </ng-container>
+        <a routerLink="/admin" routerLinkActive="active-link" *ngIf="isAdmin$ | async">{{ "NAV.ADMIN" | translate }}</a>
+        <a routerLink="/settings" routerLinkActive="active-link">Settings</a>
+        <a routerLink="/login" (click)="logout()">{{ "NAV.LOGOUT" | translate }}</a>
+      </div>
     </nav>
-    <div class="lang-selector">
-      <select #langSelect (change)="changeLang(langSelect.value)" [value]="currentLang">
-        <option value="en">EN</option>
-        <option value="fr">FR</option>
-        <option value="ar">AR</option>
-      </select>
+    <div class="header-controls">
+      <div class="theme-selector">
+        <button class="theme-btn" (click)="toggleTheme()" [title]="isDarkMode ? 'Light Mode' : 'Dark Mode'">
+          <span *ngIf="isDarkMode$ | async" class="theme-icon">☀️</span>
+          <span *ngIf="!(isDarkMode$ | async)" class="theme-icon">🌙</span>
+        </button>
+      </div>
+      <div class="lang-selector">
+        <select #langSelect (change)="changeLang(langSelect.value)" [value]="currentLang">
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+          <option value="ar">AR</option>
+        </select>
+      </div>
     </div>
   </header>
   <main class="app-main">
     <router-outlet></router-outlet>
   </main>
+  
+  <!-- Floating Chatbot with FAB Icon (for authenticated users only) -->
+  <app-chatbot *ngIf="showNavigation"></app-chatbot>
 </div>

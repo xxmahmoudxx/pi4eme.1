@@ -118,5 +118,52 @@
         "HEALTH_INSIGHT": "رؤى الصحة",
         "SCORE": "النتيجة",
         "STATUS": "الحالة"
+    },
+    "THEME": {
+        "DARK_MODE": "الوضع الليلي",
+        "LIGHT_MODE": "الوضع الفاتح",
+        "TOGGLE_THEME": "تبديل المظهر",
+        "SYSTEM_PREFERENCE": "تفضيل النظام"
+    },
+    "CHATBOT": {
+        "TITLE": "المساعد التجاري",
+        "WELCOME": "مرحباً! 👋 أنا مساعدك في ذكاء الأعمال. يمكنني مساعدتك في تحليل مبيعاتك ومشترياتك وأداء أعمالك. ماذا تريد أن تعرف؟",
+        "PLACEHOLDER": "اكتب سؤالك هنا...",
+        "SEND": "إرسال",
+        "LOADING": "جاري التحميل...",
+        "ERROR": "عذرا، حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.",
+        "RATE_LIMIT": "أنت تُرسل الرسائل بسرعة كبيرة. يرجى الانتظار قبل إرسال رسالة أخرى.",
+        "EMPTY_MESSAGE": "يرجى إدخال رسالة قبل الإرسال.",
+        "PRESS_CTRL_ENTER": "اضغط على Ctrl+Enter للإرسال"
+    },
+    "VALIDATION": {
+        "EMAIL_REQUIRED": "البريد الإلكتروني مطلوب",
+        "EMAIL_INVALID": "صيغة بريد إلكتروني غير صحيحة",
+        "PASSWORD_REQUIRED": "كلمة المرور مطلوبة",
+        "PASSWORD_MIN_LENGTH": "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل",
+        "PASSWORD_LOWERCASE": "يجب أن تحتوي كلمة المرور على أحرف صغيرة",
+        "PASSWORD_UPPERCASE": "يجب أن تحتوي كلمة المرور على أحرف كبيرة",
+        "PASSWORD_NUMBERS": "يجب أن تحتوي كلمة المرور على أرقام",
+        "PASSWORD_SPECIAL": "يجب أن تحتوي كلمة المرور على أحرف خاصة (@$!%*?&)",
+        "NAME_REQUIRED": "الاسم مطلوب",
+        "NAME_INVALID": "يجب أن يحتوي الاسم على أحرف والفراغات والشرط والفاصلة العليا فقط",
+        "NAME_MIN_LENGTH": "يجب أن يحتوي الاسم على حرفين على الأقل",
+        "PHONE_REQUIRED": "رقم الهاتف مطلوب",
+        "PHONE_INVALID": "صيغة رقم هاتف غير صحيحة",
+        "PHONE_MIN_DIGITS": "يجب أن يحتوي رقم الهاتف على 7 أرقام على الأقل",
+        "PASSWORD_MISMATCH": "كلمات المرور غير متطابقة",
+        "FIELD_REQUIRED": "هذا الحقل مطلوب",
+        "STRENGTH_WEAK": "ضعيف",
+        "STRENGTH_MEDIUM": "متوسط",
+        "STRENGTH_STRONG": "قوي"
+    },
+    "DASHBOARD": {
+        "HEALTH_SCORE": "درجة الصحة",
+        "SALES_OVERVIEW": "نظرة عامة على المبيعات",
+        "PURCHASES_OVERVIEW": "نظرة عامة على المشتريات",
+        "TOP_PRODUCTS": "أفضل المنتجات",
+        "RECENT_ACTIVITY": "النشاط الأخير",
+        "PERFORMANCE_METRICS": "مؤشرات الأداء",
+        "TREND_ANALYSIS": "تحليل الاتجاهات"
     }
 }

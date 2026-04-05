@@ -117,5 +117,52 @@
         "HEALTH_INSIGHT": "Health Insight",
         "SCORE": "Score",
         "STATUS": "Status"
+    },
+    "THEME": {
+        "DARK_MODE": "Dark Mode",
+        "LIGHT_MODE": "Light Mode",
+        "TOGGLE_THEME": "Toggle Theme",
+        "SYSTEM_PREFERENCE": "System Preference"
+    },
+    "CHATBOT": {
+        "TITLE": "Business Assistant",
+        "WELCOME": "Hello! 👋 I'm your Business Intelligence Assistant. I can help you analyze your sales, purchases, and business performance. What would you like to know?",
+        "PLACEHOLDER": "Type your question here...",
+        "SEND": "Send",
+        "LOADING": "Loading...",
+        "ERROR": "Sorry, I encountered an error processing your request. Please try again.",
+        "RATE_LIMIT": "You're sending messages too quickly. Please wait a moment before sending another message.",
+        "EMPTY_MESSAGE": "Please enter a message before sending.",
+        "PRESS_CTRL_ENTER": "Press Ctrl+Enter to send"
+    },
+    "VALIDATION": {
+        "EMAIL_REQUIRED": "Email is required",
+        "EMAIL_INVALID": "Invalid email format",
+        "PASSWORD_REQUIRED": "Password is required",
+        "PASSWORD_MIN_LENGTH": "Password must be at least 8 characters long",
+        "PASSWORD_LOWERCASE": "Password must contain lowercase letters",
+        "PASSWORD_UPPERCASE": "Password must contain uppercase letters",
+        "PASSWORD_NUMBERS": "Password must contain numbers",
+        "PASSWORD_SPECIAL": "Password must contain special characters (@$!%*?&)",
+        "NAME_REQUIRED": "Name is required",
+        "NAME_INVALID": "Name must only contain letters, spaces, hyphens, and apostrophes",
+        "NAME_MIN_LENGTH": "Name must be at least 2 characters long",
+        "PHONE_REQUIRED": "Phone number is required",
+        "PHONE_INVALID": "Invalid phone number format",
+        "PHONE_MIN_DIGITS": "Phone number must have at least 7 digits",
+        "PASSWORD_MISMATCH": "Passwords do not match",
+        "FIELD_REQUIRED": "This field is required",
+        "STRENGTH_WEAK": "Weak",
+        "STRENGTH_MEDIUM": "Medium",
+        "STRENGTH_STRONG": "Strong"
+    },
+    "DASHBOARD": {
+        "HEALTH_SCORE": "Health Score",
+        "SALES_OVERVIEW": "Sales Overview",
+        "PURCHASES_OVERVIEW": "Purchases Overview",
+        "TOP_PRODUCTS": "Top Products",
+        "RECENT_ACTIVITY": "Recent Activity",
+        "PERFORMANCE_METRICS": "Performance Metrics",
+        "TREND_ANALYSIS": "Trend Analysis"
     }
 }

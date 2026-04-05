@@ -1,8 +1,9 @@
 .app-shell {
   min-height: 100vh;
-  background: var(--c-bg);
+  background: var(--bg-primary);
   display: flex;
   flex-direction: column;
+  transition: background-color var(--transition-normal);
 }
 
 /* ─── Header ─────────────────────────────────────────────────── */
@@ -10,17 +11,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 32px;
-  height: 64px;
-  background: linear-gradient(135deg, var(--c-darkest) 0%, var(--c-dark) 100%);
-  color: var(--c-white);
+  padding: var(--spacing-md) var(--spacing-lg);
+  height: auto;
+  min-height: 64px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--spacing-md);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 16px rgba(2, 16, 36, 0.3);
-  border-bottom: 2px solid var(--c-mid);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+:root.dark-theme .app-header {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* ─── Brand ──────────────────────────────────────────────────── */
@@ -29,37 +35,43 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .brand-logo {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px;
   filter: brightness(1.1);
+  transition: transform 0.3s ease;
+}
+
+.brand-logo:hover {
+  transform: scale(1.05);
 }
 
 .brand-text {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .brand-title {
-  font-size: 20px;
+  font-size: clamp(18px, 3vw, 22px);
   font-weight: 800;
-  color: var(--c-white);
+  color: white;
   letter-spacing: -0.5px;
   line-height: 1;
 }
 
 .brand-sub {
-  font-size: 10px;
-  color: var(--c-lightest);
-  opacity: 0.8;
-  letter-spacing: 1.5px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 0.9;
+  letter-spacing: 1px;
   text-transform: uppercase;
   font-weight: 500;
 }
@@ -69,40 +81,210 @@
   display: flex;
   gap: 4px;
   align-items: center;
+  justify-content: center;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.nav-center {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .nav a {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   font-weight: 500;
-  font-size: 13.5px;
+  font-size: clamp(12px, 2vw, 14px);
   white-space: nowrap;
   padding: 8px 14px;
   border-radius: 8px;
-  transition: all 0.18s ease;
-  letter-spacing: 0.1px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
   position: relative;
 }
 
 .nav a:hover {
-  color: var(--c-white);
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.active-link {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Chatbot Floating ────────────────────────────────────────── */
+/* Chatbot component handles its own positioning and animations */
+
+/* ─── Header Controls ────────────────────────────────────────── */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* ─── Theme Selector ─────────────────────────────────────────── */
+.theme-selector {
+  display: flex;
+  align-items: center;
+}
+
+.theme-btn {
   background: rgba(255, 255, 255, 0.1);
-  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-width: 36px;
+  min-height: 36px;
 }
 
-.nav a.active-link {
-  color: var(--c-white);
-  background: rgba(255, 255, 255, 0.15);
+.theme-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
-.nav a:last-child {
-  color: var(--c-lightest);
-  border: 1px solid rgba(193, 232, 255, 0.35);
+.theme-icon {
+  display: inline-block;
 }
 
-.nav a:last-child:hover {
-  background: rgba(193, 232, 255, 0.15);
-  border-color: rgba(193, 232, 255, 0.6);
+/* ─── Language Selector ──────────────────────────────────────── */
+.lang-selector select {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  outline: none;
+  min-width: 60px;
+}
+
+.lang-selector select:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.lang-selector select:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: -2px;
+}
+
+/* ─── Main Content ───────────────────────────────────────────── */
+.app-main {
+  padding: var(--spacing-lg) var(--spacing-lg) calc(var(--spacing-lg) + 60px);
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ─── Responsive Design ──────────────────────────────────────── */
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+  .app-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    height: auto;
+    gap: var(--spacing-sm);
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-title {
+    font-size: 18px;
+  }
+
+  .brand-sub {
+    font-size: 10px;
+  }
+
+  .nav {
+    gap: 2px;
+  }
+
+  .nav a {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .header-controls {
+    gap: 8px;
+  }
+
+  .lang-selector select {
+    min-width: 50px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .theme-btn {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 4px 8px;
+    font-size: 16px;
+  }
+
+  .app-main {
+    padding: var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) + 60px);
+  }
+}
+
+/* Tablet (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .app-header {
+    padding: var(--spacing-md) var(--spacing-md);
+  }
+
+  .brand-title {
+    font-size: 20px;
+  }
+
+  .nav a {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .app-main {
+    padding: var(--spacing-md) var(--spacing-md) calc(var(--spacing-md) + 60px);
+  }
+}
+
+/* Desktop (769px and above) */
+@media (min-width: 769px) {
+  .app-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
 }
 
 /* ─── Language Selector ──────────────────────────────────────── */

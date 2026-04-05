@@ -118,5 +118,52 @@
         "HEALTH_INSIGHT": "Insights Santé",
         "SCORE": "Score",
         "STATUS": "Statut"
+    },
+    "THEME": {
+        "DARK_MODE": "Mode sombre",
+        "LIGHT_MODE": "Mode clair",
+        "TOGGLE_THEME": "Basculer le thème",
+        "SYSTEM_PREFERENCE": "Préférence système"
+    },
+    "CHATBOT": {
+        "TITLE": "Assistant Business",
+        "WELCOME": "Bonjour! 👋 Je suis votre Assistant Intelligence Affaires. Je peux vous aider à analyser vos ventes, vos achats et les performances de votre entreprise. Que souhaitez-vous savoir?",
+        "PLACEHOLDER": "Tapez votre question ici...",
+        "SEND": "Envoyer",
+        "LOADING": "Chargement...",
+        "ERROR": "Désolé, j'ai rencontré une erreur lors du traitement de votre demande. Veuillez réessayer.",
+        "RATE_LIMIT": "Vous envoyez des messages trop rapidement. Veuillez attendre un moment avant d'envoyer un autre message.",
+        "EMPTY_MESSAGE": "Veuillez entrer un message avant d'envoyer.",
+        "PRESS_CTRL_ENTER": "Appuyez sur Ctrl+Entrée pour envoyer"
+    },
+    "VALIDATION": {
+        "EMAIL_REQUIRED": "L'e-mail est requis",
+        "EMAIL_INVALID": "Format d'e-mail invalide",
+        "PASSWORD_REQUIRED": "Le mot de passe est requis",
+        "PASSWORD_MIN_LENGTH": "Le mot de passe doit contenir au moins 8 caractères",
+        "PASSWORD_LOWERCASE": "Le mot de passe doit contenir des lettres minuscules",
+        "PASSWORD_UPPERCASE": "Le mot de passe doit contenir des lettres majuscules",
+        "PASSWORD_NUMBERS": "Le mot de passe doit contenir des chiffres",
+        "PASSWORD_SPECIAL": "Le mot de passe doit contenir des caractères spéciaux (@$!%*?&)",
+        "NAME_REQUIRED": "Le nom est requis",
+        "NAME_INVALID": "Le nom ne peut contenir que des lettres, espaces, traits d'union et apostrophes",
+        "NAME_MIN_LENGTH": "Le nom doit contenir au moins 2 caractères",
+        "PHONE_REQUIRED": "Le numéro de téléphone est requis",
+        "PHONE_INVALID": "Format de numéro de téléphone invalide",
+        "PHONE_MIN_DIGITS": "Le numéro de téléphone doit avoir au moins 7 chiffres",
+        "PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas",
+        "FIELD_REQUIRED": "Ce champ est obligatoire",
+        "STRENGTH_WEAK": "Faible",
+        "STRENGTH_MEDIUM": "Moyen",
+        "STRENGTH_STRONG": "Fort"
+    },
+    "DASHBOARD": {
+        "HEALTH_SCORE": "Score de santé",
+        "SALES_OVERVIEW": "Aperçu des ventes",
+        "PURCHASES_OVERVIEW": "Aperçu des achats",
+        "TOP_PRODUCTS": "Meilleurs produits",
+        "RECENT_ACTIVITY": "Activité récente",
+        "PERFORMANCE_METRICS": "Métriques de performance",
+        "TREND_ANALYSIS": "Analyse des tendances"
     }
 }

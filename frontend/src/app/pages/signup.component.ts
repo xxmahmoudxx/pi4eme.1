@@ -25,13 +25,15 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
         <form *ngIf="!submitted" (ngSubmit)="submit()">
           <div class="form-group">
-            <label>{{ 'SIGNUP.NAME' | translate }}</label>
-            <input type="text" [(ngModel)]="name" name="name" required placeholder="John Doe" />
+            <label>{{ 'NAME' | translate }}</label>
+            <input type="text" [(ngModel)]="name" name="name" required placeholder="John" />
+            <span class="error-msg" *ngIf="name && !isValidName()">⚠️ Name must have at least 2 letters and cannot be exactly two words</span>
           </div>
 
           <div class="form-group">
             <label>{{ 'SIGNUP.EMAIL' | translate }}</label>
             <input type="email" [(ngModel)]="email" name="email" required placeholder="you@example.com" />
+            <span class="error-msg" *ngIf="email && !isValidEmail()">⚠️ Email must contain &#64; and .</span>
           </div>
 
           <div class="form-group">
@@ -57,6 +59,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
             <div class="form-group">
               <label>{{ 'SIGNUP.COMPANY_NAME' | translate }}</label>
               <input type="text" [(ngModel)]="companyName" name="companyName" required placeholder="Acme Corp" />
+              <span class="error-msg" *ngIf="companyName && !isValidCompanyName()">⚠️ Company name cannot be only numbers</span>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -71,6 +74,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
             <div class="form-group">
               <label>{{ 'SIGNUP.NOTIF_EMAIL' | translate }}</label>
               <input type="email" [(ngModel)]="notificationEmail" name="notificationEmail" placeholder="alerts@yourcompany.com" />
+              <span class="error-msg" *ngIf="notificationEmail && !isValidEmail(notificationEmail)">⚠️ Notification email must contain &#64; and .</span>
             </div>
           </ng-container>
 
@@ -82,7 +86,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
             </div>
           </ng-container>
 
-          <button class="btn-primary" type="submit" [disabled]="submitting">
+          <button class="btn-primary" type="submit" [disabled]="submitting || !isFormValid()">
             {{ submitting ? 'Creating account...' : ('SIGNUP.SUBMIT' | translate) }}
           </button>
           <p class="hint">
@@ -182,6 +186,13 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .hint { font-size: 12.5px; color: #5483B3; margin: 0; }
     .hint a { color: #052659; font-weight: 700; text-decoration: none; }
     .hint a:hover { text-decoration: underline; }
+    .error-msg {
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 4px;
+      font-weight: 500;
+      display: block;
+    }
     .btn-primary {
       width: 100%; padding: 13px 20px;
       background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
@@ -217,7 +228,74 @@ export class SignupComponent {
     private translate: TranslateService,
   ) { }
 
+  // Validation: Name must have at least 2 letters and cannot be exactly two words
+  isValidName(): boolean {
+    if (!this.name || this.name.trim().length === 0) return false;
+    
+    // Check if it has at least 2 letters (filter out spaces)
+    const letters = this.name.replace(/\s+/g, '').length;
+    if (letters < 2) return false;
+    
+    // Check if it's only numbers (with spaces allowed)
+    const onlyNumbers = /^\d+(\s+\d+)*$/.test(this.name.trim());
+    if (onlyNumbers) return false;
+    
+    // Check that it's NOT exactly 2 words (allow 1 word or 3+ words)
+    const words = this.name.trim().split(/\s+/).filter(w => w.length > 0);
+    return words.length !== 2;
+  }
+
+  // Validation: Email must contain @ and .
+  isValidEmail(emailVal?: string): boolean {
+    const val = emailVal || this.email;
+    if (!val || val.trim().length === 0) return false;
+    return val.includes('@') && val.includes('.');
+  }
+
+  // Validation: Company name cannot be only numbers
+  isValidCompanyName(): boolean {
+    if (!this.companyName || this.companyName.trim().length === 0) return false;
+    
+    // Check if it's only numbers (with spaces allowed)
+    const onlyNumbers = /^\d+(\s+\d+)*$/.test(this.companyName.trim());
+    return !onlyNumbers;
+  }
+
+  // Overall form validation
+  isFormValid(): boolean {
+    // Check basic fields
+    if (!this.name || !this.email || !this.password || !this.role) return false;
+    
+    // Check field validations
+    if (!this.isValidName() || !this.isValidEmail()) return false;
+    
+    // Check password minimum length
+    if (this.password.length < 8) return false;
+    
+    // Company Owner specific validations
+    if (this.role === 'CompanyOwner') {
+      if (!this.companyName || !this.isValidCompanyName()) return false;
+      if (this.taxRate < 0) return false;
+      if (!this.currency) return false;
+      
+      // Notification email validation if provided
+      if (this.notificationEmail && !this.isValidEmail(this.notificationEmail)) return false;
+    }
+    
+    // Accountant specific validations
+    if (this.role === 'Accountant') {
+      if (!this.companyId) return false;
+    }
+    
+    return true;
+  }
+
   submit() {
+    if (!this.isFormValid()) {
+      alert(this.translate.instant('SIGNUP.VALIDATION_ERROR') || 'Please fill in all required fields correctly');
+      return;
+    }
+
     this.submitting = true;
     this.authService
       .signup({

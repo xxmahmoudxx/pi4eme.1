@@ -8,6 +8,7 @@ import { PurchasesModule } from './purchases/purchases.module';
 import { SalesModule } from './sales/sales.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { OcrModule } from './ocr/ocr.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { OcrModule } from './ocr/ocr.module';
     SalesModule,
     AnalyticsModule,
     OcrModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
 })
