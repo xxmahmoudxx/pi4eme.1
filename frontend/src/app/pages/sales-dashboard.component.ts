@@ -222,7 +222,7 @@ export class SalesDashboardComponent implements OnInit {
   // Dynamic form fields
   formFields: FormFieldDef[] = [
     { name: 'date', label: 'Date', type: 'date', required: true, default: new Date().toISOString().slice(0, 10) },
-    { name: 'customer', label: 'Customer', type: 'text', required: false, placeholder: 'e.g. John Doe (optional)' },
+    { name: 'customer', label: 'Customer', type: 'text', required: false, placeholder: 'e.g. John Doe (optional)', autocomplete: 'customer' },
     { name: 'product', label: 'Product', type: 'text', required: true, placeholder: 'e.g. Premium Widget' },
     { name: 'category', label: 'Category', type: 'text', required: false, placeholder: 'e.g. Electronics' },
     { name: 'quantity', label: 'Quantity', type: 'number', required: true, default: 1 },

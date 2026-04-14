@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/auth.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from './services/language.service';
 import { ThemeService } from './services/theme.service';
 import { ChatbotComponent } from './components/chatbot.component';
+import { SidebarComponent } from './components/sidebar.component';
 import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, TranslateModule, ChatbotComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, ChatbotComponent, SidebarComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })

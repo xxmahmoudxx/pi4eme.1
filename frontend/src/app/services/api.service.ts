@@ -131,6 +131,48 @@ export class ApiService {
     return this.http.delete(`${this.apiBase}/sales/${id}`);
   }
 
+  // ── Customers ───────────────────────────────────────────────
+  getCustomers() {
+    return this.http.get<any[]>(`${this.apiBase}/customers`);
+  }
+
+  searchCustomers(query: string) {
+    return this.http.get<any[]>(`${this.apiBase}/customers/search?query=${encodeURIComponent(query)}`);
+  }
+
+  createCustomer(data: any) {
+    return this.http.post<any>(`${this.apiBase}/customers`, data);
+  }
+
+  updateCustomer(id: string, data: any) {
+    return this.http.patch<any>(`${this.apiBase}/customers/${id}`, data);
+  }
+
+  deleteCustomer(id: string) {
+    return this.http.delete(`${this.apiBase}/customers/${id}`);
+  }
+
+  // ── Suppliers ───────────────────────────────────────────────
+  getSuppliers() {
+    return this.http.get<any[]>(`${this.apiBase}/suppliers`);
+  }
+
+  searchSuppliers(query: string) {
+    return this.http.get<any[]>(`${this.apiBase}/suppliers/search?query=${encodeURIComponent(query)}`);
+  }
+
+  createSupplier(data: any) {
+    return this.http.post<any>(`${this.apiBase}/suppliers`, data);
+  }
+
+  updateSupplier(id: string, data: any) {
+    return this.http.patch<any>(`${this.apiBase}/suppliers/${id}`, data);
+  }
+
+  deleteSupplier(id: string) {
+    return this.http.delete(`${this.apiBase}/suppliers/${id}`);
+  }
+
   // ── OCR ──────────────────────────────────────────────────────
   ocrInvoice(file: File) {
     const fd = new FormData();

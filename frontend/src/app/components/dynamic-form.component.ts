@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../services/api.service';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 
 export interface FormFieldDef {
   name: string;
@@ -10,6 +12,7 @@ export interface FormFieldDef {
   placeholder?: string;
   default?: any;
   custom?: boolean; // user-added field
+  autocomplete?: 'customer' | 'supplier'; // autocomplete type
 }
 
 @Component({
@@ -25,8 +28,41 @@ export interface FormFieldDef {
               <label>{{ field.label }} {{ field.required ? '*' : '' }}</label>
               <button type="button" class="btn-remove-field" *ngIf="field.custom" (click)="removeField(i)" title="Remove field">&times;</button>
             </div>
+
+            <!-- Autocomplete field -->
+            <div class="autocomplete-wrapper" *ngIf="field.autocomplete">
+              <input
+                type="text"
+                [(ngModel)]="formData[field.name]"
+                [name]="field.name"
+                [placeholder]="field.placeholder || ''"
+                [required]="field.required"
+                (input)="onAutocompleteInput(field)"
+                (focus)="onAutocompleteFocus(field)"
+                (blur)="onAutocompleteBlur(field)"
+                autocomplete="off"
+              />
+              <div class="autocomplete-dropdown" *ngIf="activeAutocomplete === field.name && suggestions.length > 0">
+                <div class="autocomplete-item"
+                     *ngFor="let item of suggestions"
+                     (mousedown)="selectSuggestion(field, item)">
+                  <span class="suggestion-name">{{ item.name }}</span>
+                  <span class="suggestion-meta" *ngIf="item.email">{{ item.email }}</span>
+                </div>
+                <div class="autocomplete-hint" *ngIf="formData[field.name]?.trim() && !hasSuggestionMatch()">
+                  <span class="new-badge">NEW</span> "{{ formData[field.name] }}" will be auto-created
+                </div>
+              </div>
+              <div class="autocomplete-dropdown" *ngIf="activeAutocomplete === field.name && suggestions.length === 0 && formData[field.name]?.trim()">
+                <div class="autocomplete-hint">
+                  <span class="new-badge">NEW</span> "{{ formData[field.name] }}" will be auto-created
+                </div>
+              </div>
+            </div>
+
+            <!-- Regular text input -->
             <input
-              *ngIf="field.type === 'text'"
+              *ngIf="field.type === 'text' && !field.autocomplete"
               type="text"
               [(ngModel)]="formData[field.name]"
               [name]="field.name"
@@ -73,7 +109,7 @@ export interface FormFieldDef {
     .dynamic-form { display: flex; flex-direction: column; gap: 12px; }
     .form-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .form-row { display: contents; }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; position: relative; }
     .form-group.full-width { grid-column: 1 / -1; }
     .label-row { display: flex; align-items: center; justify-content: space-between; }
     .label-row label { font-size: 11px; font-weight: 700; color: #5483B3; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -89,6 +125,36 @@ export interface FormFieldDef {
     .form-group input:focus, .form-group select:focus {
       outline: none; border-color: #5483B3; box-shadow: 0 0 0 3px rgba(84,131,179,0.12);
     }
+
+    /* Autocomplete */
+    .autocomplete-wrapper { position: relative; }
+    .autocomplete-wrapper input { width: 100%; box-sizing: border-box; }
+    .autocomplete-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: white; border: 1.5px solid #C1E8FF; border-top: none;
+      border-radius: 0 0 8px 8px; box-shadow: 0 6px 20px rgba(2,16,36,0.1);
+      z-index: 50; max-height: 200px; overflow-y: auto;
+      animation: dropIn 0.15s ease;
+    }
+    @keyframes dropIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .autocomplete-item {
+      padding: 8px 12px; cursor: pointer; display: flex; flex-direction: column;
+      gap: 1px; transition: background 0.15s;
+    }
+    .autocomplete-item:hover { background: rgba(84,131,179,0.06); }
+    .suggestion-name { font-size: 13px; font-weight: 600; color: #021024; }
+    .suggestion-meta { font-size: 11px; color: #7DA0CA; }
+    .autocomplete-hint {
+      padding: 8px 12px; font-size: 12px; color: #5483B3;
+      display: flex; align-items: center; gap: 6px;
+      border-top: 1px solid rgba(84,131,179,0.08);
+    }
+    .new-badge {
+      display: inline-block; padding: 1px 6px; border-radius: 4px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white; font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    }
+
     .add-field-row {
       display: flex; gap: 8px; padding: 10px; background: #f8fbff; border-radius: 8px;
       border: 1px dashed #C1E8FF; align-items: center;
@@ -119,7 +185,7 @@ export interface FormFieldDef {
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
   `],
 })
-export class DynamicFormComponent implements OnInit {
+export class DynamicFormComponent implements OnInit, OnDestroy {
   @Input() fields: FormFieldDef[] = [];
   @Input() loading = false;
   @Input() submitLabel = 'Submit';
@@ -129,8 +195,37 @@ export class DynamicFormComponent implements OnInit {
   newFieldName = '';
   newFieldType: 'text' | 'number' | 'date' = 'text';
 
+  // Autocomplete state
+  activeAutocomplete: string | null = null;
+  suggestions: any[] = [];
+  private searchSubject = new Subject<{ field: FormFieldDef; query: string }>();
+  private blurTimeout: any;
+
+  constructor(private api: ApiService) {}
+
   ngOnInit() {
     this.resetForm();
+
+    // Setup debounced search
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged((a, b) => a.query === b.query && a.field.name === b.field.name),
+      switchMap(({ field, query }) => {
+        if (!query || query.trim().length < 1) return of([]);
+        if (field.autocomplete === 'customer') {
+          return this.api.searchCustomers(query);
+        } else if (field.autocomplete === 'supplier') {
+          return this.api.searchSuppliers(query);
+        }
+        return of([]);
+      }),
+    ).subscribe(results => {
+      this.suggestions = results;
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.blurTimeout) clearTimeout(this.blurTimeout);
   }
 
   resetForm() {
@@ -138,6 +233,40 @@ export class DynamicFormComponent implements OnInit {
     for (const f of this.fields) {
       this.formData[f.name] = f.default !== undefined ? f.default : (f.type === 'number' ? 0 : '');
     }
+  }
+
+  // ── Autocomplete handlers ──
+  onAutocompleteInput(field: FormFieldDef) {
+    this.activeAutocomplete = field.name;
+    const query = this.formData[field.name] || '';
+    this.searchSubject.next({ field, query });
+  }
+
+  onAutocompleteFocus(field: FormFieldDef) {
+    if (this.blurTimeout) { clearTimeout(this.blurTimeout); this.blurTimeout = null; }
+    this.activeAutocomplete = field.name;
+    const query = this.formData[field.name] || '';
+    this.searchSubject.next({ field, query });
+  }
+
+  onAutocompleteBlur(field: FormFieldDef) {
+    // Delay to allow click on suggestion
+    this.blurTimeout = setTimeout(() => {
+      this.activeAutocomplete = null;
+      this.suggestions = [];
+    }, 200);
+  }
+
+  selectSuggestion(field: FormFieldDef, item: any) {
+    this.formData[field.name] = item.name;
+    this.activeAutocomplete = null;
+    this.suggestions = [];
+    if (this.blurTimeout) { clearTimeout(this.blurTimeout); this.blurTimeout = null; }
+  }
+
+  hasSuggestionMatch(): boolean {
+    const current = (this.formData[this.activeAutocomplete || ''] || '').toLowerCase().trim();
+    return this.suggestions.some(s => s.name.toLowerCase().trim() === current);
   }
 
   addField() {

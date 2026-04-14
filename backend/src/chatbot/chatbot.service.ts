@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Sale, SaleDocument } from '../sales/schemas/sale.schema';
 import { Purchase, PurchaseDocument } from '../purchases/schemas/purchase.schema';
-import { Stock, StockDocument } from '../auth/schemas/Stock.schema';
 import { User, UserDocument } from '../auth/schemas/user.schema';
 import { firstValueFrom } from 'rxjs';
 
@@ -19,7 +18,6 @@ export class ChatbotService {
     private configService: ConfigService,
     @InjectModel(Sale.name) private saleModel: Model<SaleDocument>,
     @InjectModel(Purchase.name) private purchaseModel: Model<PurchaseDocument>,
-    @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {
     this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -271,144 +269,15 @@ export class ChatbotService {
   }
 
   private async generateInventoryAlert(companyId: string): Promise<{ reply: string }> {
-    try {
-      const companyObjectId = new Types.ObjectId(companyId);
-
-      // Get all stocks
-      const stocks = await this.stockModel.find({ company: companyObjectId }).exec();
-
-      if (stocks.length === 0) {
-        return {
-          reply: '📦 **Inventory Status:**\n\nNo inventory data found. Upload your sales and purchase data to track inventory! 📁'
-        };
-      }
-
-      // Get sales data to calculate velocity
-      const sales = await this.saleModel.find({ companyId: companyObjectId }).exec();
-
-      // Categorize inventory
-      const critical: any[] = [];
-      const low: any[] = [];
-      const optimal: any[] = [];
-
-      for (const stock of stocks) {
-        // Calculate daily sales velocity
-        const daysSinceOldestSale = this.getDaysSinceDate(
-          sales.length > 0 ? new Date(sales[sales.length - 1].date) : new Date()
-        );
-        const dailyVelocity = sales.length / Math.max(daysSinceOldestSale, 1);
-
-        // Reorder point = (daily velocity * lead time) + safety stock
-        // Assuming 7-day lead time and 3-day safety stock
-        const reorderPoint = (dailyVelocity * 7) + (dailyVelocity * 3);
-        const safetyStock = dailyVelocity * 3;
-
-        const item = {
-          name: stock._id,
-          quantity: stock.quantityAvailable,
-          dailyVelocity: dailyVelocity.toFixed(2),
-          reorderPoint: reorderPoint.toFixed(0),
-          safetyStock: safetyStock.toFixed(0),
-          recommendedOrder: Math.ceil((reorderPoint * 1.25) - stock.quantityAvailable)
-        };
-
-        if (stock.quantityAvailable < safetyStock) {
-          critical.push(item);
-        } else if (stock.quantityAvailable < reorderPoint) {
-          low.push(item);
-        } else {
-          optimal.push(item);
-        }
-      }
-
-      let response = `📊 **Inventory Alert Summary**\n\n`;
-      response += `📦 Total SKUs: ${stocks.length}\n`;
-      response += `✅ Optimal: ${optimal.length} | ⚠️ Low: ${low.length} | 🔴 Critical: ${critical.length}\n\n`;
-
-      if (critical.length > 0) {
-        response += `🔴 **CRITICAL - Reorder Immediately:**\n`;
-        critical.slice(0, 5).forEach(item => {
-          response += `❌ ${item.name}: ${item.quantity} units (Reorder: ${item.recommendedOrder} units)\n`;
-        });
-        response += `\n`;
-      }
-
-      if (low.length > 0) {
-        response += `⚠️ **LOW STOCK - Plan Reorder:**\n`;
-        low.slice(0, 5).forEach(item => {
-          response += `⚡ ${item.name}: ${item.quantity} units (Reorder: ${item.recommendedOrder} units)\n`;
-        });
-        response += `\n`;
-      }
-
-      if (optimal.length > 0) {
-        response += `✅ **OPTIMAL LEVEL (${optimal.length} items):**\n`;
-        response += `Stock levels are healthy. Monitor regularly.\n`;
-      }
-
-      return { reply: response };
-    } catch (error) {
-      console.error('Error generating inventory alert:', error);
-      return { reply: 'Unable to generate inventory alerts. Please try again.' };
-    }
+    return {
+      reply: '📦 **Inventory Status:**\n\nInventory tracking is managed through the Analytics dashboard using your sales and purchase data.\n\nGo to **Analytics → Stockout Risks** to view AI-powered inventory predictions based on your sales velocity and purchase history! 📊'
+    };
   }
 
   private async analyzeProductInventory(companyId: string, productName: string): Promise<{ reply: string }> {
-    try {
-      const companyObjectId = new Types.ObjectId(companyId);
-
-      // Find stock for this product
-      const stock = await this.stockModel.findOne({ company: companyObjectId }).exec();
-
-      if (!stock) {
-        return {
-          reply: `📦 **Product Inventory: "${productName}"**\n\nNo inventory data found for this product. 🔎`
-        };
-      }
-
-      // Get sales velocity
-      const sales = await this.saleModel.find({ companyId: companyObjectId }).exec();
-      const daysSinceStart = this.getDaysSinceDate(
-        sales.length > 0 ? new Date(sales[sales.length - 1].date) : new Date()
-      );
-      const dailyVelocity = sales.length / Math.max(daysSinceStart, 1);
-
-      // Calculate metrics
-      const reorderPoint = (dailyVelocity * 7) + (dailyVelocity * 3); // 7-day lead + 3-day safety
-      const safetyStock = dailyVelocity * 3;
-      const daysUntilStockout = stock.quantityAvailable / Math.max(dailyVelocity, 0.1);
-      const recommendedOrder = Math.ceil((reorderPoint * 1.25) - stock.quantityAvailable);
-
-      // Status
-      let status = '✅ OPTIMAL';
-      let statusEmoji = '✅';
-      if (stock.quantityAvailable < safetyStock) {
-        status = '🔴 CRITICAL - REORDER NOW';
-        statusEmoji = '🔴';
-      } else if (stock.quantityAvailable < reorderPoint) {
-        status = '⚠️ LOW - PLAN REORDER';
-        statusEmoji = '⚠️';
-      }
-
-      return {
-        reply: `📦 **Inventory Analysis: "${productName}"**\n\n${statusEmoji} **Status:** ${status}\n\n**Current Levels:**\n📊 Quantity Available: ${stock.quantityAvailable} units\n📈 Daily Sales Velocity: ${dailyVelocity.toFixed(2)} units/day\n⏱️ Days Until Stockout: ${daysUntilStockout.toFixed(1)} days\n\n**Reorder Metrics:**\n📍 Reorder Point: ${reorderPoint.toFixed(0)} units\n🛡️ Safety Stock: ${safetyStock.toFixed(0)} units\n📦 Recommended Order: ${recommendedOrder} units\n\n${
-            stock.quantityAvailable < safetyStock
-              ? `⚠️ **ACTION REQUIRED:** Place order immediately to avoid stockout!`
-              : stock.quantityAvailable < reorderPoint
-              ? `⚠️ **RECOMMENDATION:** Schedule reorder for next week.`
-              : `✅ **STATUS:** Stock levels are healthy. No immediate action needed.`
-          }`
-      };
-    } catch (error) {
-      console.error('Error analyzing product inventory:', error);
-      return { reply: 'Unable to analyze product inventory. Please try again.' };
-    }
-  }
-
-  private getDaysSinceDate(date: Date): number {
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return {
+      reply: `📦 **Product Inventory: "${productName}"**\n\nFor detailed stock analysis, go to **Analytics → Stockout Risks** in your dashboard. Our ML model uses your sales and purchase history to predict stockout risks and recommend reorder quantities! 📊`
+    };
   }
 
   private extractProductName(message: string): string | null {

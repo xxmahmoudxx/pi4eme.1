@@ -17,10 +17,6 @@ export class CompanyConfig {
 
   @Prop({ required: true })
   email: string;
-   // Company (1) ──owns──► (*) Product
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }] })
-  products: Types.ObjectId[];
 }
 
 export type CompanyConfigDocument = CompanyConfig & Document;

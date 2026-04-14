@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Sale, SaleDocument } from './schemas/sale.schema';
 import { EtlService, ColumnMapping } from '../etl/etl.service';
 import { OcrService } from '../ocr/ocr.service';
+import { CustomersService } from '../customers/customers.service';
 
 @Injectable()
 export class SalesService {
@@ -12,6 +13,7 @@ export class SalesService {
         private readonly saleModel: Model<SaleDocument>,
         private readonly etl: EtlService,
         private readonly ocr: OcrService,
+        private readonly customersService: CustomersService,
     ) { }
 
     // ── Create single sale (manual entry) ────────────────────────
@@ -29,10 +31,18 @@ export class SalesService {
             totalAmount = quantity * unitPrice;
         }
 
+        // Auto-create customer if new
+        const customerName = data.customer || 'Unknown';
+        try {
+            await this.customersService.findOrCreate(companyId, customerName);
+        } catch (e: any) {
+            console.warn('Customer auto-create failed:', e?.message || e);
+        }
+
         return this.saleModel.create({
             companyId: new Types.ObjectId(companyId),
             date: data.date ? new Date(data.date) : new Date(),
-            customer: data.customer || 'Unknown',
+            customer: customerName,
             product: data.product,
             category: data.category || '',
             quantity,
@@ -108,6 +118,17 @@ export class SalesService {
             status: row.status,
             notes: row.notes,
         }));
+
+        // Auto-create customers from imported data (non-blocking, per-customer isolation)
+        const uniqueCustomers = [...new Set(docs.map(d => d.customer).filter(c => c && c !== 'Unknown'))];
+        const customerResults = await Promise.allSettled(
+            uniqueCustomers.map(name => this.customersService.findOrCreate(companyId, name)),
+        );
+        for (const r of customerResults) {
+            if (r.status === 'rejected') {
+                console.warn('Customer auto-create failed:', r.reason?.message || r.reason);
+            }
+        }
 
         if (docs.length) await this.saleModel.insertMany(docs);
 
@@ -331,6 +352,17 @@ export class SalesService {
         }
 
         if (validDocs.length > 0) {
+            // Auto-create customers from OCR data (non-blocking, per-customer isolation)
+            const uniqueCustomers = [...new Set(validDocs.map(d => d.customer).filter(c => c && c !== 'Unknown'))];
+            const customerResults = await Promise.allSettled(
+                uniqueCustomers.map(name => this.customersService.findOrCreate(companyId, name)),
+            );
+            for (const r of customerResults) {
+                if (r.status === 'rejected') {
+                    console.warn('Customer auto-create failed:', r.reason?.message || r.reason);
+                }
+            }
+
             await this.saleModel.insertMany(validDocs);
         }
 

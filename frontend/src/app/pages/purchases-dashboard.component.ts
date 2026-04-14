@@ -312,7 +312,7 @@ export class PurchasesDashboardComponent implements OnInit {
   // Dynamic form fields
   formFields: FormFieldDef[] = [
     { name: 'date', label: 'Date', type: 'date', required: true, default: new Date().toISOString().slice(0, 10) },
-    { name: 'supplier', label: 'Supplier', type: 'text', required: false, placeholder: 'e.g. Acme Corp (optional)' },
+    { name: 'supplier', label: 'Supplier', type: 'text', required: false, placeholder: 'e.g. Acme Corp (optional)', autocomplete: 'supplier' },
     { name: 'item', label: 'Item', type: 'text', required: true, placeholder: 'e.g. Office Paper A4' },
     { name: 'category', label: 'Category', type: 'text', required: false, placeholder: 'e.g. Office Supplies' },
     { name: 'quantity', label: 'Quantity', type: 'number', required: true, default: 1 },

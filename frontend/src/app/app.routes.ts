@@ -10,6 +10,8 @@ import { FaceVerifyComponent } from './pages/face-verify.component';
 import { SettingsComponent } from './pages/settings.component';
 import { ForgotPasswordComponent } from './pages/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password.component';
+import { CustomersDashboardComponent } from './pages/customers-dashboard.component';
+import { SuppliersDashboardComponent } from './pages/suppliers-dashboard.component';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 import { adminGuard } from './guards/admin.guard';
@@ -24,6 +26,8 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'sales', component: SalesDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
   { path: 'purchases', component: PurchasesDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
+  { path: 'customers', component: CustomersDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
+  { path: 'suppliers', component: SuppliersDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
   { path: 'report', component: ReportDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
   { path: 'assistant', component: AssistantComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [authGuard, rolesGuard(['Admin'], '/sales')] },

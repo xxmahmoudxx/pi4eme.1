@@ -6,6 +6,7 @@ import { PurchasesService } from './purchases.service';
 import { PurchasesController } from './purchases.controller';
 import { EtlModule } from '../etl/etl.module';
 import { OcrModule } from '../ocr/ocr.module';
+import { SuppliersModule } from '../suppliers/suppliers.module';
 
 @Module({
     imports: [
@@ -13,6 +14,7 @@ import { OcrModule } from '../ocr/ocr.module';
         MulterModule.register({ storage: undefined }),
         EtlModule,
         OcrModule,
+        SuppliersModule,
     ],
     controllers: [PurchasesController],
     providers: [PurchasesService],

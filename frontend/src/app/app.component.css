@@ -90,7 +90,7 @@
   display: flex;
   gap: 4px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
 }
 
@@ -118,9 +118,6 @@
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
-
-/* ─── Chatbot Floating ────────────────────────────────────────── */
-/* Chatbot component handles its own positioning and animations */
 
 /* ─── Header Controls ────────────────────────────────────────── */
 .header-controls {
@@ -172,7 +169,7 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   outline: none;
   min-width: 60px;
 }
@@ -187,14 +184,26 @@
   outline-offset: -2px;
 }
 
+/* ─── Body with Sidebar ─────────────────────────────────────── */
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: calc(100vh - 64px);
+}
+
 /* ─── Main Content ───────────────────────────────────────────── */
 .app-main {
-  padding: var(--spacing-lg) var(--spacing-lg) calc(var(--spacing-lg) + 60px);
+  padding: 28px 32px 72px;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
   flex: 1;
   animation: fadeIn 0.3s ease-in-out;
+  min-width: 0;
+}
+
+.app-main.with-sidebar {
+  max-width: 100%;
 }
 
 @keyframes fadeIn {
@@ -285,38 +294,4 @@
   .app-header {
     padding: var(--spacing-md) var(--spacing-lg);
   }
-}
-
-/* ─── Language Selector ──────────────────────────────────────── */
-.lang-selector select {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--c-white);
-  border: 1px solid rgba(193, 232, 255, 0.3);
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.18s ease;
-  outline: none;
-}
-
-.lang-selector select:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(193, 232, 255, 0.6);
-}
-
-.lang-selector select:focus {
-  outline: 2px solid var(--c-light);
-  outline-offset: 2px;
-}
-
-/* ─── Main Content ───────────────────────────────────────────── */
-.app-main {
-  padding: 28px 32px 72px;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  flex: 1;
 }

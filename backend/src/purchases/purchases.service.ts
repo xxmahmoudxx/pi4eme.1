@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Purchase, PurchaseDocument } from './schemas/purchase.schema';
 import { EtlService, ColumnMapping } from '../etl/etl.service';
 import { OcrService } from '../ocr/ocr.service';
+import { SuppliersService } from '../suppliers/suppliers.service';
 
 @Injectable()
 export class PurchasesService {
@@ -12,6 +13,7 @@ export class PurchasesService {
         private readonly purchaseModel: Model<PurchaseDocument>,
         private readonly etl: EtlService,
         private readonly ocr: OcrService,
+        private readonly suppliersService: SuppliersService,
     ) { }
 
     // ── Create single purchase (manual entry) ────────────────────
@@ -29,10 +31,18 @@ export class PurchasesService {
             totalCost = quantity * unitCost;
         }
 
+        // Auto-create supplier if new
+        const supplierName = data.supplier || 'Unknown';
+        try {
+            await this.suppliersService.findOrCreate(companyId, supplierName);
+        } catch (e: any) {
+            console.warn('Supplier auto-create failed:', e?.message || e);
+        }
+
         return this.purchaseModel.create({
             companyId: new Types.ObjectId(companyId),
             date: data.date ? new Date(data.date) : new Date(),
-            supplier: data.supplier || 'Unknown',
+            supplier: supplierName,
             category: data.category || '',
             item: data.item,
             quantity,
@@ -108,6 +118,17 @@ export class PurchasesService {
             status: row.status,
             notes: row.notes,
         }));
+
+        // Auto-create suppliers from imported data (per-supplier isolation)
+        const uniqueSuppliers = [...new Set(docs.map(d => d.supplier).filter(s => s && s !== 'Unknown'))];
+        const supplierResults = await Promise.allSettled(
+            uniqueSuppliers.map(name => this.suppliersService.findOrCreate(companyId, name)),
+        );
+        for (const r of supplierResults) {
+            if (r.status === 'rejected') {
+                console.warn('Supplier auto-create failed:', r.reason?.message || r.reason);
+            }
+        }
 
         if (docs.length) await this.purchaseModel.insertMany(docs);
 
@@ -330,6 +351,17 @@ export class PurchasesService {
         }
 
         if (validDocs.length > 0) {
+            // Auto-create suppliers from OCR data (non-blocking, per-supplier isolation)
+            const uniqueSuppliers = [...new Set(validDocs.map(d => d.supplier).filter(s => s && s !== 'Unknown'))];
+            const supplierResults = await Promise.allSettled(
+                uniqueSuppliers.map(name => this.suppliersService.findOrCreate(companyId, name)),
+            );
+            for (const r of supplierResults) {
+                if (r.status === 'rejected') {
+                    console.warn('Supplier auto-create failed:', r.reason?.message || r.reason);
+                }
+            }
+
             await this.purchaseModel.insertMany(validDocs);
         }
 

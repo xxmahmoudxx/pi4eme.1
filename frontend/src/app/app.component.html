@@ -9,12 +9,6 @@
     </div>
     <nav class="nav" *ngIf="showNavigation">
       <div class="nav-center">
-        <ng-container *ngIf="!(isAdmin$ | async)">
-          <a routerLink="/sales" routerLinkActive="active-link">{{ "NAV.SALES" | translate }}</a>
-          <a routerLink="/purchases" routerLinkActive="active-link">{{ "NAV.PURCHASES" | translate }}</a>
-          <a routerLink="/report" routerLinkActive="active-link">{{ "NAV.REPORT" | translate }}</a>
-          <a routerLink="/assistant" routerLinkActive="active-link">{{ "NAV.ASSISTANT" | translate }}</a>
-        </ng-container>
         <a routerLink="/admin" routerLinkActive="active-link" *ngIf="isAdmin$ | async">{{ "NAV.ADMIN" | translate }}</a>
         <a routerLink="/settings" routerLinkActive="active-link">Settings</a>
         <a routerLink="/login" (click)="logout()">{{ "NAV.LOGOUT" | translate }}</a>
@@ -36,9 +30,13 @@
       </div>
     </div>
   </header>
-  <main class="app-main">
-    <router-outlet></router-outlet>
-  </main>
+
+  <div class="app-body">
+    <app-sidebar *ngIf="showNavigation"></app-sidebar>
+    <main class="app-main" [class.with-sidebar]="showNavigation">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
   
   <!-- Floating Chatbot with FAB Icon (for authenticated users only) -->
   <app-chatbot *ngIf="showNavigation"></app-chatbot>

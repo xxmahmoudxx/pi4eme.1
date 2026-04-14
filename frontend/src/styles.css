@@ -1246,3 +1246,72 @@ input:focus, select:focus, textarea:focus {
   height: 1px;
   background: #444444;
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* DARK MODE - Partners (Customers & Suppliers) */
+/* ═══════════════════════════════════════════════════════════════ */
+
+:root.dark-theme .search-bar {
+  background: #1a1a1a !important;
+  border-color: #333 !important;
+}
+:root.dark-theme .search-bar:focus-within {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.2) !important;
+}
+:root.dark-theme .search-input {
+  color: #fff !important;
+}
+
+:root.dark-theme .partner-card {
+  background: #1a1a1a !important;
+  border-color: #333 !important;
+}
+:root.dark-theme .partner-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+}
+:root.dark-theme .partner-name { color: #fff !important; }
+:root.dark-theme .partner-meta { color: #888 !important; }
+:root.dark-theme .partner-date { color: #666 !important; }
+
+:root.dark-theme .btn-action.edit {
+  background: rgba(102,126,234,0.12) !important;
+  color: #a5b4fc !important;
+}
+:root.dark-theme .btn-action.delete {
+  background: rgba(239,68,68,0.12) !important;
+  color: #fca5a5 !important;
+}
+
+:root.dark-theme .modal-card {
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+}
+:root.dark-theme .modal-header h2 { color: #fff !important; }
+:root.dark-theme .btn-close { color: #888 !important; }
+:root.dark-theme .modal-form label { color: #888 !important; }
+:root.dark-theme .modal-form input {
+  background: #2d2d2d !important;
+  color: #fff !important;
+  border-color: #404040 !important;
+}
+:root.dark-theme .modal-form input:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.2) !important;
+}
+
+/* Autocomplete Dropdown Dark Mode */
+:root.dark-theme .autocomplete-dropdown {
+  background: #2d2d2d !important;
+  border-color: #404040 !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4) !important;
+}
+:root.dark-theme .autocomplete-item:hover {
+  background: rgba(255,255,255,0.06) !important;
+}
+:root.dark-theme .suggestion-name { color: #fff !important; }
+:root.dark-theme .suggestion-meta { color: #888 !important; }
+:root.dark-theme .autocomplete-hint {
+  color: #888 !important;
+  border-top-color: #404040 !important;
+}
