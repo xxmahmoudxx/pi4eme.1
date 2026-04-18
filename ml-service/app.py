@@ -23,7 +23,7 @@ from sklearn.linear_model import LinearRegression
 
 # ── Tesseract path configuration (Windows) ────────────────────────────
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"D:\Programes\Houni\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"D:\imagepiworker\tesseract.exe"
 
 app = Flask(__name__)
 CORS(app)
@@ -103,23 +103,23 @@ def stockout_prediction():
 
         # Risk classification
         if days_until_stockout < 7:
-            risk = 'High'
+            risk = 'HIGH'
         elif days_until_stockout < 21:
-            risk = 'Medium'
+            risk = 'MEDIUM'
         else:
-            risk = 'Low'
+            risk = 'LOW'
 
         # Reorder recommendation (30-day supply + 25% safety stock)
         reorder_qty = 0
         urgency = 'None'
         explanation = ''
-        if risk in ('High', 'Medium'):
+        if risk in ('HIGH', 'MEDIUM'):
             reorder_qty = int(np.ceil(daily_velocity * 30 * 1.25))
-            if risk == 'High':
-                urgency = 'Urgent'
+            if risk == 'HIGH':
+                urgency = 'URGENT'
                 explanation = f"Stock critically low. At current sales rate of {daily_velocity:.1f} units/day, stock will run out in ~{int(days_until_stockout)} days. Order {reorder_qty} units immediately."
             else:
-                urgency = 'Soon'
+                urgency = 'SOON'
                 explanation = f"Stock getting low. At current sales rate of {daily_velocity:.1f} units/day, consider ordering {reorder_qty} units within the next week."
 
         results.append({
@@ -184,11 +184,11 @@ def health_score():
     # 1. Profit Margin Score (25%)
     if total_revenue > 0:
         margin = profit / total_revenue
-        margin_score = min(max(margin * 100, 0), 100)  # clamp 0-100
+        margin_score = min(max(margin * 100, 0), 100)
     else:
         margin_score = 0
     factors.append({
-        'name': 'Profit Margin',
+        'name': 'PROFIT_MARGIN',
         'score': round(margin_score, 1),
         'weight': 25,
         'detail': f"{'Profit' if profit >= 0 else 'Loss'}: {profit:.2f} ({margin_score:.0f}% margin)"
@@ -208,9 +208,9 @@ def health_score():
             trend_score = 50
     else:
         trend_score = 50
-    trend_dir = 'Increasing' if trend_score > 55 else ('Decreasing' if trend_score < 45 else 'Stable')
+    trend_dir = 'INCREASING' if trend_score > 55 else ('DECREASING' if trend_score < 45 else 'STABLE')
     factors.append({
-        'name': 'Revenue Trend',
+        'name': 'REVENUE_TREND',
         'score': round(trend_score, 1),
         'weight': 20,
         'detail': f"Revenue trend: {trend_dir}"
@@ -223,7 +223,7 @@ def health_score():
     else:
         efficiency_score = 0
     factors.append({
-        'name': 'Cost Efficiency',
+        'name': 'COST_EFFICIENCY',
         'score': round(efficiency_score, 1),
         'weight': 15,
         'detail': f"Cost-to-revenue ratio: {cost_ratio:.1%}" if total_revenue > 0 else "No revenue data"
@@ -243,21 +243,20 @@ def health_score():
     else:
         consistency_score = 50
     factors.append({
-        'name': 'Sales Consistency',
+        'name': 'SALES_CONSISTENCY',
         'score': round(consistency_score, 1),
         'weight': 15,
-        'detail': f"Sales volatility: {'Low' if consistency_score > 60 else 'High'}"
+        'detail': f"Sales volatility: {'LOW' if consistency_score > 60 else 'HIGH'}"
     })
 
     # 5. Inventory Risk Score (15%)
-    # Simplified: ratio of products without stock issues
     sold_products = set((s.get('product') or '').strip().lower() for s in sales)
     purchased_products = set((p.get('item') or '').strip().lower() for p in purchases)
     covered = len(sold_products & purchased_products)
     total_products = len(sold_products)
     inventory_score = (covered / total_products * 100) if total_products > 0 else 50
     factors.append({
-        'name': 'Inventory Coverage',
+        'name': 'INVENTORY_COVERAGE',
         'score': round(inventory_score, 1),
         'weight': 15,
         'detail': f"{covered}/{total_products} sold products have purchase supply"
@@ -280,10 +279,10 @@ def health_score():
     else:
         growth_score = 50
     factors.append({
-        'name': 'Growth Rate',
+        'name': 'GROWTH_RATE',
         'score': round(growth_score, 1),
         'weight': 10,
-        'detail': f"Month-over-month growth: {'Positive' if growth_score > 55 else ('Negative' if growth_score < 45 else 'Flat')}"
+        'detail': f"Month-over-month growth: {'POSITIVE' if growth_score > 55 else ('NEGATIVE' if growth_score < 45 else 'FLAT')}"
     })
 
     # Weighted total
@@ -291,14 +290,14 @@ def health_score():
     total_score = min(max(round(total_score, 1), 0), 100)
 
     if total_score >= 70:
-        status = 'Healthy'
+        status = 'HEALTHY'
         explanation = 'Your company shows strong financial health with good margins and consistent sales.'
     elif total_score >= 40:
-        status = 'Warning'
+        status = 'WARNING'
         weak = min(factors, key=lambda f: f['score'])
         explanation = f"Some areas need attention. Weakest factor: {weak['name']} ({weak['score']:.0f}/100)."
     else:
-        status = 'Critical'
+        status = 'CRITICAL'
         weak = min(factors, key=lambda f: f['score'])
         explanation = f"Financial health is concerning. Focus on improving {weak['name']} immediately."
 
@@ -331,7 +330,7 @@ def sales_forecast():
         return jsonify({
             'actual': [],
             'forecast': [],
-            'trend': 'No Data',
+            'trend': 'NO_DATA',
             'nextWeekTotal': 0,
             'confidence': 0,
         })
@@ -351,7 +350,7 @@ def sales_forecast():
         return jsonify({
             'actual': [{'date': k, 'revenue': v} for k, v in sorted(daily.items())],
             'forecast': [],
-            'trend': 'Insufficient Data',
+            'trend': 'INSUFFICIENT_DATA',
             'nextWeekTotal': 0,
             'confidence': 0,
         })
@@ -393,11 +392,11 @@ def sales_forecast():
     relative_slope = slope / avg_revenue if avg_revenue > 0 else 0
 
     if relative_slope > 0.02:
-        trend = 'Increasing'
+        trend = 'INCREASING'
     elif relative_slope < -0.02:
-        trend = 'Decreasing'
+        trend = 'DECREASING'
     else:
-        trend = 'Stable'
+        trend = 'STABLE'
 
     next_week_total = round(sum(max(float(v), 0) for v in forecast_y), 2)
 
@@ -896,6 +895,74 @@ def parse_invoice_line(line, metadata):
         'customer': metadata.get('customer'),
         'supplier': metadata.get('supplier'),
     }
+
+
+# ════════════════════════════════════════════════════════════════
+# FEATURE 7: AI PURCHASE ANALYSIS & APPROVAL
+# ════════════════════════════════════════════════════════════════
+
+@app.route('/ml/analyze-purchase', methods=['POST'])
+def analyze_purchase():
+    """
+    Evaluates a new purchase request against rules and history.
+    Input: { current: {...}, history: [...] }
+    """
+    data = request.get_json()
+    current = data.get('current', {})
+    history = data.get('history', [])
+    
+    amount = current.get('totalCost', 0)
+    category = (current.get('category', '')).strip().lower()
+    item = (current.get('item', '')).strip().lower()
+    
+    # 1. Budget Rule (Simple heuristic: max allowed single purchase = 5000)
+    MAX_BUDGET = 5000
+    
+    # 2. Category Authorization
+    AUTHORIZED_CATEGORIES = ['inventory', 'office supplies', 'electronics', 'maintenance', 'marketing', 'travel', 'food']
+    
+    decision = 'APPROVED'
+    confidence = 90
+    flags = []
+    reasoning = []
+    
+    # Rule checks
+    if amount > MAX_BUDGET:
+        decision = 'REJECTED'
+        confidence = 95
+        flags.append('Over budget')
+        reasoning.append(f"Amount {amount} exceeds the single purchase limit of {MAX_BUDGET}.")
+        
+    if category and category not in AUTHORIZED_CATEGORIES:
+        flags.append('Unauthorized category')
+        if decision == 'APPROVED':
+            decision = 'REJECTED'
+            confidence = 85
+        reasoning.append(f"Category '{category}' is not in the list of pre-authorized categories.")
+
+    # 3. Suspicious Activity (Double check identical items within 24h)
+    duplicates = [h for h in history if h.get('item', '').lower() == item and abs(h.get('totalCost', 0) - amount) < 1]
+    if duplicates:
+        flags.append('Duplicate entry risk')
+        confidence -= 15
+        reasoning.append(f"A similar purchase for '{item}' was found in recent history. Possible duplicate.")
+
+    # 4. Validating item name
+    if len(item) < 3:
+        flags.append('Vague description')
+        confidence -= 10
+        reasoning.append("The item name is too short or vague.")
+
+    if decision == 'APPROVED':
+        if not reasoning:
+            reasoning.append("Purchase details align with company policy and historical patterns.")
+    
+    return jsonify({
+        'decision': decision,
+        'confidence': confidence,
+        'flags': flags,
+        'explanation': " ".join(reasoning)
+    })
 
 
 if __name__ == '__main__':

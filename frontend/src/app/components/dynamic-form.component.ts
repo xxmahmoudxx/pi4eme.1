@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface FormFieldDef {
   name: string;
   label: string;
-  type: 'text' | 'number' | 'date';
+  type: 'text' | 'number' | 'date' | 'checkbox';
   required: boolean;
   placeholder?: string;
   default?: any;
@@ -18,15 +19,15 @@ export interface FormFieldDef {
 @Component({
   selector: 'app-dynamic-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <form (ngSubmit)="submit()" class="dynamic-form">
       <div class="form-fields">
         <div class="form-row" *ngFor="let field of fields; let i = index">
           <div class="form-group" [class.full-width]="i === fields.length - 1 && fields.length % 2 !== 0">
             <div class="label-row">
-              <label>{{ field.label }} {{ field.required ? '*' : '' }}</label>
-              <button type="button" class="btn-remove-field" *ngIf="field.custom" (click)="removeField(i)" title="Remove field">&times;</button>
+              <label>{{ field.label | translate }} {{ field.required ? '*' : '' }}</label>
+              <button type="button" class="btn-remove-field" *ngIf="field.custom" (click)="removeField(i)" [title]="'SETTINGS.REMOVE' | translate">&times;</button>
             </div>
 
             <!-- Autocomplete field -->
@@ -35,7 +36,7 @@ export interface FormFieldDef {
                 type="text"
                 [(ngModel)]="formData[field.name]"
                 [name]="field.name"
-                [placeholder]="field.placeholder || ''"
+                [placeholder]="(field.placeholder || '') | translate"
                 [required]="field.required"
                 (input)="onAutocompleteInput(field)"
                 (focus)="onAutocompleteFocus(field)"
@@ -50,12 +51,12 @@ export interface FormFieldDef {
                   <span class="suggestion-meta" *ngIf="item.email">{{ item.email }}</span>
                 </div>
                 <div class="autocomplete-hint" *ngIf="formData[field.name]?.trim() && !hasSuggestionMatch()">
-                  <span class="new-badge">NEW</span> "{{ formData[field.name] }}" will be auto-created
+                  <span class="new-badge">NEW</span> "{{ formData[field.name] }}" {{ 'COMMON.WILL_BE_CREATED' | translate }}
                 </div>
               </div>
               <div class="autocomplete-dropdown" *ngIf="activeAutocomplete === field.name && suggestions.length === 0 && formData[field.name]?.trim()">
                 <div class="autocomplete-hint">
-                  <span class="new-badge">NEW</span> "{{ formData[field.name] }}" will be auto-created
+                  <span class="new-badge">NEW</span> "{{ formData[field.name] }}" {{ 'COMMON.WILL_BE_CREATED' | translate }}
                 </div>
               </div>
             </div>
@@ -66,7 +67,7 @@ export interface FormFieldDef {
               type="text"
               [(ngModel)]="formData[field.name]"
               [name]="field.name"
-              [placeholder]="field.placeholder || ''"
+              [placeholder]="(field.placeholder || '') | translate"
               [required]="field.required"
             />
             <input
@@ -78,30 +79,41 @@ export interface FormFieldDef {
               min="0"
               [required]="field.required"
             />
-            <input
-              *ngIf="field.type === 'date'"
-              type="date"
-              [(ngModel)]="formData[field.name]"
-              [name]="field.name"
-              [required]="field.required"
-            />
+              <input
+                *ngIf="field.type === 'date'"
+                type="date"
+                [(ngModel)]="formData[field.name]"
+                [name]="field.name"
+                [required]="field.required"
+              />
+
+              <!-- Checkbox input -->
+              <div class="checkbox-wrapper" *ngIf="field.type === 'checkbox'">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="formData[field.name]"
+                  [name]="field.name"
+                  [id]="field.name + '_' + i"
+                />
+                <label [for]="field.name + '_' + i">{{ (field.placeholder || 'COMMON.YES') | translate }}</label>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
       <!-- Add Custom Field -->
       <div class="add-field-row">
-        <input type="text" [(ngModel)]="newFieldName" name="newFieldName" placeholder="New field name..." class="add-field-input" />
+        <input type="text" [(ngModel)]="newFieldName" name="newFieldName" [placeholder]="'COMMON.NEW_FIELD_NAME' | translate" class="add-field-input" />
         <select [(ngModel)]="newFieldType" name="newFieldType" class="add-field-select">
-          <option value="text">Text</option>
-          <option value="number">Number</option>
-          <option value="date">Date</option>
+          <option value="text">{{ 'COMMON.TEXT' | translate }}</option>
+          <option value="number">{{ 'COMMON.NUMBER' | translate }}</option>
+          <option value="date">{{ 'COMMON.DATE' | translate }}</option>
         </select>
-        <button type="button" class="btn-add-field" (click)="addField()" [disabled]="!newFieldName.trim()">+ Add Field</button>
+        <button type="button" class="btn-add-field" (click)="addField()" [disabled]="!newFieldName.trim()">+ {{ 'COMMON.ADD_FIELD' | translate }}</button>
       </div>
 
       <button class="btn-submit" type="submit" [disabled]="loading">
-        {{ loading ? 'Saving...' : submitLabel }}
+        {{ loading ? ('COMMON.SAVING' | translate) : (submitLabel | translate) }}
       </button>
     </form>
   `,
@@ -153,6 +165,26 @@ export interface FormFieldDef {
       display: inline-block; padding: 1px 6px; border-radius: 4px;
       background: linear-gradient(135deg, #10b981, #059669);
       color: white; font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      cursor: pointer;
+    }
+    .checkbox-wrapper label {
+      font-size: 13px;
+      color: #021024;
+      text-transform: none;
+      letter-spacing: 0;
+      cursor: pointer;
     }
 
     .add-field-row {
@@ -231,7 +263,11 @@ export class DynamicFormComponent implements OnInit, OnDestroy {
   resetForm() {
     this.formData = {};
     for (const f of this.fields) {
-      this.formData[f.name] = f.default !== undefined ? f.default : (f.type === 'number' ? 0 : '');
+      if (f.default !== undefined) {
+        this.formData[f.name] = f.default;
+      } else {
+        this.formData[f.name] = f.type === 'number' ? 0 : (f.type === 'checkbox' ? false : '');
+      }
     }
   }
 

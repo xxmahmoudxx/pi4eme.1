@@ -35,7 +35,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
         </div>
         <div class="insight-row">
           <span class="insight-label">{{ 'ASSISTANT.RISK' | translate }}</span>
-          <span class="insight-val risk">{{ inventoryInsight.risk || ('COMMON.N_A' | translate) }}</span>
+          <span class="insight-val risk" [class]="inventoryInsight.risk">
+            {{ getRiskKey(inventoryInsight.risk) | translate }}
+          </span>
         </div>
         <div class="insight-row">
           <span class="insight-label">{{ 'ASSISTANT.REORDER' | translate }}</span>
@@ -51,7 +53,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
         </div>
         <div class="insight-row">
           <span class="insight-label">{{ 'ASSISTANT.STATUS' | translate }}</span>
-          <span class="insight-val">{{ reportInsight.status || ('COMMON.N_A' | translate) }}</span>
+          <span class="insight-val">
+            {{ getStatusKey(reportInsight.status) | translate }}
+          </span>
         </div>
       </div>
     </div>
@@ -78,7 +82,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .insight-val { font-size: 14px; font-weight: 700; color: #021024; }
     .insight-val.best  { color: #059669; }
     .insight-val.worst { color: #c0392b; }
-    .insight-val.risk  { color: #b7770d; }
+    .insight-val.risk.HIGH { color: #c0392b; }
+    .insight-val.risk.MEDIUM { color: #b7770d; }
+    .insight-val.risk.LOW { color: #059669; }
     .insight-val.score { color: #052659; font-size: 18px; }
   `],
 })
@@ -94,7 +100,6 @@ export class AssistantComponent implements OnInit {
   }
 
   loadInsights() {
-    // Product performance → extract best/worst
     this.api.getProductPerformance().subscribe({
       next: (data: any[]) => {
         if (data?.length) {
@@ -106,22 +111,28 @@ export class AssistantComponent implements OnInit {
       error: () => { },
     });
 
-    // Stockout → get highest risk item
     this.api.getStockoutRisks().subscribe({
       next: (data: any[]) => {
         if (data?.length) {
-          this.inventoryInsight = data[0]; // highest risk first
+          this.inventoryInsight = data[0]; 
         }
       },
       error: () => { },
     });
 
-    // Health score
     this.api.getHealthScore().subscribe({
       next: (data: any) => {
         this.reportInsight = data || {};
       },
       error: () => { },
     });
+  }
+
+  getRiskKey(risk: string): string {
+    return risk && risk === risk.toUpperCase() ? 'ML.' + risk : risk;
+  }
+
+  getStatusKey(status: string): string {
+    return status && status === status.toUpperCase() ? 'ML.' + status : status;
   }
 }

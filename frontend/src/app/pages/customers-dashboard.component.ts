@@ -3,20 +3,21 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-customers-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, TranslateModule],
   template: `
     <div class="page-header">
       <div class="page-header-row">
         <div>
-          <h1>Customers</h1>
-          <p class="page-subtitle">Manage your customer database</p>
+          <h1>{{ 'PARTNERS.CUSTOMERS_TITLE' | translate }}</h1>
+          <p class="page-subtitle">{{ 'PARTNERS.CUSTOMERS_SUB' | translate }}</p>
         </div>
         <button class="btn-add" (click)="showModal = true; editingCustomer = null; resetForm()">
-          <span class="btn-icon">+</span> Add Customer
+          <span class="btn-icon">+</span> {{ 'PARTNERS.ADD_CUSTOMER' | translate }}
         </button>
       </div>
     </div>
@@ -28,7 +29,7 @@ import { ApiService } from '../services/api.service';
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
       </span>
-      <input type="text" [(ngModel)]="searchQuery" (input)="onSearch()" placeholder="Search customers..." class="search-input" />
+      <input type="text" [(ngModel)]="searchQuery" (input)="onSearch()" [placeholder]="'PARTNERS.SEARCH_CUSTOMERS' | translate" class="search-input" />
     </div>
 
     <div class="partner-grid" *ngIf="filteredCustomers.length > 0" cdkDropListGroup>
@@ -75,57 +76,57 @@ import { ApiService } from '../services/api.service';
             </button>
           </div>
           <div class="partner-card-actions">
-            <button class="btn-action edit" (click)="editCustomer(c)" title="Edit">
+            <button class="btn-action edit" (click)="editCustomer(c)" [title]="'SETTINGS.EDIT' | translate">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
             </button>
-            <button class="btn-action delete" (click)="deleteCustomer(c._id)" title="Delete">
+            <button class="btn-action delete" (click)="deleteCustomer(c._id)" [title]="'ADMIN.DELETE' | translate">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6" />
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
             </button>
           </div>
-          <div class="partner-date">Added {{ c.createdAt | date:'mediumDate' }}</div>
+          <div class="partner-date">{{ 'PARTNERS.ADDED' | translate }} {{ c.createdAt | date:'mediumDate' }}</div>
         </div>
       </div>
     </div>
 
     <div class="empty-state card" *ngIf="!loading && filteredCustomers.length === 0">
       <div class="empty-icon">&#128101;</div>
-      <h3>No customers yet</h3>
-      <p>Add your first customer to get started.</p>
+      <h3>{{ 'PARTNERS.EMPTY_CUSTOMERS' | translate }}</h3>
+      <p>{{ 'PARTNERS.CUSTOMERS_SUB' | translate }}</p>
     </div>
 
     <div class="card loading-state" *ngIf="loading">
       <div class="spinner"></div>
-      <p>Loading customers...</p>
+      <p>{{ 'SETTINGS.LOADING' | translate }}</p>
     </div>
 
     <div class="modal-overlay" *ngIf="showModal" (click)="showModal = false">
       <div class="modal-card" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h2>{{ editingCustomer ? 'Edit Customer' : 'Add Customer' }}</h2>
+          <h2>{{ editingCustomer ? ('PARTNERS.EDIT_CUSTOMER' | translate) : ('PARTNERS.ADD_CUSTOMER' | translate) }}</h2>
           <button class="btn-close" (click)="showModal = false">&times;</button>
         </div>
         <form (ngSubmit)="saveCustomer()" class="modal-form">
           <div class="form-group">
-            <label>Name *</label>
-            <input type="text" [(ngModel)]="form.name" name="name" required placeholder="Customer name" />
+            <label>{{ 'PARTNERS.NAME' | translate }} *</label>
+            <input type="text" [(ngModel)]="form.name" name="name" required [placeholder]="'PARTNERS.NAME' | translate" />
           </div>
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" [(ngModel)]="form.email" name="email" placeholder="email@example.com (optional)" />
+            <label>{{ 'PARTNERS.EMAIL' | translate }}</label>
+            <input type="email" [(ngModel)]="form.email" name="email" [placeholder]="'PARTNERS.EMAIL' | translate" />
           </div>
           <div class="form-group">
-            <label>Phone</label>
-            <input type="text" [(ngModel)]="form.phone" name="phone" placeholder="+1 234 567 890 (optional)" />
+            <label>{{ 'PARTNERS.PHONE' | translate }}</label>
+            <input type="text" [(ngModel)]="form.phone" name="phone" [placeholder]="'PARTNERS.PHONE' | translate" />
           </div>
           <div *ngIf="formMsg" class="status-msg" [class.error]="formError">{{ formMsg }}</div>
           <button type="submit" class="btn-submit" [disabled]="!form.name.trim() || saving">
-            {{ saving ? 'Saving...' : (editingCustomer ? 'Update' : 'Create') }}
+            {{ saving ? ('COMMON.SAVING' | translate) : (editingCustomer ? ('COMMON.UPDATE' | translate) : ('COMMON.CREATE' | translate)) }}
           </button>
         </form>
       </div>
@@ -287,7 +288,7 @@ export class CustomersDashboardComponent implements OnInit {
   draggedCustomerId: string | null = null;
   form = { name: '', email: '', phone: '' };
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private translate: TranslateService) {}
 
   get customerDropListIds(): string[] {
     return this.filteredCustomers.map(customer => this.getCustomerDropListId(customer));
@@ -423,7 +424,7 @@ export class CustomersDashboardComponent implements OnInit {
   }
 
   deleteCustomer(id: string) {
-    if (!confirm('Delete this customer?')) return;
+    if (!confirm(this.translate.instant('PARTNERS.DELETE_CUSTOMER'))) return;
     this.api.deleteCustomer(id).subscribe(() => this.loadCustomers());
   }
 

@@ -2,46 +2,47 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FaceRecognitionService } from '../services/face-recognition.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-face-verify',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, TranslateModule],
     template: `
     <div class="card verify-card">
-      <h2>🔐 Face Recognition</h2>
+      <h2>🔐 {{ 'SETTINGS.FACE_RECOGNITION' | translate }}</h2>
 
       <!-- ── Mode Tabs ── -->
       <div class="tabs">
         <button class="tab" [class.active]="mode === 'verify'" (click)="switchMode('verify')">
-          Verify Identity
+          {{ 'FACE.VERIFY_TAB' | translate }}
         </button>
         <button class="tab" [class.active]="mode === 'enroll'" (click)="switchMode('enroll')">
-          Enroll Face
+          {{ 'FACE.ENROLL_TAB' | translate }}
         </button>
       </div>
 
-      <p class="hint" *ngIf="mode === 'verify'">Verify your identity with your face, or skip to go straight to the dashboard.</p>
-      <p class="hint" *ngIf="mode === 'enroll'">Enroll your face for quick face login. You can update it anytime.</p>
+      <p class="hint" *ngIf="mode === 'verify'">{{ 'FACE.VERIFY_HINT' | translate }}</p>
+      <p class="hint" *ngIf="mode === 'enroll'">{{ 'FACE.ENROLL_HINT' | translate }}</p>
 
       <!-- Live camera preview -->
       <div class="camera-container" [class.hidden]="!cameraActive">
         <video autoplay playsinline class="camera-preview"></video>
-        <div class="camera-overlay">Look directly at the camera and stay still</div>
+        <div class="camera-overlay">{{ 'FACE.CAMERA_OVERLAY' | translate }}</div>
       </div>
 
       <!-- Status badge -->
       <div class="status-badge" [ngClass]="status">
-        <span *ngIf="status === 'idle'">📷 Camera not started</span>
-        <span *ngIf="status === 'loading'">⚙️ Loading AI models…</span>
-        <span *ngIf="status === 'camera'">🎥 Position your face in frame then capture</span>
-        <span *ngIf="status === 'scanning'">🔄 Analysing face…</span>
-        <span *ngIf="status === 'matched'">✅ Face matched! (distance: {{ distance }})</span>
-        <span *ngIf="status === 'no-match'">❌ Face did not match (distance: {{ distance }}) — try again or skip</span>
-        <span *ngIf="status === 'no-face'">😕 No face detected — move closer and retry</span>
-        <span *ngIf="status === 'no-enrolled'">ℹ️ No face enrolled yet — switch to the Enroll tab to register your face</span>
-        <span *ngIf="status === 'uploading'">☁️ Saving face to server…</span>
-        <span *ngIf="status === 'enrolled'">✅ Face enrolled successfully! You can now use face login.</span>
+        <span *ngIf="status === 'idle'">📷 {{ 'FACE.IDLE' | translate }}</span>
+        <span *ngIf="status === 'loading'">⚙️ {{ 'FACE.LOADING_MODELS' | translate }}</span>
+        <span *ngIf="status === 'camera'">🎥 {{ 'FACE.POSITION_FACE' | translate }}</span>
+        <span *ngIf="status === 'scanning'">🔄 {{ 'FACE.SCANNING' | translate }}</span>
+        <span *ngIf="status === 'matched'">✅ {{ 'FACE.MATCHED' | translate }} (distance: {{ distance }})</span>
+        <span *ngIf="status === 'no-match'">❌ {{ 'FACE.NO_MATCH' | translate }} (distance: {{ distance }})</span>
+        <span *ngIf="status === 'no-face'">😕 {{ 'FACE.NO_FACE' | translate }}</span>
+        <span *ngIf="status === 'no-enrolled'">ℹ️ {{ 'FACE.NO_ENROLLED' | translate }}</span>
+        <span *ngIf="status === 'uploading'">☁️ {{ 'FACE.UPLOADING' | translate }}</span>
+        <span *ngIf="status === 'enrolled'">✅ {{ 'FACE.ENROLLED' | translate }}</span>
         <span *ngIf="status === 'failed'">⚠️ {{ errorMsg }}</span>
       </div>
 
@@ -51,25 +52,25 @@ import { FaceRecognitionService } from '../services/face-recognition.service';
                 *ngIf="!cameraActive && status !== 'matched' && status !== 'enrolled'"
                 [disabled]="status === 'loading'"
                 (click)="openCamera()">
-          📷 Open Camera
+          📷 {{ 'FACE.OPEN_CAMERA' | translate }}
         </button>
         <button class="btn-face capture"
                 *ngIf="cameraActive && status === 'camera' && mode === 'verify'"
                 (click)="captureAndMatch()">
-          📸 Capture &amp; Verify
+          📸 {{ 'FACE.CAPTURE_VERIFY' | translate }}
         </button>
         <button class="btn-face capture"
                 *ngIf="cameraActive && status === 'camera' && mode === 'enroll'"
                 (click)="captureAndEnroll()">
-          📸 Capture &amp; Enroll
+          📸 {{ 'FACE.CAPTURE_ENROLL' | translate }}
         </button>
         <button class="btn-face retry"
                 *ngIf="status === 'no-match' || status === 'no-face' || status === 'failed'"
                 (click)="openCamera()">
-          🔄 Retry
+          🔄 {{ 'FACE.RETRY' | translate }}
         </button>
         <button class="btn-skip" (click)="skip()">
-          {{ status === 'matched' || status === 'enrolled' ? '➡️ Enter Dashboard' : 'Skip' }}
+          {{ status === 'matched' || status === 'enrolled' ? ('FACE.ENTER_DASHBOARD' | translate) : ('FACE.SKIP' | translate) }}
         </button>
       </div>
     </div>
@@ -141,6 +142,7 @@ export class FaceVerifyComponent {
     constructor(
         private faceService: FaceRecognitionService,
         private router: Router,
+        private translate: TranslateService
     ) { }
 
     switchMode(newMode: 'verify' | 'enroll') {
@@ -167,7 +169,7 @@ export class FaceVerifyComponent {
                 if (video) video.srcObject = this.stream;
             }, 100);
         } catch {
-            this.errorMsg = 'Camera access denied — please allow camera permission.';
+            this.errorMsg = this.translate.instant('FACE.CAMERA_DENIED');
             this.status = 'failed';
             this.cameraActive = false;
         }
@@ -192,7 +194,7 @@ export class FaceVerifyComponent {
             else if (result.match) this.status = 'matched';
             else this.status = 'no-match';
         } catch {
-            this.errorMsg = 'Verification failed. Try again or skip.';
+            this.errorMsg = this.translate.instant('FACE.VERIFY_FAILED');
             this.status = 'failed';
         }
     }
@@ -214,7 +216,7 @@ export class FaceVerifyComponent {
             await this.faceService.enroll(descriptor);
             this.status = 'enrolled';
         } catch {
-            this.errorMsg = 'Failed to save face. Try again.';
+            this.errorMsg = this.translate.instant('FACE.ENROLL_FAILED');
             this.status = 'failed';
         }
     }

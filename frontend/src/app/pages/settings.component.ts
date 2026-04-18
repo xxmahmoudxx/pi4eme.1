@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 type SetupStep = 'idle' | 'qr' | 'confirming' | 'done';
 type DisableStep = 'idle' | 'confirming';
@@ -10,13 +11,13 @@ type DisableStep = 'idle' | 'confirming';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslateModule],
   template: `
     <div class="page-container">
-      <h2>Settings</h2>
+      <h2>{{ 'SETTINGS.TITLE' | translate }}</h2>
 
       <!-- ── Loading ── -->
-      <div *ngIf="loading" class="status-loading">Loading...</div>
+      <div *ngIf="loading" class="status-loading">{{ 'SETTINGS.LOADING' | translate }}</div>
 
       <div *ngIf="!loading" class="sections">
 
@@ -33,8 +34,8 @@ type DisableStep = 'idle' | 'confirming';
               </div>
             </div>
             <div class="section-info">
-              <h3>Account</h3>
-              <p class="section-desc">Manage your profile, photo, and company details.</p>
+              <h3>{{ 'SETTINGS.ACCOUNT' | translate }}</h3>
+              <p class="section-desc">{{ 'SETTINGS.ACCOUNT_DESC' | translate }}</p>
             </div>
             <span class="arrow" *ngIf="activeSection !== 'account'">&#8594;</span>
           </div>
@@ -49,54 +50,54 @@ type DisableStep = 'idle' | 'confirming';
                 <div *ngIf="!photoPreview" class="avatar-placeholder">
                   {{ userProfile?.name?.charAt(0)?.toUpperCase() || '?' }}
                 </div>
-                <div *ngIf="photoSaving" class="avatar-saving">Saving...</div>
+                <div *ngIf="photoSaving" class="avatar-saving">{{ 'SETTINGS.SAVING' | translate }}</div>
               </div>
               <div class="photo-actions">
                 <label class="btn btn-ghost upload-btn">
-                  Change Photo
+                  {{ 'SETTINGS.CHANGE_PHOTO' | translate }}
                   <input type="file" accept="image/*" (change)="onPhotoSelected($event)" hidden />
                 </label>
-                <span class="photo-hint">Max 2 MB, JPG or PNG</span>
+                <span class="photo-hint">{{ 'SETTINGS.PHOTO_HINT' | translate }}</span>
               </div>
             </div>
 
             <!-- ── Personal Info ── -->
             <div class="info-block">
               <div class="info-block-header">
-                <h4>Personal Information</h4>
-                <button *ngIf="!editingUser" class="btn btn-ghost btn-sm" (click)="startEditUser()">Edit</button>
+                <h4>{{ 'SETTINGS.PERSONAL_INFO' | translate }}</h4>
+                <button *ngIf="!editingUser" class="btn btn-ghost btn-sm" (click)="startEditUser()">{{ 'SETTINGS.EDIT' | translate }}</button>
               </div>
 
               <div *ngIf="!editingUser" class="info-rows">
                 <div class="info-row">
-                  <span class="info-label">Name</span>
+                  <span class="info-label">{{ 'SETTINGS.NAME' | translate }}</span>
                   <span class="info-value">{{ userProfile?.name }}</span>
                 </div>
                 <div class="info-row">
-                  <span class="info-label">Email</span>
+                  <span class="info-label">{{ 'SETTINGS.EMAIL' | translate }}</span>
                   <span class="info-value">{{ userProfile?.email }}</span>
                 </div>
                 <div class="info-row">
-                  <span class="info-label">Role</span>
+                  <span class="info-label">{{ 'SETTINGS.ROLE' | translate }}</span>
                   <span class="info-value">{{ userProfile?.role }}</span>
                 </div>
               </div>
 
               <div *ngIf="editingUser" class="edit-form">
                 <div class="form-group">
-                  <label class="form-label">Name</label>
+                  <label class="form-label">{{ 'SETTINGS.NAME' | translate }}</label>
                   <input type="text" class="form-input" [(ngModel)]="editName" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Email</label>
+                  <label class="form-label">{{ 'SETTINGS.EMAIL' | translate }}</label>
                   <input type="email" class="form-input" [(ngModel)]="editEmail" />
                 </div>
                 <p *ngIf="userSaveError" class="error-msg">{{ userSaveError }}</p>
                 <div class="btn-row">
                   <button class="btn btn-primary" (click)="saveUser()" [disabled]="userSaving">
-                    {{ userSaving ? 'Saving...' : 'Save' }}
+                    {{ userSaving ? ('SETTINGS.SAVING' | translate) : ('SETTINGS.SAVE' | translate) }}
                   </button>
-                  <button class="btn btn-ghost" (click)="cancelEditUser()" [disabled]="userSaving">Cancel</button>
+                  <button class="btn btn-ghost" (click)="cancelEditUser()" [disabled]="userSaving">{{ 'SETTINGS.CANCEL' | translate }}</button>
                 </div>
               </div>
 
@@ -106,52 +107,52 @@ type DisableStep = 'idle' | 'confirming';
             <!-- ── Company Info (CompanyOwner only) ── -->
             <div *ngIf="isCompanyOwner && companyConfig" class="info-block">
               <div class="info-block-header">
-                <h4>Company Information</h4>
-                <button *ngIf="!editingCompany" class="btn btn-ghost btn-sm" (click)="startEditCompany()">Edit</button>
+                <h4>{{ 'SETTINGS.COMPANY_INFO' | translate }}</h4>
+                <button *ngIf="!editingCompany" class="btn btn-ghost btn-sm" (click)="startEditCompany()">{{ 'SETTINGS.EDIT' | translate }}</button>
               </div>
 
               <div *ngIf="!editingCompany" class="info-rows">
                 <div class="info-row">
-                  <span class="info-label">Company Name</span>
+                  <span class="info-label">{{ 'SETTINGS.COMPANY_NAME' | translate }}</span>
                   <span class="info-value">{{ companyConfig.companyName }}</span>
                 </div>
                 <div class="info-row">
-                  <span class="info-label">Tax Rate</span>
+                  <span class="info-label">{{ 'SETTINGS.TAX_RATE' | translate }}</span>
                   <span class="info-value">{{ companyConfig.taxRate }}%</span>
                 </div>
                 <div class="info-row">
-                  <span class="info-label">Currency</span>
+                  <span class="info-label">{{ 'SETTINGS.CURRENCY' | translate }}</span>
                   <span class="info-value">{{ companyConfig.currency }}</span>
                 </div>
                 <div class="info-row">
-                  <span class="info-label">Notification Email</span>
+                  <span class="info-label">{{ 'SETTINGS.NOTIF_EMAIL' | translate }}</span>
                   <span class="info-value">{{ companyConfig.email }}</span>
                 </div>
               </div>
 
               <div *ngIf="editingCompany" class="edit-form">
                 <div class="form-group">
-                  <label class="form-label">Company Name</label>
+                  <label class="form-label">{{ 'SETTINGS.COMPANY_NAME' | translate }}</label>
                   <input type="text" class="form-input" [(ngModel)]="editCompanyName" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Tax Rate (%)</label>
+                  <label class="form-label">{{ 'SETTINGS.TAX_RATE' | translate }}</label>
                   <input type="number" class="form-input" [(ngModel)]="editTaxRate" min="0" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Currency</label>
+                  <label class="form-label">{{ 'SETTINGS.CURRENCY' | translate }}</label>
                   <input type="text" class="form-input" [(ngModel)]="editCurrency" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Notification Email</label>
+                  <label class="form-label">{{ 'SETTINGS.NOTIF_EMAIL' | translate }}</label>
                   <input type="email" class="form-input" [(ngModel)]="editCompanyEmail" />
                 </div>
                 <p *ngIf="companySaveError" class="error-msg">{{ companySaveError }}</p>
                 <div class="btn-row">
                   <button class="btn btn-primary" (click)="saveCompany()" [disabled]="companySaving">
-                    {{ companySaving ? 'Saving...' : 'Save' }}
+                    {{ companySaving ? ('SETTINGS.SAVING' | translate) : ('SETTINGS.SAVE' | translate) }}
                   </button>
-                  <button class="btn btn-ghost" (click)="cancelEditCompany()" [disabled]="companySaving">Cancel</button>
+                  <button class="btn btn-ghost" (click)="cancelEditCompany()" [disabled]="companySaving">{{ 'SETTINGS.CANCEL' | translate }}</button>
                 </div>
               </div>
 
@@ -168,8 +169,8 @@ type DisableStep = 'idle' | 'confirming';
           <div class="section-header">
             <div class="section-icon">🔐</div>
             <div class="section-info">
-              <h3>Two-Factor Authentication</h3>
-              <p class="section-desc">Require a code from Google Authenticator on each login.</p>
+              <h3>{{ 'SETTINGS.TWO_FACTOR' | translate }}</h3>
+              <p class="section-desc">{{ 'SETTINGS.TWO_FACTOR_DESC' | translate }}</p>
             </div>
             <span class="badge" [class.badge-on]="twoFactorEnabled" [class.badge-off]="!twoFactorEnabled">
               {{ twoFactorEnabled ? 'ON' : 'OFF' }}
@@ -181,31 +182,27 @@ type DisableStep = 'idle' | 'confirming';
             <ng-container *ngIf="!twoFactorEnabled">
               <div *ngIf="enableStep === 'idle'" class="action-area">
                 <button class="btn btn-primary" (click)="startEnable(); $event.stopPropagation()" [disabled]="actionLoading">
-                  {{ actionLoading ? 'Generating...' : 'Enable 2FA' }}
+                  {{ actionLoading ? ('SETTINGS.LOADING' | translate) : ('SETTINGS.ENABLE_2FA' | translate) }}
                 </button>
               </div>
 
               <div *ngIf="enableStep === 'qr'" class="qr-area" (click)="$event.stopPropagation()">
-                <p class="qr-instructions">
-                  1. Open <strong>Google Authenticator</strong> on your phone.<br>
-                  2. Tap <strong>+</strong> then <strong>Scan a QR code</strong>.<br>
-                  3. Scan the code below.
-                </p>
+                <p class="qr-instructions" [innerText]="'SETTINGS.QR_INSTRUCTIONS' | translate"></p>
                 <div class="qr-wrapper">
                   <img [src]="qrCode" alt="2FA QR Code" class="qr-image" />
                 </div>
                 <p class="manual-key">
-                  Can't scan? Enter this key manually:<br>
+                  {{ 'SETTINGS.MANUAL_KEY' | translate }}<br>
                   <code>{{ manualSecret }}</code>
                 </p>
                 <button class="btn btn-primary" (click)="enableStep = 'confirming'">
-                  I've scanned it - Enter code
+                  {{ 'SETTINGS.SCANNED_PROMPT' | translate }}
                 </button>
-                <button class="btn btn-ghost" (click)="cancelEnable()">Cancel</button>
+                <button class="btn btn-ghost" (click)="cancelEnable()">{{ 'SETTINGS.CANCEL' | translate }}</button>
               </div>
 
               <div *ngIf="enableStep === 'confirming'" class="confirm-area" (click)="$event.stopPropagation()">
-                <p class="confirm-desc">Enter the 6-digit code from Google Authenticator to confirm setup:</p>
+                <p class="confirm-desc">{{ 'SETTINGS.ENTER_CODE' | translate }}</p>
                 <input
                   type="text"
                   class="otp-input"
@@ -219,10 +216,10 @@ type DisableStep = 'idle' | 'confirming';
                 <div class="btn-row">
                   <button class="btn btn-success" (click)="confirmEnable()"
                           [disabled]="actionLoading || confirmCode.length !== 6">
-                    {{ actionLoading ? 'Activating...' : 'Activate 2FA' }}
+                    {{ actionLoading ? ('SETTINGS.ACTIVATING' | translate) : ('SETTINGS.ACTIVATE_2FA' | translate) }}
                   </button>
                   <button class="btn btn-ghost" (click)="enableStep = 'qr'" [disabled]="actionLoading">
-                    Back
+                    {{ 'SETTINGS.BACK' | translate }}
                   </button>
                 </div>
               </div>
@@ -235,12 +232,12 @@ type DisableStep = 'idle' | 'confirming';
             <ng-container *ngIf="twoFactorEnabled">
               <div *ngIf="disableStep === 'idle'" class="action-area">
                 <button class="btn btn-danger" (click)="disableStep = 'confirming'; $event.stopPropagation()">
-                  Disable 2FA
+                  {{ 'SETTINGS.DISABLE_2FA' | translate }}
                 </button>
               </div>
 
               <div *ngIf="disableStep === 'confirming'" class="confirm-area" (click)="$event.stopPropagation()">
-                <p class="confirm-desc">Enter your current 6-digit code to confirm disabling 2FA:</p>
+                <p class="confirm-desc">{{ 'SETTINGS.ENTER_CODE' | translate }}</p>
                 <input
                   type="text"
                   class="otp-input"
@@ -253,10 +250,10 @@ type DisableStep = 'idle' | 'confirming';
                 <div class="btn-row">
                   <button class="btn btn-danger" (click)="confirmDisable()"
                           [disabled]="actionLoading || disableCode.length !== 6">
-                    {{ actionLoading ? 'Disabling...' : 'Confirm Disable' }}
+                    {{ actionLoading ? ('SETTINGS.LOADING' | translate) : ('SETTINGS.CONFIRM_DISABLE' | translate) }}
                   </button>
                   <button class="btn btn-ghost" (click)="cancelDisable()" [disabled]="actionLoading">
-                    Cancel
+                    {{ 'SETTINGS.CANCEL' | translate }}
                   </button>
                 </div>
               </div>
@@ -271,8 +268,8 @@ type DisableStep = 'idle' | 'confirming';
           <div class="section-header">
             <div class="section-icon">📷</div>
             <div class="section-info">
-              <h3>Face Recognition</h3>
-              <p class="section-desc">Enroll or verify your face for quick passwordless login.</p>
+              <h3>{{ 'SETTINGS.FACE_RECOGNITION' | translate }}</h3>
+              <p class="section-desc">{{ 'SETTINGS.FACE_DESC' | translate }}</p>
             </div>
             <span class="arrow">→</span>
           </div>
@@ -343,7 +340,7 @@ type DisableStep = 'idle' | 'confirming';
 
     /* ── QR area ── */
     .qr-area { display: flex; flex-direction: column; gap: 14px; }
-    .qr-instructions { margin: 0; font-size: 13px; color: #374151; line-height: 1.7; }
+    .qr-instructions { margin: 0; font-size: 13px; color: #374151; line-height: 1.7; white-space: pre-line; }
     .qr-wrapper {
       display: flex; justify-content: center;
       background: #fff; border: 1.5px solid #C1E8FF;
@@ -510,7 +507,7 @@ export class SettingsComponent implements OnInit {
   actionLoading = false;
   actionError = '';
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private translate: TranslateService) { }
 
   ngOnInit() {
     this.isCompanyOwner = this.authService.getUserRole() === 'CompanyOwner';

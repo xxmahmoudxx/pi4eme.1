@@ -1,21 +1,23 @@
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface MappingConfirmed {
   mapping: Record<string, string>;
+  isRequest: boolean;
 }
 
 @Component({
   selector: 'app-csv-mapping',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <div class="mapping-overlay" *ngIf="visible">
       <div class="mapping-modal">
         <div class="modal-header">
-          <h2>Map CSV Columns</h2>
-          <p class="modal-sub">We detected {{ headers.length }} columns and {{ totalRows }} data rows. Map each CSV column to a standard field.</p>
+          <h2>{{ 'CSV.MAP_COLUMNS' | translate }}</h2>
+          <p class="modal-sub">{{ 'CSV.DETECTED_COLS' | translate:{ headers: headers.length, rows: totalRows } }}</p>
           <button class="btn-close" (click)="cancel()">&times;</button>
         </div>
 
@@ -29,9 +31,9 @@ export interface MappingConfirmed {
           <table class="mapping-table">
             <thead>
               <tr>
-                <th>CSV Column</th>
-                <th>Sample Data</th>
-                <th>Map To</th>
+                <th>{{ 'CSV.COLUMN' | translate }}</th>
+                <th>{{ 'CSV.SAMPLE' | translate }}</th>
+                <th>{{ 'CSV.MAP_TO' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -41,9 +43,9 @@ export interface MappingConfirmed {
                 <td>
                   <select [(ngModel)]="mapping[h]" [name]="'map_' + h" class="map-select"
                           [class.mapped]="mapping[h]" [class.unmapped]="!mapping[h]">
-                    <option value="">-- skip --</option>
+                    <option value="">-- {{ 'CSV.SKIP' | translate }} --</option>
                     <option *ngFor="let f of standardFields" [value]="f" [disabled]="isFieldUsed(f, h)">
-                      {{ f }}{{ isRequired(f) ? ' *' : '' }}{{ isFieldUsed(f, h) ? ' (used)' : '' }}
+                      {{ f }}{{ isRequired(f) ? ' *' : '' }}{{ isFieldUsed(f, h) ? ' (' + ('CSV.USED' | translate) + ')' : '' }}
                     </option>
                   </select>
                 </td>
@@ -55,7 +57,7 @@ export interface MappingConfirmed {
         <!-- Field Requirements -->
         <div class="mapping-status">
           <div class="status-group">
-            <span class="status-group-label">Required:</span>
+            <span class="status-group-label">{{ 'CSV.REQUIRED' | translate }}:</span>
             <div class="status-item"
                  *ngFor="let f of requiredFields"
                  [class.ok]="isMapped(f)" [class.missing]="!isMapped(f)">
@@ -63,7 +65,7 @@ export interface MappingConfirmed {
             </div>
           </div>
           <div class="status-group" *ngIf="eitherOrFields.length > 0">
-            <span class="status-group-label">Need at least one:</span>
+            <span class="status-group-label">{{ 'CSV.NEED_ONE' | translate }}:</span>
             <div class="status-item"
                  *ngFor="let f of eitherOrFields"
                  [class.ok]="isMapped(f)" [class.neutral]="!isMapped(f) && eitherOrSatisfied()"
@@ -92,34 +94,43 @@ export interface MappingConfirmed {
             {{ quality.message }}
           </div>
           <div class="quality-details">
-            <span class="qd valid">{{ quality.validRows }} rows ready</span>
-            <span class="qd invalid" *ngIf="quality.invalidRows > 0">{{ quality.invalidRows }} rows skipped</span>
-            <span class="qd percent">{{ quality.qualityPercent }}% quality</span>
+            <span class="qd valid">{{ quality.validRows }} {{ 'CSV.ROWS_READY' | translate }}</span>
+            <span class="qd invalid" *ngIf="quality.invalidRows > 0">{{ quality.invalidRows }} {{ 'CSV.ROWS_SKIPPED' | translate }}</span>
+            <span class="qd percent">{{ quality.qualityPercent }}% {{ 'CSV.QUALITY' | translate }}</span>
           </div>
         </div>
 
         <!-- Smart Fixes Applied -->
         <div class="smartfixes-section" *ngIf="smartFixes.length > 0">
-          <div class="section-label">&#9889; Auto-fixes applied:</div>
+          <div class="section-label">&#9889; {{ 'CSV.AUTO_FIXES' | translate }}:</div>
           <div class="smartfix-item" *ngFor="let fix of smartFixes">{{ fix }}</div>
         </div>
 
         <!-- Preview Warnings (not blocking) -->
         <div class="warnings-section" *ngIf="previewWarnings.length > 0">
-          <div class="section-label">&#9888; Warnings (non-blocking):</div>
+          <div class="section-label">&#9888; {{ 'CSV.WARNINGS' | translate }}:</div>
           <div class="warning-item" *ngFor="let w of previewWarnings">{{ w }}</div>
         </div>
 
         <!-- Preview Errors -->
         <div class="errors-section" *ngIf="previewErrors.length > 0">
-          <div class="section-label">Rows that will be skipped:</div>
+          <div class="section-label">{{ 'CSV.SKIPPED_ROWS_MSG' | translate }}:</div>
           <div class="error-item" *ngFor="let e of previewErrors">{{ e }}</div>
         </div>
 
+        <!-- Request Toggle -->
+        <div class="request-toggle-card">
+          <input type="checkbox" id="csvIsRequest" [(ngModel)]="isRequest" />
+          <div class="request-label-wrap">
+            <label for="csvIsRequest">{{ 'PURCHASES.SUBMIT_AS_REQUEST' | translate }}</label>
+            <p class="request-hint">{{ 'PURCHASES.REQUEST_HINT' | translate }}</p>
+          </div>
+        </div>
+
         <div class="modal-actions">
-          <button class="btn-cancel" (click)="cancel()">Cancel</button>
+          <button class="btn-cancel" (click)="cancel()">{{ 'SETTINGS.CANCEL' | translate }}</button>
           <button class="btn-confirm" (click)="confirm()" [disabled]="!canImport()">
-            Import {{ quality ? quality.validRows : totalRows }} Rows
+            {{ 'CSV.IMPORT_BTN' | translate:{ count: quality ? quality.validRows : totalRows } }}
           </button>
         </div>
       </div>
@@ -216,6 +227,16 @@ export interface MappingConfirmed {
     .errors-section { margin-bottom: 14px; padding: 10px 14px; background: #fce7e7; border-radius: 8px; border: 1px solid #f5b7b1; }
     .error-item { font-size: 12px; color: #c0392b; padding: 2px 0; }
 
+    .request-toggle-card {
+      margin-bottom: 20px; padding: 14px; border-radius: 12px;
+      background: #f0f6ff; border: 2px dashed #5483B3;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .request-toggle-card input { width: 22px; height: 22px; cursor: pointer; }
+    .request-label-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .request-label-wrap label { font-weight: 700; color: #052659; cursor: pointer; font-size: 14px; }
+    .request-hint { font-size: 11px; color: #5483B3; margin: 0; }
+
     /* Actions */
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
     .btn-cancel {
@@ -242,7 +263,7 @@ export class CsvMappingComponent implements OnChanges {
   @Input() totalRows = 0;
   @Input() standardFields: string[] = [];
   @Input() requiredFields: string[] = [];
-  @Input() eitherOrFields: string[] = [];    // e.g. ['totalAmount', 'unitPrice']
+  @Input() eitherOrFields: string[] = [];
   @Input() hints: string[] = [];
   @Input() quality: any = null;
   @Input() previewErrors: string[] = [];
@@ -252,6 +273,9 @@ export class CsvMappingComponent implements OnChanges {
   @Output() mappingCancelled = new EventEmitter<void>();
 
   mapping: Record<string, string> = {};
+  isRequest = false;
+
+  constructor(private translate: TranslateService) {}
 
   ngOnChanges(_changes: SimpleChanges) {
     if (this.suggestedMapping) {
@@ -293,7 +317,7 @@ export class CsvMappingComponent implements OnChanges {
     for (const [k, v] of Object.entries(this.mapping)) {
       if (v) clean[k] = v;
     }
-    this.mappingConfirmed.emit({ mapping: clean });
+    this.mappingConfirmed.emit({ mapping: clean, isRequest: this.isRequest });
   }
 
   cancel() {

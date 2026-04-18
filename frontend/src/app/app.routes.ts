@@ -17,6 +17,8 @@ import { guestGuard } from './guards/guest.guard';
 import { adminGuard } from './guards/admin.guard';
 import { rolesGuard } from './guards/roles.guard';
 import { AuthCallbackComponent } from './pages/auth-callback.component';
+import { PurchaseRequestsComponent } from './pages/purchase-requests.component';
+import { PurchaseHistoryComponent } from './pages/purchase-history.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -29,6 +31,8 @@ export const routes: Routes = [
   { path: 'customers', component: CustomersDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
   { path: 'suppliers', component: SuppliersDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
   { path: 'report', component: ReportDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
+  { path: 'purchase-requests', component: PurchaseRequestsComponent, canActivate: [authGuard, rolesGuard(['Accountant'], '/sales')] },
+  { path: 'purchase-history', component: PurchaseHistoryComponent, canActivate: [authGuard, rolesGuard(['Accountant'], '/sales')] },
   { path: 'assistant', component: AssistantComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [authGuard, rolesGuard(['Admin'], '/sales')] },
   { path: 'face-verify', component: FaceVerifyComponent, canActivate: [authGuard] },

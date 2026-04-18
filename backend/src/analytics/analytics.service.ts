@@ -22,7 +22,7 @@ export class AnalyticsService {
      * POST to Python ML, return result.
      */
     private async callMl(companyId: string, endpoint: string): Promise<any> {
-        const cid = new Types.ObjectId(companyId);
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
 
         const [rawPurchases, rawSales] = await Promise.all([
             this.purchaseModel.find({ companyId: cid }).lean().exec(),
@@ -103,6 +103,35 @@ export class AnalyticsService {
         } catch (e) {
             this.logger.error('Product performance failed', e);
             return [];
+        }
+    }
+
+    async analyzePurchaseRequest(companyId: string, current: any) {
+        try {
+            const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
+            // Get recent history (last 20) to check for patterns/duplicates
+            const history = await this.purchaseModel
+                .find({ companyId: cid })
+                .sort({ createdAt: -1 })
+                .limit(20)
+                .lean()
+                .exec();
+
+            const url = `${this.mlBaseUrl}/ml/analyze-purchase`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ current, history }),
+            });
+
+            if (!response.ok) {
+                this.logger.error(`ML analyze-purchase failed: ${response.status}`);
+                return null;
+            }
+            return await response.json();
+        } catch (e) {
+            this.logger.error('Purchase analysis call failed', e);
+            return null;
         }
     }
 }

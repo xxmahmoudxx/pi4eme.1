@@ -5,6 +5,7 @@ import { Purchase, PurchaseDocument } from './schemas/purchase.schema';
 import { EtlService, ColumnMapping } from '../etl/etl.service';
 import { OcrService } from '../ocr/ocr.service';
 import { SuppliersService } from '../suppliers/suppliers.service';
+import { AnalyticsService } from '../analytics/analytics.service';
 
 @Injectable()
 export class PurchasesService {
@@ -14,6 +15,7 @@ export class PurchasesService {
         private readonly etl: EtlService,
         private readonly ocr: OcrService,
         private readonly suppliersService: SuppliersService,
+        private readonly analyticsService: AnalyticsService,
     ) { }
 
     // ── Create single purchase (manual entry) ────────────────────
@@ -39,8 +41,8 @@ export class PurchasesService {
             console.warn('Supplier auto-create failed:', e?.message || e);
         }
 
-        return this.purchaseModel.create({
-            companyId: new Types.ObjectId(companyId),
+        const purchaseData: any = {
+            companyId: Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId,
             date: data.date ? new Date(data.date) : new Date(),
             supplier: supplierName,
             category: data.category || '',
@@ -48,9 +50,23 @@ export class PurchasesService {
             quantity,
             unitCost,
             totalCost,
-            status: data.status || 'received',
+            status: data.isRequest ? 'pending_review' : (data.status || 'received'),
             notes: data.notes || '',
-        });
+            submittedBy: data.submittedBy || 'Owner',
+        };
+
+        // If it's a request, run AI analysis
+        if (data.isRequest) {
+            const aiResult = await this.analyticsService.analyzePurchaseRequest(companyId, purchaseData);
+            if (aiResult) {
+                purchaseData.aiDecision = aiResult.decision;
+                purchaseData.aiConfidence = aiResult.confidence;
+                purchaseData.aiReasoning = aiResult.explanation;
+                purchaseData.aiFlags = aiResult.flags;
+            }
+        }
+
+        return this.purchaseModel.create(purchaseData);
     }
 
     // ── CSV Preview: parse headers + auto-suggest mapping ────────
@@ -86,7 +102,7 @@ export class PurchasesService {
     }
 
     // ── CSV Import with user-confirmed mapping ───────────────────
-    async importCsvWithMapping(companyId: string, csvContent: string, mapping: ColumnMapping): Promise<{
+    async importCsvWithMapping(companyId: string, csvContent: string, mapping: ColumnMapping, isRequest = false, submittedBy = 'Owner'): Promise<{
         imported: number;
         errors: string[];
         warnings: string[];
@@ -106,7 +122,7 @@ export class PurchasesService {
             );
         }
 
-        const docs = result.rows.map((row) => ({
+        const docs: any[] = result.rows.map((row) => ({
             companyId: new Types.ObjectId(companyId),
             date: row.date,
             supplier: row.supplier,
@@ -115,9 +131,26 @@ export class PurchasesService {
             quantity: row.quantity,
             unitCost: row.unitCost,
             totalCost: row.totalCost,
-            status: row.status,
+            status: isRequest ? 'pending_review' : (row.status || 'received'),
             notes: row.notes,
+            submittedBy: submittedBy,
         }));
+
+        // If it's a request, run AI analysis for each row (limited to 50 for performance)
+        if (isRequest) {
+            const analysisLimit = 50;
+            const rowsToAnalyze = docs.slice(0, analysisLimit);
+            
+            await Promise.all(rowsToAnalyze.map(async (doc) => {
+                const aiResult = await this.analyticsService.analyzePurchaseRequest(companyId, doc);
+                if (aiResult) {
+                    doc.aiDecision = aiResult.decision;
+                    doc.aiConfidence = aiResult.confidence;
+                    doc.aiReasoning = aiResult.explanation;
+                    doc.aiFlags = aiResult.flags;
+                }
+            }));
+        }
 
         // Auto-create suppliers from imported data (per-supplier isolation)
         const uniqueSuppliers = [...new Set(docs.map(d => d.supplier).filter(s => s && s !== 'Unknown'))];
@@ -168,16 +201,18 @@ export class PurchasesService {
 
     // ── Read ─────────────────────────────────────────────────────
     async findAll(companyId: string): Promise<Purchase[]> {
-        return this.purchaseModel.find({ companyId: new Types.ObjectId(companyId) }).sort({ date: -1 }).exec();
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
+        return this.purchaseModel.find({ companyId: cid }).sort({ date: -1 }).exec();
     }
 
     async delete(companyId: string, id: string): Promise<void> {
-        await this.purchaseModel.deleteOne({ _id: id, companyId: new Types.ObjectId(companyId) }).exec();
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
+        await this.purchaseModel.deleteOne({ _id: id, companyId: cid }).exec();
     }
 
     // ── KPIs ─────────────────────────────────────────────────────
     async getKpis(companyId: string) {
-        const cid = new Types.ObjectId(companyId);
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         const [result] = await this.purchaseModel.aggregate([
             { $match: { companyId: cid } },
             {
@@ -211,7 +246,7 @@ export class PurchasesService {
 
     // ── Charts ───────────────────────────────────────────────────
     async overTime(companyId: string, interval: string = 'day') {
-        const cid = new Types.ObjectId(companyId);
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         const dateFormat = interval === 'month' ? '%Y-%m' : '%Y-%m-%d';
         return this.purchaseModel.aggregate([
             { $match: { companyId: cid } },
@@ -227,7 +262,7 @@ export class PurchasesService {
     }
 
     async bySupplier(companyId: string) {
-        const cid = new Types.ObjectId(companyId);
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         return this.purchaseModel.aggregate([
             { $match: { companyId: cid } },
             { $group: { _id: '$supplier', total: { $sum: '$totalCost' }, count: { $sum: 1 } } },
@@ -236,7 +271,7 @@ export class PurchasesService {
     }
 
     async byCategory(companyId: string) {
-        const cid = new Types.ObjectId(companyId);
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         return this.purchaseModel.aggregate([
             { $match: { companyId: cid } },
             { $group: { _id: { $ifNull: ['$category', 'Uncategorized'] }, total: { $sum: '$totalCost' }, count: { $sum: 1 } } },
@@ -294,7 +329,7 @@ export class PurchasesService {
     }
 
     // ── Confirm OCR Rows (ETL-validated) ────────────────────────────
-    async confirmOcrRows(companyId: string, rows: any[]): Promise<{
+    async confirmOcrRows(companyId: string, rows: any[], isRequest = false, submittedBy = 'Owner'): Promise<{
         imported: number;
         skipped: number;
         errors: string[];
@@ -336,7 +371,7 @@ export class PurchasesService {
                 warnings.push(`Row ${rowNum}: invalid date, using today`);
             }
 
-            validDocs.push({
+            const doc: any = {
                 companyId: new Types.ObjectId(companyId),
                 date: isNaN(date.getTime()) ? new Date() : date,
                 supplier: row.supplier || 'Unknown',
@@ -345,9 +380,23 @@ export class PurchasesService {
                 quantity,
                 unitCost,
                 totalCost,
-                status: 'received',
+                status: isRequest ? 'pending_review' : 'received',
                 notes: 'Imported from invoice image (OCR)',
-            });
+                submittedBy: submittedBy,
+            };
+
+            // Run AI analysis if request
+            if (isRequest) {
+                const aiResult = await this.analyticsService.analyzePurchaseRequest(companyId, doc);
+                if (aiResult) {
+                    doc.aiDecision = aiResult.decision;
+                    doc.aiConfidence = aiResult.confidence;
+                    doc.aiReasoning = aiResult.explanation;
+                    doc.aiFlags = aiResult.flags;
+                }
+            }
+
+            validDocs.push(doc);
         }
 
         if (validDocs.length > 0) {
@@ -437,6 +486,74 @@ export class PurchasesService {
         assessed.issues = issues;
 
         return assessed;
+    }
+
+    // ── Accountant & History Features ─────────────────────────────
+    async findRequests(companyId: string, filters: any = {}): Promise<Purchase[]> {
+        const query: any = { 
+            companyId: Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId, 
+            status: 'pending_review' 
+        };
+        
+        // Add more filters if needed (date, employee, category, etc.)
+        if (filters.employee) query.submittedBy = filters.employee;
+        if (filters.category) query.category = filters.category;
+        if (filters.startDate || filters.endDate) {
+            query.date = {};
+            if (filters.startDate) query.date.$gte = new Date(filters.startDate);
+            if (filters.endDate) query.date.$lte = new Date(filters.endDate);
+        }
+
+        return this.purchaseModel.find(query).sort({ createdAt: -1 }).exec();
+    }
+
+    async getHistory(companyId: string, filters: any = {}): Promise<Purchase[]> {
+        const query: any = { 
+            companyId: Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId 
+        };
+        
+        if (filters.status) query.finalStatus = filters.status;
+        if (filters.employee) query.submittedBy = filters.employee;
+        if (filters.category) query.category = filters.category;
+        
+        return this.purchaseModel.find(query).sort({ date: -1 }).exec();
+    }
+
+    async reviewRequest(companyId: string, id: string, review: { status: 'APPROVED' | 'REJECTED', comment?: string }): Promise<Purchase> {
+        const update: any = {
+            finalStatus: review.status,
+            accountantComment: review.comment || '',
+            reviewedAt: new Date(),
+            status: review.status === 'APPROVED' ? 'received' : 'cancelled'
+        };
+
+        return this.purchaseModel.findOneAndUpdate(
+            { _id: id, companyId: Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId },
+            { $set: update },
+            { new: true }
+        ).exec();
+    }
+
+    async getReviewStats(companyId: string) {
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
+        const stats = await this.purchaseModel.aggregate([
+            { $match: { companyId: cid, finalStatus: { $ne: 'PENDING' } } },
+            {
+                $group: {
+                    _id: null,
+                    totalReviewed: { $sum: 1 },
+                    approved: { $sum: { $cond: [{ $eq: ['$finalStatus', 'APPROVED'] }, 1, 0] } },
+                    rejected: { $sum: { $cond: [{ $eq: ['$finalStatus', 'REJECTED'] }, 1, 0] } },
+                    aiMatches: { $sum: { $cond: [{ $eq: ['$aiDecision', '$finalStatus'] }, 1, 0] } },
+                }
+            }
+        ]);
+
+        const result = stats[0] || { totalReviewed: 0, approved: 0, rejected: 0, aiMatches: 0 };
+        return {
+            ...result,
+            accuracy: result.totalReviewed > 0 ? Math.round((result.aiMatches / result.totalReviewed) * 100) : 100
+        };
     }
 }
 

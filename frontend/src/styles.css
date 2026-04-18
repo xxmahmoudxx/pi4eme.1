@@ -1314,4 +1314,294 @@ input:focus, select:focus, textarea:focus {
 :root.dark-theme .autocomplete-hint {
   color: #888 !important;
   border-top-color: #404040 !important;
-}
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* Purchase Requests & History - Accountant Pages Dark Mode */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Purchase Requests Component */
+:root.dark-theme app-purchase-requests .stat-card {
+  background: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-requests .stat-card.accent {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+:root.dark-theme app-purchase-requests .request-card {
+  background: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3) !important;
+}
+
+:root.dark-theme app-purchase-requests .request-card:hover {
+  box-shadow: 0 20px 45px rgba(0,0,0,0.4) !important;
+}
+
+:root.dark-theme app-purchase-requests .item-info h3 {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-requests .category {
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-purchase-requests .detail-row {
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-purchase-requests .ai-section {
+  background: #2d2d2d !important;
+  border: 1px solid #404040 !important;
+}
+
+:root.dark-theme app-purchase-requests .ai-explanation {
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-purchase-requests .confidence {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-purchase-requests .comment-input {
+  background: #2d2d2d !important;
+  border-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-requests .btn-outline {
+  background: #2d2d2d !important;
+  border-color: #404040 !important;
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-purchase-requests .btn-outline:hover {
+  background: #3a1a1a !important;
+  color: #f87171 !important;
+  border-color: #ef4444 !important;
+}
+
+:root.dark-theme app-purchase-requests .empty-state {
+  background: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+}
+
+:root.dark-theme app-purchase-requests .empty-state h2 {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-requests .empty-state p {
+  color: #b0b0b0 !important;
+}
+
+/* Purchase History Component */
+:root.dark-theme app-purchase-history .summary-pill {
+  background: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-purchase-history .summary-pill.accent {
+  background: #2d2d2d !important;
+  border-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .search-box input {
+  background: #2d2d2d !important;
+  border-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .filter-group select {
+  background: #2d2d2d !important;
+  border-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .table-container {
+  background: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+}
+
+:root.dark-theme app-purchase-history .history-table th {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-purchase-history .history-row:hover {
+  background: rgba(255,255,255,0.05) !important;
+}
+
+:root.dark-theme app-purchase-history .history-table td {
+  border-bottom-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .avatar {
+  background: #404040 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .item-name {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .category-tag {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-purchase-history .amount-cell {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .badge.approved {
+  background: #1a3a2a !important;
+  color: #4ade80 !important;
+}
+
+:root.dark-theme app-purchase-history .badge.rejected {
+  background: #3a1a1a !important;
+  color: #f87171 !important;
+}
+
+:root.dark-theme app-purchase-history .badge.solid.approved {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .badge.solid.rejected {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-purchase-history .empty-results {
+  color: #808080 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* Report Dashboard Dark Mode */
+/* ═══════════════════════════════════════════════════════════════ */
+
+:root.dark-theme app-report-dashboard .page-header h1 {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .page-subtitle {
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-report-dashboard .kpi-label {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-report-dashboard .kpi-value {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .health-explain {
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-report-dashboard .health-score-circle {
+  background: #1a1a1a !important;
+  border-color: #333333 !important;
+}
+
+:root.dark-theme app-report-dashboard .gauge-track {
+  background: #333333 !important;
+}
+
+:root.dark-theme app-report-dashboard .factors-grid h3 {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .factor-row {
+  border-bottom-color: #333333 !important;
+}
+
+:root.dark-theme app-report-dashboard .factor-name {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .factor-detail {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-report-dashboard .factor-bar {
+  background: #333333 !important;
+}
+
+:root.dark-theme app-report-dashboard .factor-score {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .forecast-footer {
+  border-top-color: #333333 !important;
+}
+
+:root.dark-theme app-report-dashboard .trend-indicator {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-report-dashboard .total-prediction {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .total-prediction strong {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .ai-badge {
+  background: #2d2d2d !important;
+  color: #ffffff !important;
+  border-color: #404040 !important;
+}
+
+:root.dark-theme app-report-dashboard .confidence-badge {
+  background: #1a3a2a !important;
+  color: #4ade80 !important;
+}
+
+:root.dark-theme app-report-dashboard .ai-loading {
+  color: #808080 !important;
+}
+
+:root.dark-theme app-report-dashboard .ai-loading .spinner-sm {
+  border-color: #404040 !important;
+  border-top-color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .section-header h2 {
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .forecast-subtitle {
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-report-dashboard .chart-container canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+:root.dark-theme app-report-dashboard .score-status {
+  background: #2d2d2d !important;
+  color: #b0b0b0 !important;
+}
+
+:root.dark-theme app-report-dashboard .score-status.good {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .score-status.warn {
+  background: #b7770d !important;
+  color: #ffffff !important;
+}
+
+:root.dark-theme app-report-dashboard .score-status.bad {
+  background: #c0392b !important;
+  color: #ffffff !important;
+}

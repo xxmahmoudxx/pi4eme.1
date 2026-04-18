@@ -1,24 +1,25 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-csv-upload',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   template: `
     <div class="csv-upload" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.dragging]="dragging">
       <div class="upload-area">
         <span class="upload-icon">☁️</span>
-        <p class="upload-text">Drag & drop your <strong>.csv</strong> file here</p>
-        <p class="upload-sub">or</p>
+        <p class="upload-text" [innerHTML]="'CSV.DRAG_DROP' | translate"></p>
+        <p class="upload-sub">{{ 'COMMON.OR' | translate }}</p>
         <label class="btn-browse">
-          Browse File
+          {{ 'CSV.BROWSE' | translate }}
           <input type="file" accept=".csv" (change)="onFileChange($event)" hidden />
         </label>
         <span *ngIf="selected" class="file-name">📄 {{ selected.name }}</span>
       </div>
       <button class="btn-upload" type="button" (click)="emitFile()" [disabled]="!selected">
-        Upload CSV
+        {{ 'CSV.UPLOAD_BTN' | translate }}
       </button>
     </div>
   `,

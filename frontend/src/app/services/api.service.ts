@@ -14,10 +14,11 @@ export class ApiService {
     return this.http.post<any>(`${this.apiBase}/purchases/upload/preview`, fd);
   }
 
-  confirmPurchasesCsv(file: File, mapping: Record<string, string>) {
+  confirmPurchasesCsv(file: File, mapping: Record<string, string>, isRequest = false) {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('mapping', JSON.stringify(mapping));
+    fd.append('isRequest', isRequest ? 'true' : 'false');
     return this.http.post<any>(`${this.apiBase}/purchases/upload/confirm`, fd);
   }
 
@@ -57,6 +58,22 @@ export class ApiService {
 
   deletePurchase(id: string) {
     return this.http.delete(`${this.apiBase}/purchases/${id}`);
+  }
+
+  getPurchaseRequests(filters: any = {}) {
+    return this.http.get<any[]>(`${this.apiBase}/purchases/requests`, { params: filters });
+  }
+
+  getPurchaseReviewStats() {
+    return this.http.get<any>(`${this.apiBase}/purchases/review-stats`);
+  }
+
+  getPurchaseHistory(filters: any = {}) {
+    return this.http.get<any[]>(`${this.apiBase}/purchases/history`, { params: filters });
+  }
+
+  reviewPurchaseRequest(id: string, review: { status: 'APPROVED' | 'REJECTED'; comment?: string }) {
+    return this.http.post<any>(`${this.apiBase}/purchases/${id}/review`, review);
   }
 
   // ── Sales ────────────────────────────────────────────────────
@@ -103,8 +120,8 @@ export class ApiService {
     return this.http.post<any>(`${this.apiBase}/purchases/upload-image`, fd);
   }
 
-  confirmPurchasesOcr(rows: any[]) {
-    return this.http.post<any>(`${this.apiBase}/purchases/ocr/confirm`, { rows });
+  confirmPurchasesOcr(rows: any[], isRequest = false) {
+    return this.http.post<any>(`${this.apiBase}/purchases/ocr/confirm`, { rows, isRequest });
   }
 
   getSales() {

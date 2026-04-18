@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { FaceRecognitionService } from '../services/face-recognition.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 
 @Component({
@@ -18,47 +18,47 @@ import { TranslateModule } from '@ngx-translate/core';
         <!-- Card Header -->
         <div class="card-header">
           <img class="card-logo" src="assets/tenexa-logo.png" alt="Tenexa Logo" />
-          <h2>{{ 'LOGIN.TITLE' | translate }}</h2>
-          <p>{{ 'LOGIN.SUBTITLE' | translate }}</p>
+          <h2>{{ 'AUTH.LOGIN_TITLE' | translate }}</h2>
+          <p>{{ 'AUTH.LOGIN_SUB' | translate }}</p>
         </div>
 
         <div *ngIf="verifiedMessage" class="verified-banner">
-          ✅ Email verified successfully! You can now log in.
+          {{ 'AUTH.VERIFIED_SUCCESS' | translate }}
         </div>
 
         <!-- ── Tabs ── -->
         <div class="tabs" *ngIf="step === 'credentials'">
           <button class="tab" [class.active]="mode === 'password'" (click)="mode = 'password'; reset()">
-            🔑 Password
+            🔑 {{ 'AUTH.PASSWORD' | translate }}
           </button>
           <button class="tab" [class.active]="mode === 'face'" (click)="mode = 'face'; reset()">
-            📷 Face Login
+            📷 {{ 'AUTH.FACE_LOGIN' | translate }}
           </button>
         </div>
 
         <!-- ─────────── PASSWORD MODE ─────────── -->
         <form *ngIf="mode === 'password' && step === 'credentials'" (ngSubmit)="submit()">
           <div class="form-group">
-            <label>{{ 'LOGIN.EMAIL' | translate }}</label>
+            <label>{{ 'AUTH.EMAIL' | translate }}</label>
             <input type="email" [(ngModel)]="email" name="email" required placeholder="you@example.com" />
           </div>
           <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <label>{{ 'LOGIN.PASSWORD' | translate }}</label>
-              <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+              <label>{{ 'AUTH.PASSWORD' | translate }}</label>
+              <a routerLink="/forgot-password" class="forgot-link">{{ 'AUTH.FORGOT' | translate }}</a>
             </div>
             <input type="password" [(ngModel)]="password" name="password" required placeholder="••••••••" />
           </div>
           <button class="btn-primary" type="submit" [disabled]="loading">
-            {{ loading ? 'Signing in...' : ('LOGIN.SUBMIT' | translate) }}
+            {{ loading ? ('SETTINGS.SAVING' | translate) : ('AUTH.SIGNIN_BTN' | translate) }}
           </button>
         </form>
 
         <!-- ─────────── 2FA OTP STEP ─────────── -->
         <div *ngIf="step === 'otp'" class="otp-section">
           <div class="otp-icon">🔐</div>
-          <h3>Two-Factor Authentication</h3>
-          <p class="otp-hint">Open Google Authenticator and enter the 6-digit code.</p>
+          <h3>{{ 'SETTINGS.TWO_FACTOR' | translate }}</h3>
+          <p class="otp-hint">{{ 'SETTINGS.ENTER_CODE' | translate }}</p>
 
           <input
             type="text"
@@ -72,33 +72,33 @@ import { TranslateModule } from '@ngx-translate/core';
           />
 
           <button class="btn-primary" (click)="submitOtp()" [disabled]="loading || otpCode.length !== 6">
-            {{ loading ? 'Verifying...' : 'Verify Code' }}
+            {{ loading ? ('SETTINGS.ACTIVATING' | translate) : ('SETTINGS.ACTIVATE_2FA' | translate) }}
           </button>
 
           <p *ngIf="otpError" class="error-msg">{{ otpError }}</p>
-          <button class="btn-back" (click)="backToLogin()">← Back to login</button>
+          <button class="btn-back" (click)="backToLogin()">← {{ 'SETTINGS.BACK' | translate }}</button>
         </div>
 
         <!-- ─────────── FACE LOGIN MODE ─────────── -->
         <div *ngIf="mode === 'face' && step === 'credentials'" class="face-section">
           <div class="form-group">
-            <label>Your Email</label>
+            <label>{{ 'AUTH.EMAIL' | translate }}</label>
             <input type="email" [(ngModel)]="email" name="email" placeholder="you@example.com" />
           </div>
 
           <div class="camera-container" [class.hidden]="!cameraActive">
             <video autoplay playsinline class="camera-preview"></video>
-            <div class="camera-overlay">Look directly at the camera</div>
+            <div class="camera-overlay">{{ 'FACE.CAMERA_OVERLAY' | translate }}</div>
           </div>
 
           <div class="status-badge" [ngClass]="faceStatus">
-            <span *ngIf="faceStatus === 'idle'">Enter your email then open camera</span>
-            <span *ngIf="faceStatus === 'loading'">⏳ Loading AI models...</span>
-            <span *ngIf="faceStatus === 'camera'">✅ Ready — click Capture when in frame</span>
-            <span *ngIf="faceStatus === 'scanning'">🔍 Analysing face...</span>
-            <span *ngIf="faceStatus === 'success'">✅ Face matched! Logging you in...</span>
+            <span *ngIf="faceStatus === 'idle'">{{ 'AUTH.FACE_IDLE' | translate }}</span>
+            <span *ngIf="faceStatus === 'loading'">⏳ {{ 'FACE.LOADING_MODELS' | translate }}</span>
+            <span *ngIf="faceStatus === 'camera'">✅ {{ 'AUTH.FACE_READY' | translate }}</span>
+            <span *ngIf="faceStatus === 'scanning'">🔍 {{ 'FACE.SCANNING' | translate }}</span>
+            <span *ngIf="faceStatus === 'success'">✅ {{ 'AUTH.FACE_SUCCESS' | translate }}</span>
             <span *ngIf="faceStatus === 'failed'">{{ errorMsg }}</span>
-            <span *ngIf="faceStatus === 'no-face'">No face detected — move closer and retry</span>
+            <span *ngIf="faceStatus === 'no-face'">{{ 'FACE.NO_FACE' | translate }}</span>
           </div>
 
           <div class="face-buttons">
@@ -106,24 +106,24 @@ import { TranslateModule } from '@ngx-translate/core';
                     *ngIf="!cameraActive && faceStatus !== 'success'"
                     [disabled]="!email || faceStatus === 'loading'"
                     (click)="openCamera()">
-              Open Camera
+              {{ 'FACE.OPEN_CAMERA' | translate }}
             </button>
             <button class="btn-face capture"
                     *ngIf="cameraActive && faceStatus === 'camera'"
                     (click)="captureAndLogin()">
-              Capture &amp; Login
+              {{ 'FACE.CAPTURE_LOGIN' | translate }}
             </button>
             <button class="btn-face retry"
                     *ngIf="faceStatus === 'failed' || faceStatus === 'no-face'"
                     (click)="openCamera()">
-              Retry
+              {{ 'FACE.RETRY' | translate }}
             </button>
           </div>
         </div>
 
         <p class="hint" *ngIf="step === 'credentials'">
-          {{ 'LOGIN.NEW_HERE' | translate }}
-          <a routerLink="/signup">{{ 'LOGIN.CREATE_ACCOUNT' | translate }}</a>
+          {{ 'AUTH.NO_ACCOUNT' | translate }}
+          <a routerLink="/signup">{{ 'AUTH.SIGNUP_LINK' | translate }}</a>
         </p>
 
         <div class="divider" *ngIf="step === 'credentials' && mode === 'password'">or</div>
@@ -142,7 +142,7 @@ import { TranslateModule } from '@ngx-translate/core';
               2.22 0 1.605-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795
               24 17.295 24 12c0-6.63-5.37-12-12-12"/>
             </svg>
-            Continue with GitHub
+            {{ 'AUTH.CONTINUE_GITHUB' | translate }}
           </button>
         </a>
       </div>
@@ -373,6 +373,7 @@ export class LoginComponent {
     private faceService: FaceRecognitionService,
     private router: Router,
     private route: ActivatedRoute,
+    private translate: TranslateService,
   ) {
     this.verifiedMessage = this.route.snapshot.queryParams['verified'] === 'true';
   }
@@ -408,7 +409,7 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading = false;
-        alert(err.error?.message || 'Login failed. Check credentials.');
+        alert(err.error?.message || this.translate.instant('LOGIN.FAILED'));
       },
     });
   }
@@ -423,7 +424,7 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.otpError = err.error?.message || 'Invalid code. Try again.';
+        this.otpError = err.error?.message || this.translate.instant('AUTH.INVALID_OTP');
         this.otpCode = '';
       },
     });
@@ -439,7 +440,7 @@ export class LoginComponent {
   }
 
   async openCamera() {
-    if (!this.email) { alert('Please enter your email first'); return; }
+    if (!this.email) { alert(this.translate.instant('AUTH.ENTER_EMAIL_FIRST')); return; }
     this.faceStatus = 'loading';
     try {
       const [stream] = await Promise.all([
@@ -454,7 +455,7 @@ export class LoginComponent {
         if (video) video.srcObject = this.stream;
       }, 100);
     } catch {
-      this.errorMsg = 'Camera access denied - please allow camera permission.';
+      this.errorMsg = this.translate.instant('FACE.CAMERA_DENIED');
       this.faceStatus = 'failed';
       this.cameraActive = false;
     }
@@ -479,7 +480,7 @@ export class LoginComponent {
       this.authService.setToken(result.access_token);
       setTimeout(() => this.router.navigate(['/sales']), 1000);
     } catch (err: any) {
-      this.errorMsg = err.error?.message || 'Face login failed - try again or use password';
+      this.errorMsg = err.error?.message || this.translate.instant('AUTH.FACE_LOGIN_FAILED');
       this.faceStatus = 'failed';
     }
   }

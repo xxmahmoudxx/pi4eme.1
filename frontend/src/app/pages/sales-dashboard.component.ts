@@ -16,25 +16,25 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   imports: [CommonModule, FormsModule, CsvUploadComponent, CsvMappingComponent, DynamicFormComponent, InvoiceImageUploadComponent, NgChartsModule, TranslateModule],
   template: `
     <div class="page-header">
-      <h1>Sales Dashboard</h1>
-      <p class="page-subtitle">Monitor revenue, customers, and sales performance</p>
+      <h1>{{ 'SALES.TITLE' | translate }}</h1>
+      <p class="page-subtitle">{{ 'SALES.SUBTITLE' | translate }}</p>
     </div>
 
     <!-- KPI Cards -->
     <div class="kpi-grid" *ngIf="kpis">
-      <div class="kpi-card"><span class="kpi-icon">💵</span><div class="kpi-content"><span class="kpi-value">{{ kpis.totalRevenue | number:'1.2-2' }}</span><span class="kpi-label">Total Revenue</span></div></div>
-      <div class="kpi-card"><span class="kpi-icon">🧾</span><div class="kpi-content"><span class="kpi-value">{{ kpis.count }}</span><span class="kpi-label">Total Orders</span></div></div>
-      <div class="kpi-card"><span class="kpi-icon">📊</span><div class="kpi-content"><span class="kpi-value">{{ kpis.avgOrderValue | number:'1.2-2' }}</span><span class="kpi-label">Avg Order Value</span></div></div>
-      <div class="kpi-card"><span class="kpi-icon">👥</span><div class="kpi-content"><span class="kpi-value">{{ kpis.uniqueCustomers }}</span><span class="kpi-label">Unique Customers</span></div></div>
-      <div class="kpi-card accent"><span class="kpi-icon">🏆</span><div class="kpi-content"><span class="kpi-value">{{ kpis.topProduct }}</span><span class="kpi-label">Top Product</span></div></div>
+      <div class="kpi-card"><span class="kpi-icon">💵</span><div class="kpi-content"><span class="kpi-value">{{ kpis.totalRevenue | number:'1.2-2' }}</span><span class="kpi-label">{{ 'SALES.REVENUE' | translate }}</span></div></div>
+      <div class="kpi-card"><span class="kpi-icon">🧾</span><div class="kpi-content"><span class="kpi-value">{{ kpis.count }}</span><span class="kpi-label">{{ 'SALES.ORDERS' | translate }}</span></div></div>
+      <div class="kpi-card"><span class="kpi-icon">📊</span><div class="kpi-content"><span class="kpi-value">{{ kpis.avgOrderValue | number:'1.2-2' }}</span><span class="kpi-label">{{ 'SALES.AVG_ORDER' | translate }}</span></div></div>
+      <div class="kpi-card"><span class="kpi-icon">👥</span><div class="kpi-content"><span class="kpi-value">{{ kpis.uniqueCustomers }}</span><span class="kpi-label">{{ 'SALES.CUSTOMERS' | translate }}</span></div></div>
+      <div class="kpi-card accent"><span class="kpi-icon">🏆</span><div class="kpi-content"><span class="kpi-value">{{ kpis.topProduct }}</span><span class="kpi-label">{{ 'SALES.TOP_PRODUCT' | translate }}</span></div></div>
     </div>
 
     <!-- AI SECTION: Product Performance Insights -->
     <div class="card ai-section" *ngIf="productPerformance.length > 0">
       <div class="ai-header">
         <div>
-          <h2>Product Performance Insights</h2>
-          <p class="ai-subtitle">AI classification of product performance based on sales trends</p>
+          <h2>{{ 'SALES.PERF_TITLE' | translate }}</h2>
+          <p class="ai-subtitle">{{ 'SALES.PERF_SUB' | translate }}</p>
         </div>
         <span class="ai-badge">AI</span>
       </div>
@@ -49,10 +49,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
             <span class="perf-trend">{{ p.trendArrow }}</span>
           </div>
           <div class="perf-metrics">
-            <div class="pm"><span class="pm-v">{{ p.revenue | number:'1.2-2' }}</span><span class="pm-l">Revenue</span></div>
-            <div class="pm"><span class="pm-v">{{ p.quantity }}</span><span class="pm-l">Qty Sold</span></div>
-            <div class="pm"><span class="pm-v">{{ p.orders }}</span><span class="pm-l">Orders</span></div>
-            <div class="pm"><span class="pm-v" [class.positive]="p.growth > 0" [class.negative]="p.growth < 0">{{ p.growth > 0 ? '+' : '' }}{{ p.growth }}%</span><span class="pm-l">Growth</span></div>
+            <div class="pm"><span class="pm-v">{{ p.revenue | number:'1.2-2' }}</span><span class="pm-l">{{ 'REPORT.REVENUE' | translate }}</span></div>
+            <div class="pm"><span class="pm-v">{{ p.quantity }}</span><span class="pm-l">{{ 'COMMON.QTY' | translate }}</span></div>
+            <div class="pm"><span class="pm-v">{{ p.orders }}</span><span class="pm-l">{{ 'SALES.ORDERS' | translate }}</span></div>
+            <div class="pm"><span class="pm-v" [class.positive]="p.growth > 0" [class.negative]="p.growth < 0">{{ p.growth > 0 ? '+' : '' }}{{ p.growth }}%</span><span class="pm-l">{{ 'REPORT.REVENUE_GROWTH' | translate }}</span></div>
           </div>
           <p class="perf-explain">{{ p.explanation }}</p>
         </div>
@@ -60,21 +60,21 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     </div>
 
     <div class="card ai-loading" *ngIf="aiLoading">
-      <div class="spinner-sm"></div><p>Analyzing product performance...</p>
+      <div class="spinner-sm"></div><p>{{ 'SALES.ANALYZING' | translate }}</p>
     </div>
 
     <!-- Upload + Manual Entry -->
     <div class="grid grid-2">
       <div class="card">
         <div class="card-icon">📷</div>
-        <h2>Upload Invoice Image</h2>
-        <p class="hint">Upload a sales invoice and we'll extract the data automatically</p>
+        <h2>{{ 'SALES.UPLOAD_TITLE' | translate }}</h2>
+        <p class="hint">{{ 'SALES.UPLOAD_SUB' | translate }}</p>
         <app-invoice-image-upload [type]="'sales'" (dataExtracted)="onInvoiceImageExtracted($event)"></app-invoice-image-upload>
       </div>
       <div class="card">
         <div class="card-icon">CSV</div>
-        <h2>Import Sales CSV</h2>
-        <p class="hint">Supports ANY column names - you'll map them in the next step</p>
+        <h2>{{ 'SALES.CSV_TITLE' | translate }}</h2>
+        <p class="hint">{{ 'SALES.CSV_SUB' | translate }}</p>
         <app-csv-upload (fileSelected)="onCsvSelected($event)"></app-csv-upload>
         <div *ngIf="uploadMsg" class="status-msg" [class.error]="uploadError">{{ uploadMsg }}</div>
         <div *ngIf="uploadErrors.length" class="validation-errors">
@@ -87,11 +87,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     <div class="grid grid-1">
       <div class="card">
         <div class="card-icon">+</div>
-        <h2>Add Sale Manually</h2>
+        <h2>{{ 'SALES.MANUAL_TITLE' | translate }}</h2>
         <app-dynamic-form
           [fields]="formFields"
           [loading]="manualLoading"
-          submitLabel="+ Add Sale"
+          [submitLabel]="'SALES.ADD_SALE' | translate"
           (formSubmitted)="addManual($event)">
         </app-dynamic-form>
         <div *ngIf="manualMsg" class="status-msg" [class.error]="manualError">{{ manualMsg }}</div>
@@ -119,16 +119,16 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
     <!-- Charts -->
     <div class="grid grid-2" *ngIf="kpis && kpis.count > 0">
-      <div class="card"><h3>Revenue Over Time</h3><div class="chart-wrapper"><canvas baseChart [data]="lineChartData" type="line" [options]="lineChartOptions"></canvas></div></div>
-      <div class="card"><h3>Revenue by Product</h3><div class="chart-wrapper"><canvas baseChart [data]="barChartData" type="bar" [options]="barChartOptions"></canvas></div></div>
+      <div class="card"><h3>{{ 'SALES.REVENUE_TIME' | translate }}</h3><div class="chart-wrapper"><canvas baseChart [data]="lineChartData" type="line" [options]="lineChartOptions"></canvas></div></div>
+      <div class="card"><h3>{{ 'SALES.REVENUE_PRODUCT' | translate }}</h3><div class="chart-wrapper"><canvas baseChart [data]="barChartData" type="bar" [options]="barChartOptions"></canvas></div></div>
     </div>
     <div class="grid grid-2" *ngIf="kpis && kpis.count > 0">
-      <div class="card"><h3>Revenue by Customer</h3><div class="chart-wrapper doughnut-wrapper"><canvas baseChart [data]="doughnutData" type="doughnut" [options]="doughnutOptions"></canvas></div></div>
+      <div class="card"><h3>{{ 'SALES.REVENUE_CUSTOMER' | translate }}</h3><div class="chart-wrapper doughnut-wrapper"><canvas baseChart [data]="doughnutData" type="doughnut" [options]="doughnutOptions"></canvas></div></div>
       <div class="card" *ngIf="sales.length > 0">
-        <h3>Recent Sales</h3>
+        <h3>{{ 'SALES.RECENT' | translate }}</h3>
         <div class="table-scroll">
           <table class="table">
-            <thead><tr><th>Date</th><th>Customer</th><th>Product</th><th>Category</th><th>Qty</th><th>Unit Price</th><th>Total</th><th></th></tr></thead>
+            <thead><tr><th>{{ 'COMMON.DATE' | translate }}</th><th>{{ 'ACCOUNTANT.TABLE_EMPLOYEE' | translate }}</th><th>{{ 'COMMON.ITEM' | translate }}</th><th>{{ 'PURCHASES.ALERTS' | translate }}</th><th>{{ 'COMMON.QTY' | translate }}</th><th>{{ 'COMMON.UNIT_PRICE' | translate }}</th><th>{{ 'COMMON.TOTAL' | translate }}</th><th></th></tr></thead>
             <tbody>
               <tr *ngFor="let row of sales">
                 <td>{{ row.date | date:'yyyy-MM-dd' }}</td><td>{{ row.customer }}</td><td>{{ row.product }}</td>
@@ -143,8 +143,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       </div>
     </div>
 
-    <div class="card empty-state" *ngIf="!loading && kpis && kpis.count === 0"><div class="empty-icon">--</div><h3>No sales yet</h3><p>Upload a CSV file or add sales manually to see your dashboard come to life.</p></div>
-    <div class="card loading-state" *ngIf="loading"><div class="spinner"></div><p>Loading your sales data...</p></div>
+    <div class="card empty-state" *ngIf="!loading && kpis && kpis.count === 0"><div class="empty-icon">--</div><h3>{{ 'SALES.EMPTY_TITLE' | translate }}</h3><p>{{ 'SALES.EMPTY_SUB' | translate }}</p></div>
+    <div class="card loading-state" *ngIf="loading"><div class="spinner"></div><p>{{ 'SALES.LOADING' | translate }}</p></div>
   `,
   styles: [`
     .page-header { margin-bottom: 24px; }
@@ -221,14 +221,14 @@ export class SalesDashboardComponent implements OnInit {
 
   // Dynamic form fields
   formFields: FormFieldDef[] = [
-    { name: 'date', label: 'Date', type: 'date', required: true, default: new Date().toISOString().slice(0, 10) },
-    { name: 'customer', label: 'Customer', type: 'text', required: false, placeholder: 'e.g. John Doe (optional)', autocomplete: 'customer' },
-    { name: 'product', label: 'Product', type: 'text', required: true, placeholder: 'e.g. Premium Widget' },
-    { name: 'category', label: 'Category', type: 'text', required: false, placeholder: 'e.g. Electronics' },
-    { name: 'quantity', label: 'Quantity', type: 'number', required: true, default: 1 },
-    { name: 'unitPrice', label: 'Unit Price', type: 'number', required: false, default: 0, placeholder: 'or provide Total Amount' },
-    { name: 'totalAmount', label: 'Total Amount', type: 'number', required: false, default: 0, placeholder: 'or provide Unit Price' },
-    { name: 'notes', label: 'Notes', type: 'text', required: false, placeholder: 'Optional notes...' },
+    { name: 'date', label: 'COMMON.DATE', type: 'date', required: true, default: new Date().toISOString().slice(0, 10) },
+    { name: 'customer', label: 'PARTNERS.CUSTOMER', type: 'text', required: false, placeholder: 'SALES.CUSTOMER_PLACEHOLDER', autocomplete: 'customer' },
+    { name: 'product', label: 'COMMON.PRODUCT', type: 'text', required: true, placeholder: 'SALES.PRODUCT_PLACEHOLDER' },
+    { name: 'category', label: 'COMMON.CATEGORY', type: 'text', required: false, placeholder: 'SALES.CATEGORY_PLACEHOLDER' },
+    { name: 'quantity', label: 'COMMON.QTY', type: 'number', required: true, default: 1 },
+    { name: 'unitPrice', label: 'COMMON.UNIT_PRICE', type: 'number', required: false, default: 0, placeholder: 'SALES.UNIT_PRICE_PLACEHOLDER' },
+    { name: 'totalAmount', label: 'COMMON.TOTAL', type: 'number', required: false, default: 0, placeholder: 'SALES.TOTAL_PLACEHOLDER' },
+    { name: 'notes', label: 'COMMON.NOTES', type: 'text', required: false, placeholder: 'COMMON.NOTES_PLACEHOLDER' },
   ];
 
   lineChartData: ChartData<'line'> = { labels: [], datasets: [] };
@@ -253,10 +253,10 @@ export class SalesDashboardComponent implements OnInit {
 
   loadCharts() {
     this.api.getRevenueOverTime('day').subscribe((data) => {
-      this.lineChartData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), label: 'Revenue', borderColor: '#052659', backgroundColor: 'rgba(84,131,179,0.15)', tension: 0.4, fill: true, pointBackgroundColor: '#052659' }] };
+      this.lineChartData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), label: this.translate.instant('REPORT.REVENUE'), borderColor: '#052659', backgroundColor: 'rgba(84,131,179,0.15)', tension: 0.4, fill: true, pointBackgroundColor: '#052659' }] };
     });
     this.api.getRevenueByProduct().subscribe((data) => {
-      this.barChartData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), label: 'Revenue', backgroundColor: data.map((_, i) => this.chartColors[i % this.chartColors.length]), borderRadius: 6 }] };
+      this.barChartData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), label: this.translate.instant('REPORT.REVENUE'), backgroundColor: data.map((_, i) => this.chartColors[i % this.chartColors.length]), borderRadius: 6 }] };
     });
     this.api.getRevenueByCustomer().subscribe((data) => {
       this.doughnutData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), backgroundColor: data.map((_, i) => this.chartColors[i % this.chartColors.length]) }] };

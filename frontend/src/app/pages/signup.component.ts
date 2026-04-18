@@ -15,83 +15,83 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
         <div class="card-header">
           <img class="card-logo" src="assets/tenexa-logo.png" alt="Tenexa Logo" />
-          <h2>{{ 'SIGNUP.TITLE' | translate }}</h2>
-          <p>{{ 'SIGNUP.SUBTITLE' | translate }}</p>
+          <h2>{{ 'AUTH.SIGNUP_TITLE' | translate }}</h2>
+          <p>{{ 'AUTH.SIGNUP_SUB' | translate }}</p>
         </div>
 
         <div *ngIf="submitted" class="success-box">
-          ✅ Account created! Please check your email to verify your account before logging in.
+          ✅ {{ 'AUTH.SIGNUP_SUCCESS' | translate }}
         </div>
 
         <form *ngIf="!submitted" (ngSubmit)="submit()">
           <div class="form-group">
-            <label>{{ 'NAME' | translate }}</label>
+            <label>{{ 'AUTH.FULL_NAME' | translate }}</label>
             <input type="text" [(ngModel)]="name" name="name" required placeholder="John" />
-            <span class="error-msg" *ngIf="name && !isValidName()">⚠️ Name must have at least 2 letters and cannot be exactly two words</span>
+            <span class="error-msg" *ngIf="name && !isValidName()">⚠️ {{ 'AUTH.ERR_NAME' | translate }}</span>
           </div>
 
           <div class="form-group">
-            <label>{{ 'SIGNUP.EMAIL' | translate }}</label>
+            <label>{{ 'AUTH.EMAIL' | translate }}</label>
             <input type="email" [(ngModel)]="email" name="email" required placeholder="you@example.com" />
-            <span class="error-msg" *ngIf="email && !isValidEmail()">⚠️ Email must contain &#64; and .</span>
+            <span class="error-msg" *ngIf="email && !isValidEmail()">⚠️ {{ 'AUTH.ERR_EMAIL' | translate }}</span>
           </div>
 
           <div class="form-group">
-            <label>{{ 'SIGNUP.PASSWORD' | translate }}</label>
+            <label>{{ 'AUTH.PASSWORD' | translate }}</label>
             <input type="password" [(ngModel)]="password" name="password" minlength="8" required placeholder="Min. 8 characters" />
           </div>
 
           <div class="form-group">
-            <label>{{ 'SIGNUP.ROLE' | translate }}</label>
+            <label>{{ 'ADMIN.ROLE' | translate }}</label>
             <div class="role-row">
               <label class="role-option">
                 <input type="radio" name="role" [(ngModel)]="role" value="CompanyOwner" />
-                <span>{{ 'SIGNUP.OWNER' | translate }}</span>
+                <span>{{ 'ADMIN.OWNER_ROLE' | translate }}</span>
               </label>
               <label class="role-option">
                 <input type="radio" name="role" [(ngModel)]="role" value="Accountant" />
-                <span>{{ 'SIGNUP.ACCOUNTANT' | translate }}</span>
+                <span>{{ 'ADMIN.ACCOUNTANT_ROLE' | translate }}</span>
               </label>
             </div>
           </div>
 
           <ng-container *ngIf="role === 'CompanyOwner'">
             <div class="form-group">
-              <label>{{ 'SIGNUP.COMPANY_NAME' | translate }}</label>
+              <label>{{ 'AUTH.COMPANY_NAME' | translate }}</label>
               <input type="text" [(ngModel)]="companyName" name="companyName" required placeholder="Acme Corp" />
-              <span class="error-msg" *ngIf="companyName && !isValidCompanyName()">⚠️ Company name cannot be only numbers</span>
+              <span class="error-msg" *ngIf="companyName && !isValidCompanyName()">⚠️ {{ 'AUTH.ERR_COMPANY' | translate }}</span>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>{{ 'SIGNUP.TAX_RATE' | translate }}</label>
+                <label>{{ 'SETTINGS.TAX_RATE' | translate }}</label>
                 <input type="number" [(ngModel)]="taxRate" name="taxRate" min="0" step="0.01" required placeholder="10" />
               </div>
               <div class="form-group">
-                <label>{{ 'SIGNUP.CURRENCY' | translate }}</label>
+                <label>{{ 'SETTINGS.CURRENCY' | translate }}</label>
                 <input type="text" [(ngModel)]="currency" name="currency" required placeholder="USD" />
               </div>
             </div>
             <div class="form-group">
-              <label>{{ 'SIGNUP.NOTIF_EMAIL' | translate }}</label>
+              <label>{{ 'SETTINGS.NOTIF_EMAIL' | translate }}</label>
               <input type="email" [(ngModel)]="notificationEmail" name="notificationEmail" placeholder="alerts@yourcompany.com" />
-              <span class="error-msg" *ngIf="notificationEmail && !isValidEmail(notificationEmail)">⚠️ Notification email must contain &#64; and .</span>
+              <span class="error-msg" *ngIf="notificationEmail && !isValidEmail(notificationEmail)">⚠️ {{ 'AUTH.ERR_EMAIL' | translate }}</span>
             </div>
           </ng-container>
 
           <ng-container *ngIf="role === 'Accountant'">
             <div class="form-group">
-              <label>{{ 'SIGNUP.COMPANY_ID' | translate }}</label>
+              <label>{{ 'ADMIN.COMPANY_ID' | translate }}</label>
               <input type="text" [(ngModel)]="companyId" name="companyId" required placeholder="COMP-XXXX" />
-              <p class="hint">{{ 'SIGNUP.ID_HINT' | translate }}</p>
+              <p class="hint">{{ 'AUTH.ASK_ID' | translate }}</p>
             </div>
           </ng-container>
 
           <button class="btn-primary" type="submit" [disabled]="submitting || !isFormValid()">
-            {{ submitting ? 'Creating account...' : ('SIGNUP.SUBMIT' | translate) }}
+            {{ submitting ? ('SETTINGS.SAVING' | translate) : ('AUTH.SIGNUP_BTN' | translate) }}
           </button>
           <p class="hint">
-            {{ 'SIGNUP.ALREADY_HAVE' | translate }}
-            <a routerLink="/login">{{ 'SIGNUP.LOGIN' | translate }}</a>
+            {{ 'AUTH.HAVE_ACCOUNT' | translate }}
+            <a routerLink="/login">{{ 'AUTH.SIGNIN_BTN' | translate }}</a>
           </p>
         </form>
       </div>

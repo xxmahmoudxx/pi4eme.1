@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type PurchaseStatus = 'pending' | 'received' | 'cancelled';
+export type PurchaseStatus = 'pending' | 'received' | 'cancelled' | 'pending_review';
 
 @Schema({ collection: 'purchases_flat', timestamps: true })
 export class Purchase {
@@ -31,13 +31,39 @@ export class Purchase {
 
   @Prop({
     required: true,
-    enum: ['pending', 'received', 'cancelled'],
+    enum: ['pending', 'received', 'cancelled', 'pending_review'],
     default: 'received',
   })
   status: PurchaseStatus;
 
   @Prop({ default: '' })
   notes: string;
+
+  // AI Decision Fields
+  @Prop({ type: String, enum: ['APPROVED', 'REJECTED'], default: null })
+  aiDecision: string;
+
+  @Prop({ type: Number, default: 0 })
+  aiConfidence: number;
+
+  @Prop({ type: String, default: '' })
+  aiReasoning: string;
+
+  @Prop({ type: [String], default: [] })
+  aiFlags: string[];
+
+  // Accountant Review Fields
+  @Prop({ type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' })
+  finalStatus: string;
+
+  @Prop({ type: String, default: '' })
+  accountantComment: string;
+
+  @Prop({ type: Date, default: null })
+  reviewedAt: Date;
+
+  @Prop({ type: String, default: '' })
+  submittedBy: string;
 }
 
 export type PurchaseDocument = Purchase & Document;

@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface InvoiceExtraction {
   rawText: string;
@@ -24,7 +25,7 @@ export interface InvoiceExtraction {
 @Component({
   selector: 'app-invoice-image-upload',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <!-- Upload Area -->
     <div class="upload-area" *ngIf="!extractedData"
@@ -32,9 +33,9 @@ export interface InvoiceExtraction {
          [class.drag-over]="isDragOver">
       <input #fileInput type="file" accept="image/jpeg,image/png" (change)="onFileSelected($event)" style="display:none" />
       <button class="btn-upload" (click)="fileInput.click()" [disabled]="uploading">
-        {{ uploading ? 'Processing...' : 'Upload Invoice Image' }}
+        {{ uploading ? ('COMMON.PROCESSING' | translate) : ('INVOICE.UPLOAD_IMAGE' | translate) }}
       </button>
-      <p class="upload-hint">Drop image here or click to browse. Supports JPG, PNG (max 5MB)</p>
+      <p class="upload-hint">{{ 'INVOICE.UPLOAD_HINT' | translate }}</p>
       <div *ngIf="uploadError" class="error-msg">{{ uploadError }}</div>
     </div>
 
@@ -42,7 +43,9 @@ export interface InvoiceExtraction {
     <div class="preview-section" *ngIf="extractedData">
       <!-- Quality Alert -->
       <div class="quality-alert" [class]="extractedData.quality.status">
-        <span class="q-badge">{{ extractedData.quality.status | uppercase }}</span>
+        <span class="q-badge" *ngIf="extractedData.quality.status === 'good'">{{ 'COMMON.GOOD' | translate | uppercase }}</span>
+        <span class="q-badge" *ngIf="extractedData.quality.status === 'warning'">{{ 'COMMON.WARNING' | translate | uppercase }}</span>
+        <span class="q-badge" *ngIf="extractedData.quality.status === 'poor'">{{ 'COMMON.POOR' | translate | uppercase }}</span>
         <div>
           <p class="q-msg">{{ extractedData.quality.message }}</p>
           <p class="q-hint">{{ extractedData.recommendation.hint }}</p>
@@ -51,15 +54,15 @@ export interface InvoiceExtraction {
 
       <!-- Stats -->
       <div class="stats-row">
-        <div class="stat"><span class="stat-label">Total Rows</span><span class="stat-value">{{ extractedData.quality.totalRows }}</span></div>
-        <div class="stat"><span class="stat-label">Valid</span><span class="stat-value valid">{{ extractedData.quality.validRows }}</span></div>
-        <div class="stat"><span class="stat-label">Needs Review</span><span class="stat-value invalid">{{ extractedData.quality.invalidRows }}</span></div>
-        <div class="stat"><span class="stat-label">Quality</span><span class="stat-value">{{ extractedData.quality.qualityPercent }}%</span></div>
+        <div class="stat"><span class="stat-label">{{ 'INVOICE.TOTAL_ROWS' | translate }}</span><span class="stat-value">{{ extractedData.quality.totalRows }}</span></div>
+        <div class="stat"><span class="stat-label">{{ 'INVOICE.VALID' | translate }}</span><span class="stat-value valid">{{ extractedData.quality.validRows }}</span></div>
+        <div class="stat"><span class="stat-label">{{ 'INVOICE.NEEDS_REVIEW' | translate }}</span><span class="stat-value invalid">{{ extractedData.quality.invalidRows }}</span></div>
+        <div class="stat"><span class="stat-label">{{ 'CSV.QUALITY' | translate }}</span><span class="stat-value">{{ extractedData.quality.qualityPercent }}%</span></div>
       </div>
 
       <!-- User Note -->
       <div class="user-note">
-        We detected {{ extractedData.quality.totalRows }} item(s) automatically. Please review and fix any errors before saving.
+        {{ 'INVOICE.USER_NOTE' | translate:{ count: extractedData.quality.totalRows } }}
       </div>
 
       <!-- Editable Table -->
@@ -67,22 +70,22 @@ export interface InvoiceExtraction {
         <table class="invoice-table">
           <thead>
             <tr>
-              <th>{{ type === 'sales' ? 'Product' : 'Item' }}</th>
-              <th>Qty</th>
-              <th>{{ type === 'sales' ? 'Unit Price' : 'Unit Cost' }}</th>
-              <th>{{ type === 'sales' ? 'Total Amount' : 'Total Cost' }}</th>
-              <th>Date</th>
-              <th *ngIf="type === 'sales'">Customer</th>
-              <th *ngIf="type === 'purchases'">Supplier</th>
-              <th>Status</th>
+              <th>{{ (type === 'sales' ? 'INVOICE.PRODUCT' : 'INVOICE.ITEM') | translate }}</th>
+              <th>{{ 'COMMON.QTY' | translate }}</th>
+              <th>{{ (type === 'sales' ? 'INVOICE.UNIT_PRICE' : 'INVOICE.UNIT_COST') | translate }}</th>
+              <th>{{ (type === 'sales' ? 'INVOICE.TOTAL_AMOUNT' : 'INVOICE.TOTAL_COST') | translate }}</th>
+              <th>{{ 'COMMON.DATE' | translate }}</th>
+              <th *ngIf="type === 'sales'">{{ 'PARTNERS.CUSTOMER' | translate }}</th>
+              <th *ngIf="type === 'purchases'">{{ 'PARTNERS.SUPPLIER' | translate }}</th>
+              <th>{{ 'COMMON.STATUS' | translate }}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let row of extractedData.rows; let i = index" [class.invalid-row]="!row.isValid">
               <td>
-                <input *ngIf="type === 'sales'" [(ngModel)]="row.product" (ngModelChange)="onRowEdited(i)" class="cell-input" placeholder="Product name" />
-                <input *ngIf="type === 'purchases'" [(ngModel)]="row.item" (ngModelChange)="onRowEdited(i)" class="cell-input" placeholder="Item name" />
+                <input *ngIf="type === 'sales'" [(ngModel)]="row.product" (ngModelChange)="onRowEdited(i)" class="cell-input" [placeholder]="'INVOICE.PRODUCT_NAME' | translate" />
+                <input *ngIf="type === 'purchases'" [(ngModel)]="row.item" (ngModelChange)="onRowEdited(i)" class="cell-input" [placeholder]="'INVOICE.ITEM_NAME' | translate" />
               </td>
               <td><input [(ngModel)]="row.quantity" type="number" step="1" min="0" (ngModelChange)="onRowEdited(i)" class="cell-input num" /></td>
               <td>
@@ -94,38 +97,38 @@ export interface InvoiceExtraction {
                 <input *ngIf="type === 'purchases'" [(ngModel)]="row.totalCost" type="number" step="0.01" min="0" (ngModelChange)="onRowEdited(i)" class="cell-input num" />
               </td>
               <td><input [(ngModel)]="row.date" type="date" (ngModelChange)="onRowEdited(i)" class="cell-input" /></td>
-              <td *ngIf="type === 'sales'"><input [(ngModel)]="row.customer" class="cell-input" placeholder="Optional" /></td>
-              <td *ngIf="type === 'purchases'"><input [(ngModel)]="row.supplier" class="cell-input" placeholder="Optional" /></td>
+              <td *ngIf="type === 'sales'"><input [(ngModel)]="row.customer" class="cell-input" [placeholder]="'COMMON.OPTIONAL' | translate" /></td>
+              <td *ngIf="type === 'purchases'"><input [(ngModel)]="row.supplier" class="cell-input" [placeholder]="'COMMON.OPTIONAL' | translate" /></td>
               <td>
                 <span class="status-icon" [class.ok]="row.isValid" [class.warn]="!row.isValid"
-                      [title]="row.issues?.join(', ') || 'Valid'">
+                      [title]="row.issues?.join(', ') || ('COMMON.VALID' | translate)">
                   {{ row.isValid ? 'OK' : '!!' }}
                 </span>
               </td>
-              <td><button class="btn-del-row" (click)="deleteRow(i)" title="Remove row">X</button></td>
+              <td><button class="btn-del-row" (click)="deleteRow(i)" [title]="'COMMON.REMOVE' | translate">X</button></td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <!-- Add Row -->
-      <button class="btn-add-row" (click)="addEmptyRow()">+ Add Row</button>
+      <button class="btn-add-row" (click)="addEmptyRow()">+ {{ 'COMMON.ADD_ROW' | translate }}</button>
 
       <!-- Issues Summary -->
       <div *ngIf="extractedData.quality.invalidRows > 0" class="issues-summary">
-        <strong>Issues:</strong>
+        <strong>{{ 'COMMON.ISSUES' | translate }}:</strong>
         <span *ngFor="let row of extractedData.rows; let i = index">
           <span *ngIf="!row.isValid" class="issue-item">
-            Row {{ i + 1 }}: {{ row.issues?.join(', ') }}
+            {{ 'COMMON.ROW' | translate }} {{ i + 1 }}: {{ row.issues?.join(', ') }}
           </span>
         </span>
       </div>
 
       <!-- Actions -->
       <div class="action-buttons">
-        <button class="btn-secondary" (click)="resetUpload()" [disabled]="saving">Cancel</button>
+        <button class="btn-secondary" (click)="resetUpload()" [disabled]="saving">{{ 'SETTINGS.CANCEL' | translate }}</button>
         <button class="btn-primary" (click)="onDataConfirm()" [disabled]="saving || extractedData.quality.validRows === 0">
-          {{ saving ? 'Saving...' : 'Confirm & Save (' + extractedData.quality.validRows + ' rows)' }}
+          {{ saving ? ('SETTINGS.SAVING' | translate) : ('INVOICE.CONFIRM_SAVE' | translate:{ count: extractedData.quality.validRows }) }}
         </button>
       </div>
     </div>
@@ -202,7 +205,7 @@ export class InvoiceImageUploadComponent {
   uploadError: string | null = null;
   isDragOver = false;
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private translate: TranslateService) {}
 
   onDragOver(e: DragEvent) { e.preventDefault(); this.isDragOver = true; }
   onDragLeave(e: DragEvent) { e.preventDefault(); this.isDragOver = false; }
@@ -220,11 +223,11 @@ export class InvoiceImageUploadComponent {
 
   private processFile(file: File) {
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      this.uploadError = 'Only JPG and PNG files are supported';
+      this.uploadError = this.translate.instant('INVOICE.ERR_TYPE');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      this.uploadError = 'File size must be less than 5MB';
+      this.uploadError = this.translate.instant('INVOICE.ERR_SIZE');
       return;
     }
     this.uploadError = null;
@@ -237,10 +240,12 @@ export class InvoiceImageUploadComponent {
     apiCall.subscribe({
       next: (result) => {
         this.extractedData = result;
+        // Re-process status labels
+        this.recalculateQuality();
         this.uploading = false;
       },
       error: (err) => {
-        this.uploadError = err?.error?.message || 'Failed to extract invoice data. Check that the image is clear and readable.';
+        this.uploadError = err?.error?.message || this.translate.instant('INVOICE.ERR_UPLOAD');
         this.uploading = false;
       },
     });
@@ -276,21 +281,21 @@ export class InvoiceImageUploadComponent {
 
   private validateSaleRow(row: any) {
     const issues: string[] = [];
-    if (!row.product) issues.push('Missing product');
-    if (!row.quantity || row.quantity <= 0) issues.push('Invalid quantity');
-    if (!row.date) issues.push('Missing date');
+    if (!row.product) issues.push(this.translate.instant('INVOICE.MISSING_PRODUCT'));
+    if (!row.quantity || row.quantity <= 0) issues.push(this.translate.instant('INVOICE.INVALID_QTY'));
+    if (!row.date) issues.push(this.translate.instant('INVOICE.MISSING_DATE'));
     if ((!row.totalAmount || row.totalAmount <= 0) && (!row.unitPrice || row.unitPrice <= 0))
-      issues.push('Missing price');
+      issues.push(this.translate.instant('INVOICE.MISSING_PRICE'));
     row.issues = issues;
     row.isValid = issues.length === 0;
   }
 
   private validatePurchaseRow(row: any) {
     const issues: string[] = [];
-    if (!row.item) issues.push('Missing item');
-    if (!row.quantity || row.quantity <= 0) issues.push('Invalid quantity');
+    if (!row.item) issues.push(this.translate.instant('INVOICE.MISSING_ITEM'));
+    if (!row.quantity || row.quantity <= 0) issues.push(this.translate.instant('INVOICE.INVALID_QTY'));
     if ((!row.totalCost || row.totalCost <= 0) && (!row.unitCost || row.unitCost <= 0))
-      issues.push('Missing cost');
+      issues.push(this.translate.instant('INVOICE.MISSING_PRICE'));
     row.issues = issues;
     row.isValid = issues.length === 0;
   }
@@ -302,7 +307,7 @@ export class InvoiceImageUploadComponent {
       product: '', item: '', quantity: 1,
       unitPrice: 0, unitCost: 0, totalAmount: 0, totalCost: 0,
       date: today, customer: '', supplier: '',
-      isValid: false, issues: [this.type === 'sales' ? 'Missing product' : 'Missing item', 'Missing price'],
+      isValid: false, issues: [this.type === 'sales' ? this.translate.instant('INVOICE.MISSING_PRODUCT') : this.translate.instant('INVOICE.MISSING_ITEM'), this.translate.instant('INVOICE.MISSING_PRICE')],
     };
     this.extractedData.rows.push(newRow);
     this.recalculateQuality();
@@ -337,9 +342,15 @@ export class InvoiceImageUploadComponent {
     const qualityPercent = total > 0 ? Math.round((validRows.length / total) * 100) : 0;
 
     let status: 'good' | 'warning' | 'poor' = 'good';
-    let message = `Good quality (${qualityPercent}%)`;
-    if (qualityPercent < 50) { status = 'poor'; message = `Poor quality (${qualityPercent}%) - many rows need review`; }
-    else if (qualityPercent < 80) { status = 'warning'; message = `Fair quality (${qualityPercent}%) - some rows need review`; }
+    let message = this.translate.instant('INVOICE.QUALITY_GOOD', { percent: qualityPercent });
+    if (qualityPercent < 50) { 
+        status = 'poor'; 
+        message = this.translate.instant('INVOICE.QUALITY_POOR', { percent: qualityPercent }); 
+    }
+    else if (qualityPercent < 80) { 
+        status = 'warning'; 
+        message = this.translate.instant('INVOICE.QUALITY_FAIR', { percent: qualityPercent }); 
+    }
 
     this.extractedData.quality = {
       totalRows: total,
@@ -353,10 +364,10 @@ export class InvoiceImageUploadComponent {
       canProceed: qualityPercent >= 50,
       needsReview: qualityPercent < 80,
       hint: qualityPercent < 50
-        ? 'Too many missing values. Please add/edit rows manually.'
+        ? this.translate.instant('INVOICE.HINT_POOR')
         : qualityPercent < 80
-        ? 'Review extracted values before saving.'
-        : 'Data looks good. Ready to save.',
+        ? this.translate.instant('INVOICE.HINT_FAIR')
+        : this.translate.instant('INVOICE.HINT_GOOD'),
     };
   }
 }

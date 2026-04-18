@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ChatbotService, ChatMessage } from '../services/chatbot.service';
 import { AnimationService } from '../services/animation.service';
 import { Observable } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-chatbot',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <div class="chatbot-widget" [class.closed]="!isOpen">
       <!-- Header -->
@@ -16,8 +17,8 @@ import { Observable } from 'rxjs';
         <div class="header-title">
           <span class="chatbot-icon">💼</span>
           <div>
-            <h3>Business Assistant</h3>
-            <p class="status-text">Always ready to help</p>
+            <h3>{{ 'CHATBOT.TITLE' | translate }}</h3>
+            <p class="status-text">{{ 'CHATBOT.STATUS' | translate }}</p>
           </div>
         </div>
         <button class="close-btn" (click)="closeChat()" type="button" title="Close">
@@ -31,8 +32,8 @@ import { Observable } from 'rxjs';
       <div class="chatbot-messages" #messagesContainer>
         <ng-container *ngIf="messages$ | async as messages">
           <div *ngIf="messages.length === 0" class="welcome-message">
-            <p>👋 Hi! I'm your AI Business Assistant</p>
-            <p>Ask me about sales, inventory, products, profitability, and more!</p>
+            <p>{{ 'CHATBOT.WELCOME_1' | translate }}</p>
+            <p>{{ 'CHATBOT.WELCOME_2' | translate }}</p>
           </div>
           <div *ngFor="let message of messages" [ngClass]="message.role" class="message">
             <div class="message-bubble" [class.typing]="message.typing">
@@ -54,7 +55,7 @@ import { Observable } from 'rxjs';
           <textarea 
             [(ngModel)]="userMessage" 
             name="message"
-            placeholder="Type your question..."
+            [placeholder]="'CHATBOT.PLACEHOLDER' | translate"
             class="message-input"
             [disabled]="(isLoading$ | async) === true">
           </textarea>
@@ -67,7 +68,7 @@ import { Observable } from 'rxjs';
             <span *ngIf="isLoading$ | async" class="loading-spinner"></span>
           </button>
         </form>
-        <div class="info-text">Press Enter to send</div>
+        <div class="info-text">{{ 'CHATBOT.PRESS_ENTER' | translate }}</div>
       </div>
     </div>
 
@@ -119,7 +120,7 @@ import { Observable } from 'rxjs';
     }
 
     .chatbot-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
       color: white;
       padding: 18px;
       display: flex;
@@ -225,12 +226,12 @@ import { Observable } from 'rxjs';
     }
 
     .chatbot-messages::-webkit-scrollbar-thumb {
-      background: rgba(102, 126, 234, 0.3);
+      background: rgba(84, 131, 179, 0.3);
       border-radius: 3px;
     }
 
     .chatbot-messages::-webkit-scrollbar-thumb:hover {
-      background: rgba(102, 126, 234, 0.5);
+      background: rgba(84, 131, 179, 0.5);
     }
 
     .message {
@@ -270,7 +271,7 @@ import { Observable } from 'rxjs';
     }
 
     .message.user .message-bubble {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
       color: white;
       border-bottom-right-radius: 4px;
     }
@@ -299,7 +300,7 @@ import { Observable } from 'rxjs';
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: rgba(102, 126, 234, 0.6);
+      background: rgba(84, 131, 179, 0.6);
       animation: typingAnimation 1.4s infinite;
     }
 
@@ -368,8 +369,8 @@ import { Observable } from 'rxjs';
     }
 
     .message-input:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+      border-color: #5483B3;
+      box-shadow: 0 0 0 3px rgba(84, 131, 179, 0.15);
       background: var(--bg-primary);
     }
 
@@ -379,7 +380,7 @@ import { Observable } from 'rxjs';
     }
 
     .send-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
       color: white;
       border: none;
       border-radius: 12px;
@@ -393,12 +394,12 @@ import { Observable } from 'rxjs';
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 2px 8px rgba(84, 131, 179, 0.3);
     }
 
     .send-btn:hover:not(:disabled) {
       transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+      box-shadow: 0 6px 16px rgba(84, 131, 179, 0.5);
     }
 
     .send-btn:active:not(:disabled) {
@@ -439,12 +440,12 @@ import { Observable } from 'rxjs';
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
       border: none;
       color: white;
       font-size: 32px;
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45);
+      box-shadow: 0 4px 16px rgba(84, 131, 179, 0.45);
       transition: all 0.3s ease;
       z-index: 9998;
       display: flex;
@@ -456,17 +457,17 @@ import { Observable } from 'rxjs';
     @keyframes fabPulse {
       0%, 100% {
         transform: scale(1);
-        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.45);
+        box-shadow: 0 4px 16px rgba(84, 131, 179, 0.45);
       }
       50% {
         transform: scale(1.08);
-        box-shadow: 0 6px 24px rgba(102, 126, 234, 0.65);
+        box-shadow: 0 6px 24px rgba(84, 131, 179, 0.65);
       }
     }
 
     .chatbot-fab:hover {
       transform: scale(1.12);
-      box-shadow: 0 8px 28px rgba(102, 126, 234, 0.75);
+      box-shadow: 0 8px 28px rgba(84, 131, 179, 0.75);
     }
 
     .chatbot-fab:active {
@@ -511,7 +512,8 @@ export class ChatbotComponent implements OnInit {
 
   constructor(
     private chatbotService: ChatbotService,
-    private animationService: AnimationService
+    private animationService: AnimationService,
+    private translate: TranslateService
   ) {
     this.messages$ = this.chatbotService.messages$;
     this.isLoading$ = this.chatbotService.isLoading$;
@@ -568,7 +570,8 @@ export class ChatbotComponent implements OnInit {
   }
 
   formatTime(date: Date): string {
-    return date.toLocaleTimeString('en-US', { 
+    // Localized time format
+    return date.toLocaleTimeString(this.translate.currentLang === 'ar' ? 'ar-EG' : (this.translate.currentLang === 'fr' ? 'fr-FR' : 'en-US'), { 
       hour: '2-digit', 
       minute: '2-digit' 
     });

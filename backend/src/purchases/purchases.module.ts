@@ -7,6 +7,7 @@ import { PurchasesController } from './purchases.controller';
 import { EtlModule } from '../etl/etl.module';
 import { OcrModule } from '../ocr/ocr.module';
 import { SuppliersModule } from '../suppliers/suppliers.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
     imports: [
@@ -15,6 +16,7 @@ import { SuppliersModule } from '../suppliers/suppliers.module';
         EtlModule,
         OcrModule,
         SuppliersModule,
+        AnalyticsModule,
     ],
     controllers: [PurchasesController],
     providers: [PurchasesService],

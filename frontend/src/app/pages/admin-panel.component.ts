@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   template: `
     <div class="page-header">
       <h1>{{ 'ADMIN.TITLE' | translate }}</h1>
-      <p class="page-subtitle">Manage users, roles, and account statuses</p>
+      <p class="page-subtitle">{{ 'ADMIN.SUBTITLE' | translate }}</p>
     </div>
 
     <div class="card">
@@ -44,7 +44,7 @@ import { FormsModule } from '@angular/forms';
             <td><code class="company-id">{{ user.companyId }}</code></td>
             <td><strong>{{ user.name }}</strong></td>
             <td class="muted">{{ user.email }}</td>
-            <td><span class="role-chip">{{ user.role }}</span></td>
+            <td><span class="role-chip">{{ 'ADMIN.' + user.role.toUpperCase() + '_ROLE' | translate }}</span></td>
             <td>
               <span [class]="'status-chip ' + (user.status === 'active' ? 'active' : 'inactive')">
                 {{ user.status }}
@@ -139,7 +139,7 @@ export class AdminPanelComponent implements OnInit {
   sortKey = 'name';
   sortOrder: 'asc' | 'desc' = 'asc';
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private translate: TranslateService) { }
 
   ngOnInit() {
     this.loadUsers();
@@ -185,14 +185,14 @@ export class AdminPanelComponent implements OnInit {
   }
 
   deleteUser(user: any) {
-    if (confirm('ADMIN.DELETE_CONFIRM')) {
+    if (confirm(this.translate.instant('ADMIN.DELETE_CONFIRM'))) {
       this.api.deleteUser(user._id).subscribe({
         next: () => {
-          alert('ADMIN.DELETE_SUCCESS');
+          alert(this.translate.instant('ADMIN.DELETE_SUCCESS'));
           this.loadUsers();
         },
         error: () => {
-          alert('ADMIN.DELETE_FAILED');
+          alert(this.translate.instant('ADMIN.DELETE_FAILED'));
         }
       });
     }
