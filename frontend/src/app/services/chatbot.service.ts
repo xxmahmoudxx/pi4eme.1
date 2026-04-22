@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from './auth.service';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 export interface ChatMessage {
@@ -36,8 +37,15 @@ export class ChatbotService {
 
   private readonly BACKEND_URL = 'http://localhost:3000';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private authService: AuthService) {
     this.initializeWelcomeMessage();
+    
+    // Listen for logouts to clear chat history
+    this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+      if (!isLoggedIn) {
+        this.clearMessages();
+      }
+    });
   }
 
   private initializeWelcomeMessage(): void {
@@ -180,6 +188,7 @@ Focus on trends, patterns, and recommendations.`;
   }
 
   clearMessages(): void {
+    this.messagesSubject.next([]);
     this.initializeWelcomeMessage();
   }
 

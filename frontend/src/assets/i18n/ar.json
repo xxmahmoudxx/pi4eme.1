@@ -98,6 +98,7 @@
         "UPLOADING": "جاري حفظ الوجه على الخادم...",
         "ENROLLED": "تم تسجيل الوجه بنجاح! يمكنك الآن استخدام تسجيل الدخول بالوجه.",
         "OPEN_CAMERA": "فتح الكاميرا",
+        "CAPTURE_LOGIN": "تسجيل الدخول",
         "CAPTURE_VERIFY": "التقاط وتحقق",
         "CAPTURE_ENROLL": "التقاط وتسجيل",
         "RETRY": "إعادة المحاولة",
@@ -167,6 +168,16 @@
         "BACK": "رجوع",
         "FACE_RECOGNITION": "التعرف على الوجه",
         "FACE_DESC": "سجل أو تحقق من وجهك لتسجيل الدخول السريع بدون كلمة مرور.",
+        "THEME": "تفضيلات المظهر",
+        "THEME_DESC": "تخصيص المظهر المرئي للوحة التحكم وموضوع الألوان.",
+        "MODE": "وضع العرض",
+        "LIGHT": "فاتح",
+        "DARK": "داكن",
+        "COLOR_THEME": "لوحة الألوان",
+        "THEME_OCEAN": "محيط",
+        "THEME_EMERALD": "زمرد",
+        "THEME_SUNSET": "غروب",
+        "THEME_AMETHYST": "جمشت",
         "DAYS": "أيام"
     },
     "CHATBOT": {
@@ -396,7 +407,9 @@
         "ITEM_PLACEHOLDER": "مثلاً مادة خام أ",
         "CATEGORY_PLACEHOLDER": "مثلاً أجهزة",
         "UNIT_PRICE_PLACEHOLDER": "أو قدم الإجمالي",
-        "TOTAL_PLACEHOLDER": "أو قدم سعر الوحدة"
+        "TOTAL_PLACEHOLDER": "أو قدم سعر الوحدة",
+        "REQUEST_SENT": "تم إرسال الطلب إلى المحاسب للموافقة. سيتم إضافته فقط بعد الموافقة.",
+        "ADDED_SUCCESS": "تمت إضافة عملية الشراء بنجاح."
     },
     "REPORT": {
         "TITLE": "التقرير المالي",

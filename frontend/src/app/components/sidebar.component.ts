@@ -54,7 +54,7 @@ interface NavSection {
     </aside>
   `,
   styles: [`
-    .sidebar { width: 240px; min-height: calc(100vh - 64px); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-right: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; padding: 12px 0; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease; position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 2px 0 16px rgba(0,0,0,0.2); }
+    .sidebar { width: 240px; min-height: calc(100vh - 64px); background: linear-gradient(135deg, var(--c-dark, #052659) 0%, var(--c-mid, #5483B3) 100%); border-right: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; padding: 12px 0; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease; position: relative; overflow: hidden; flex-shrink: 0; box-shadow: 2px 0 16px rgba(0,0,0,0.2); }
     .sidebar.collapsed { width: 64px; }
     .sidebar.dark { box-shadow: 2px 0 16px rgba(0,0,0,0.5); }
     .sidebar-toggle { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, 0.15); cursor: pointer; margin: 0 auto 12px; transition: all 0.2s ease; flex-shrink: 0; }

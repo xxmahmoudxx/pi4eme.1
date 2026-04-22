@@ -134,14 +134,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   `,
   styles: [`
     .page-header { margin-bottom: 20px; }
-    .page-header h1 { font-size: 26px; font-weight: 800; color: #021024; margin: 0 0 4px; }
-    .page-subtitle { color: #5483B3; font-size: 14px; margin: 0; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: var(--c-darkest, #021024); margin: 0 0 4px; }
+    .page-subtitle { color: var(--c-mid, #5483B3); font-size: 14px; margin: 0; }
     .page-header-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
 
     .btn-add {
       display: flex; align-items: center; gap: 6px;
       padding: 10px 20px; border-radius: 10px; border: none;
-      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
+      background: linear-gradient(135deg, var(--c-dark, #052659) 0%, var(--c-mid, #5483B3) 100%);
       color: white; font-weight: 600; font-size: 14px; cursor: pointer;
       box-shadow: 0 2px 10px rgba(5,38,89,0.25);
       transition: all 0.2s ease;
@@ -160,7 +160,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .search-icon { color: #7DA0CA; display: flex; }
     .search-input {
       flex: 1; border: none; outline: none; font-size: 14px;
-      background: transparent; color: #021024; font-family: inherit;
+      background: transparent; color: var(--c-darkest, #021024); font-family: inherit;
     }
     .search-input::placeholder { color: #b0b0b0; }
 
@@ -170,7 +170,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     }
     .partner-card-shell { display: block; }
     .partner-card {
-      background: white; border-radius: 14px; padding: 18px; height: 100%;
+      background: var(--bg-primary, white); border-radius: 14px; padding: 18px; height: 100%;
       border: 1px solid rgba(84,131,179,0.1);
       box-shadow: 0 2px 10px rgba(2,16,36,0.06);
       transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease, border-color 0.2s ease;
@@ -200,17 +200,17 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .partner-card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
     .partner-avatar {
       width: 44px; height: 44px; border-radius: 12px;
-      background: linear-gradient(135deg, #052659, #5483B3);
+      background: linear-gradient(135deg, var(--c-dark, #052659), var(--c-mid, #5483B3));
       color: white; display: flex; align-items: center; justify-content: center;
       font-size: 15px; font-weight: 700; flex-shrink: 0;
     }
     .partner-avatar.supplier {
-      background: linear-gradient(135deg, #7DA0CA, #C1E8FF);
-      color: #052659;
+      background: linear-gradient(135deg, var(--c-light, #7DA0CA), var(--c-lightest, #C1E8FF));
+      color: var(--c-dark, #052659);
     }
     .partner-info { display: flex; flex: 1; flex-direction: column; min-width: 0; }
-    .partner-name { font-weight: 700; font-size: 15px; color: #021024; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .partner-meta { font-size: 12px; color: #7DA0CA; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .partner-name { font-weight: 700; font-size: 15px; color: var(--c-darkest, #021024); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .partner-meta { font-size: 12px; color: var(--c-mid, #5483B3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .btn-drag-handle {
       width: 34px; height: 34px; border-radius: 10px; border: none;
@@ -218,7 +218,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       display: inline-flex; align-items: center; justify-content: center;
       cursor: grab; flex-shrink: 0; transition: all 0.2s ease;
     }
-    .btn-drag-handle:hover { background: rgba(84,131,179,0.16); color: #052659; }
+    .btn-drag-handle:hover { background: rgba(84,131,179,0.16); color: var(--c-dark, #052659); }
     .btn-drag-handle:active { cursor: grabbing; }
     .btn-drag-handle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(84,131,179,0.18); }
 
@@ -240,7 +240,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .empty-state h3 { color: #052659; margin-bottom: 8px; }
     .empty-state p { color: #5483B3; font-size: 14px; }
     .loading-state { text-align: center; padding: 40px; }
-    .spinner { width: 36px; height: 36px; margin: 0 auto 12px; border: 3px solid #C1E8FF; border-top: 3px solid #052659; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .spinner { width: 36px; height: 36px; margin: 0 auto 12px; border: 3px solid var(--c-lightest, #C1E8FF); border-top: 3px solid var(--c-dark, #052659); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .modal-overlay {
@@ -269,7 +269,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .status-msg.error { background: #fce7e7; color: #c0392b; border-color: #f5b7b1; }
     .btn-submit {
       padding: 12px; border: none; border-radius: 10px;
-      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
+      background: linear-gradient(135deg, var(--c-dark, #052659) 0%, var(--c-mid, #5483B3) 100%);
       color: white; font-size: 15px; font-weight: 700; cursor: pointer;
       transition: all 0.2s; box-shadow: 0 2px 10px rgba(5,38,89,0.2);
     }

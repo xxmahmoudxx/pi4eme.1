@@ -148,6 +148,7 @@
         "UPLOADING": "Enregistrement du visage sur le serveur...",
         "ENROLLED": "Visage enregistré avec succès ! Vous pouvez maintenant utiliser la connexion faciale.",
         "OPEN_CAMERA": "Ouvrir la caméra",
+        "CAPTURE_LOGIN": "Se connecter",
         "CAPTURE_VERIFY": "Capturer & Vérifier",
         "CAPTURE_ENROLL": "Capturer & Enregistrer",
         "RETRY": "Réessayer",
@@ -217,6 +218,16 @@
         "BACK": "Retour",
         "FACE_RECOGNITION": "Reconnaissance Faciale",
         "FACE_DESC": "Inscrivez-vous ou vérifiez votre visage pour une connexion rapide sans mot de passe.",
+        "THEME": "Préférences du Thème",
+        "THEME_DESC": "Personnalisez l'apparence visuelle de votre tableau de bord et le thème de couleur.",
+        "MODE": "Mode d'Affichage",
+        "LIGHT": "Clair",
+        "DARK": "Sombre",
+        "COLOR_THEME": "Palette de Couleurs",
+        "THEME_OCEAN": "Océan",
+        "THEME_EMERALD": "Émeraude",
+        "THEME_SUNSET": "Coucher de Soleil",
+        "THEME_AMETHYST": "Améthyste",
         "DAYS": "jours"
     },
     "CHATBOT": {
@@ -392,7 +403,9 @@
         "ITEM_PLACEHOLDER": "ex: Matière Première X",
         "CATEGORY_PLACEHOLDER": "ex: Matériel",
         "UNIT_PRICE_PLACEHOLDER": "ou fournissez le Total",
-        "TOTAL_PLACEHOLDER": "ou fournissez le Prix Unitaire"
+        "TOTAL_PLACEHOLDER": "ou fournissez le Prix Unitaire",
+        "REQUEST_SENT": "Demande envoyée au comptable pour approbation. Elle ne sera ajoutée qu'après validation.",
+        "ADDED_SUCCESS": "Achat ajouté avec succès."
     },
     "REPORT": {
         "TITLE": "Rapport Financier",

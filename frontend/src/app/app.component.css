@@ -14,7 +14,7 @@
   padding: var(--spacing-md) var(--spacing-lg);
   height: auto;
   min-height: 64px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--c-dark, #052659) 0%, var(--c-mid, #5483B3) 100%);
   color: white;
   flex-wrap: wrap;
   gap: var(--spacing-md);

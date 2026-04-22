@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ApiService } from '../services/api.service';
+import { ThemeService } from '../services/theme.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -123,24 +124,24 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   `,
   styles: [`
     .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 26px; font-weight: 800; color: #021024; margin: 0 0 6px; }
-    .page-subtitle { color: #5483B3; font-size: 14px; margin: 0; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: var(--c-darkest, #021024); margin: 0 0 6px; }
+    .page-subtitle { color: var(--c-mid, #5483B3); font-size: 14px; margin: 0; }
 
     .kpi-card { text-align: center; }
-    .kpi-label { font-size: 12px; font-weight: 700; color: #5483B3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .kpi-value { font-size: 24px; font-weight: 800; color: #021024; }
+    .kpi-label { font-size: 12px; font-weight: 700; color: var(--c-mid, #5483B3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .kpi-value { font-size: 24px; font-weight: 800; color: var(--c-darkest, #021024); }
     .kpi-value.positive { color: #059669; }
     .kpi-value.negative { color: #c0392b; }
 
     /* Health Card */
     .health-card { position: relative; overflow: hidden; }
     .health-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
-    .health-explain { color: #5483B3; font-size: 14px; line-height: 1.5; margin: 12px 0 0; max-width: 450px; }
+    .health-explain { color: var(--c-mid, #5483B3); font-size: 14px; line-height: 1.5; margin: 12px 0 0; max-width: 450px; }
     
     .health-score-circle {
-      width: 110px; height: 110px; border-radius: 50%; border: 8px solid #f0f6ff;
+      width: 110px; height: 110px; border-radius: 50%; border: 8px solid var(--c-bg, #f0f6ff);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      flex-shrink: 0; position: relative; background: #fff;
+      flex-shrink: 0; position: relative; background: var(--bg-primary, #fff);
     }
     .health-score-circle.good { border-color: #e9f7ef; color: #059669; }
     .health-score-circle.warn { border-color: #fef9e7; color: #b7770d; }
@@ -163,12 +164,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .gauge-fill.warn { background: linear-gradient(90deg, #f59e0b, #d97706); }
     .gauge-fill.bad  { background: linear-gradient(90deg, #ef4444, #dc2626); }
 
-    .factors-grid h3 { font-size: 14px; margin: 0 0 16px; color: #021024; border: none !important; }
-    .factor-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid #f0f6ff; }
+    .factors-grid h3 { font-size: 14px; margin: 0 0 16px; color: var(--c-darkest, #021024); border: none !important; }
+    .factor-row { display: flex; align-items: center; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--c-bg, #f0f6ff); }
     .factor-row:last-child { border-bottom: none; }
     .factor-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-    .factor-name { font-size: 13px; font-weight: 700; color: #052659; }
-    .factor-detail { font-size: 11px; color: #7DA0CA; }
+    .factor-name { font-size: 13px; font-weight: 700; color: var(--c-dark, #052659); }
+    .factor-detail { font-size: 11px; color: var(--c-light, #7DA0CA); }
     .factor-bar-wrap { width: 140px; display: flex; align-items: center; gap: 10px; }
     .factor-bar { flex: 1; height: 6px; background: #f0f6ff; border-radius: 3px; overflow: hidden; }
     .factor-fill { height: 100%; border-radius: 3px; }
@@ -179,17 +180,17 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
     .chart-container { height: 280px; margin: 20px 0; position: relative; }
     .forecast-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0f6ff; }
-    .trend-indicator { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #5483B3; }
+    .trend-indicator { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: var(--c-mid, #5483B3); }
     .trend-indicator.up { color: #059669; }
     .trend-indicator.down { color: #c0392b; }
     .trend-icon { font-size: 20px; }
-    .total-prediction { font-size: 14px; color: #021024; }
-    .total-prediction strong { font-size: 18px; color: #052659; margin-left: 6px; }
+    .total-prediction { font-size: 14px; color: var(--c-darkest, #021024); }
+    .total-prediction strong { font-size: 18px; color: var(--c-dark, #052659); margin-left: 6px; }
 
     .ai-badge {
-      background: #f0f6ff; color: #052659; padding: 2px 8px; border-radius: 4px;
+      background: var(--c-bg, #f0f6ff); color: var(--c-dark, #052659); padding: 2px 8px; border-radius: 4px;
       font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-      display: inline-flex; align-items: center; border: 1px solid #C1E8FF;
+      display: inline-flex; align-items: center; border: 1px solid var(--c-lightest, #C1E8FF);
     }
     .confidence-badge { font-size: 11px; font-weight: 700; color: #059669; background: #e9f7ef; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
 
@@ -212,7 +213,11 @@ export class ReportDashboardComponent implements OnInit {
     }
   };
 
-  constructor(private api: ApiService, private translate: TranslateService) { }
+  constructor(
+    private api: ApiService, 
+    private translate: TranslateService,
+    private themeService: ThemeService
+  ) { }
 
   ngOnInit() {
     this.healthLoading = true;
@@ -228,6 +233,9 @@ export class ReportDashboardComponent implements OnInit {
       this.forecast = data;
       this.prepareChart();
     });
+
+    this.themeService.colorTheme$.subscribe(() => this.prepareChart());
+    this.themeService.isDarkMode$.subscribe(() => this.prepareChart());
   }
 
   getStatusKey(status: string): string {
@@ -253,21 +261,25 @@ export class ReportDashboardComponent implements OnInit {
     const futureLabels = this.forecast.forecast.map((d: any) => d.date);
     const futureValues = this.forecast.forecast.map((d: any) => d.revenue);
 
+    const style = getComputedStyle(document.documentElement);
+    const cDark = style.getPropertyValue('--c-dark').trim() || '#052659';
+    const cMid = style.getPropertyValue('--c-mid').trim() || '#5483B3';
+
     this.lineChartData = {
       labels: [...actualLabels, ...futureLabels],
       datasets: [
         {
           data: actualValues,
           label: this.translate.instant('REPORT.ACTUAL'),
-          borderColor: '#052659',
-          backgroundColor: 'rgba(5, 38, 89, 0.1)',
+          borderColor: cDark,
+          backgroundColor: cDark + '20',
           fill: true,
           tension: 0.3,
         },
         {
           data: [...Array(actualValues.length - 1).fill(null), actualValues[actualValues.length - 1], ...futureValues],
           label: this.translate.instant('REPORT.FORECAST'),
-          borderColor: '#5483B3',
+          borderColor: cMid,
           borderDash: [5, 5],
           backgroundColor: 'transparent',
           fill: false,

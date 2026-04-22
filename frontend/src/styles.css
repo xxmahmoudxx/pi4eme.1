@@ -35,11 +35,6 @@
 }
 
 :root.dark-theme {
-  --c-darkest:    #ffffff;
-  --c-dark:       #e0e0e0;
-  --c-mid:        #b0b0b0;
-  --c-light:      #808080;
-  --c-lightest:   #505050;
   --c-white:      #ffffff;
   --c-bg:         #0a0a0a;
   --c-text:       #ffffff;
@@ -150,8 +145,8 @@ h1, h2, h3, h4 {
 .card h2, .card h3 {
   margin-bottom: 14px;
   font-size: 16px;
-  color: #052659;
-  border-bottom: 2px solid #C1E8FF;
+  color: var(--c-dark, #052659);
+  border-bottom: 2px solid var(--c-lightest, #C1E8FF);
   padding-bottom: 10px;
   transition: color 0.3s ease, border-color 0.3s ease;
 }
@@ -261,7 +256,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 :root.dark-theme .table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--c-darkest) 0%, var(--c-dark) 100%);
 }
 
 .table thead th {
@@ -773,47 +768,47 @@ input:focus, select:focus, textarea:focus {
   align-items: center;
   gap: 8px;
   padding: 24px;
-  border: 2px dashed #7DA0CA !important;
+  border: 2px dashed var(--c-light, #7DA0CA) !important;
   border-radius: 12px;
-  background: #f9fdff !important;
+  background: var(--bg-tertiary) !important;
   cursor: pointer;
   transition: all 0.2s;
   text-align: center;
 }
 
 :root.dark-theme .upload-area.dragging {
-  border-color: #052659 !important;
-  background: #C1E8FF !important;
+  border-color: var(--c-dark, #052659) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 :root.dark-theme .upload-icon {
   font-size: 32px;
-  color: #052659 !important;
+  color: var(--c-light, #7DA0CA) !important;
 }
 
 :root.dark-theme .upload-text {
   margin: 0;
   font-size: 14px;
-  color: #052659 !important;
+  color: #ffffff !important;
 }
 
 :root.dark-theme .upload-text strong {
-  color: #052659 !important;
+  color: var(--c-light, #7DA0CA) !important;
   font-weight: 700;
 }
 
 :root.dark-theme .upload-sub {
   margin: 0;
   font-size: 12px;
-  color: #052659 !important;
+  color: #b0b0b0 !important;
 }
 
 :root.dark-theme .btn-browse {
   padding: 8px 18px;
   border-radius: 7px;
-  border: 1.5px solid #052659 !important;
+  border: 1.5px solid var(--c-light, #7DA0CA) !important;
   background: transparent !important;
-  color: #052659 !important;
+  color: var(--c-light, #7DA0CA) !important;
   font-size: 13px;
   font-weight: 600;
   font-family: inherit;
@@ -822,17 +817,17 @@ input:focus, select:focus, textarea:focus {
 }
 
 :root.dark-theme .btn-browse:hover {
-  background: #e8f1ff !important;
-  color: #052659 !important;
-  border-color: #052659 !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
 }
 
 :root.dark-theme .file-name {
   font-size: 12.5px;
-  color: #052659 !important;
+  color: #ffffff !important;
   font-weight: 600;
-  background: #C1E8FF !important;
-  border: 1px solid #7DA0CA !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--c-light, #7DA0CA) !important;
   padding: 4px 12px;
   border-radius: 6px;
   margin-top: 4px;

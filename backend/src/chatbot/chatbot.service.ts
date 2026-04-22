@@ -7,11 +7,13 @@ import { Sale, SaleDocument } from '../sales/schemas/sale.schema';
 import { Purchase, PurchaseDocument } from '../purchases/schemas/purchase.schema';
 import { User, UserDocument } from '../auth/schemas/user.schema';
 import { firstValueFrom } from 'rxjs';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ChatbotService {
   private readonly geminiApiKey: string;
-  private readonly geminiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
+  private readonly geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
 
   constructor(
     private httpService: HttpService,
@@ -30,12 +32,79 @@ export class ChatbotService {
         return this.getFallbackResponse(userMessage, user);
       }
 
-      // Combine system prompt with user message
-      const fullPrompt = `${systemPrompt}\n\nUser Question: ${userMessage}`;
+      let appDocs = '';
+      try {
+        const rootDir = path.resolve(process.cwd(), '..');
+        const file1 = path.join(rootDir, 'valurajouterhowwemakeditsimply.md');
+        const file2 = path.join(rootDir, 'INVOICE_OCR_IMPLEMENTATION.md');
+        const file3 = path.join(rootDir, 'README.md');
 
+        if (fs.existsSync(file1)) {
+          appDocs += '\n\n--- TENEXA APP ARCHITECTURE & ML FEATURES ---\n' + fs.readFileSync(file1, 'utf8');
+        }
+        if (fs.existsSync(file2)) {
+          appDocs += '\n\n--- TENEXA INVOICE OCR ARCHITECTURE ---\n' + fs.readFileSync(file2, 'utf8');
+        }
+        if (fs.existsSync(file3)) {
+          appDocs += '\n\n--- TENEXA README ---\n' + fs.readFileSync(file3, 'utf8');
+        }
+        if (appDocs) {
+          appDocs = `\n\n[CONTEXT: Use the following documentation to answer any technical, architectural, or feature-related questions about the Tenexa application accurately. Keep your answers clear, helpful, and professional but you don't need to describe the entire architecture unless explicitly asked.]${appDocs}`;
+        }
+      } catch (e) {
+        console.error('Error reading app docs:', e);
+      }
+
+      let businessData = '';
+      try {
+        if (user?.companyId) {
+          const companyId = new Types.ObjectId(user.companyId);
+          const sales = await this.saleModel.find({ companyId }).exec();
+          const purchases = await this.purchaseModel.find({ companyId }).exec();
+
+          const totalSales = sales.length;
+          const totalRevenue = sales.reduce((sum, s) => sum + (s.totalAmount || 0), 0);
+          const avgOrderValue = totalSales > 0 ? (totalRevenue / totalSales) : 0;
+
+          const totalPurchases = purchases.length;
+          const totalCosts = purchases.reduce((sum, p) => sum + (p.totalCost || 0), 0);
+          const netProfit = totalRevenue - totalCosts;
+
+          const productMap = new Map<string, number>();
+          sales.forEach(s => {
+            const prod = s.product || 'Unknown';
+            productMap.set(prod, (productMap.get(prod) || 0) + (s.totalAmount || 0));
+          });
+          const topProducts = Array.from(productMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(p => `${p[0]}: $${p[1].toFixed(2)}`);
+
+          const customerMap = new Map<string, number>();
+          sales.forEach(s => {
+            const cust = s.customer || 'Unknown';
+            if (cust !== 'Unknown') {
+              customerMap.set(cust, (customerMap.get(cust) || 0) + (s.totalAmount || 0));
+            }
+          });
+          const topCustomers = Array.from(customerMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(c => `${c[0]}: $${c[1].toFixed(2)}`);
+
+          businessData = `\n\n[USER BUSINESS DATA CONTEXT]\nThe following is the real-time business data for the currently logged-in user. You must use this data ONLY when the user asks about their specific business, orders, revenue, average order value, products, customers or stats. Do NOT invent data.\n---\nTotal Sales/Orders: ${totalSales}\nTotal Revenue: $${totalRevenue.toFixed(2)}\nAverage Order Value (AOV): $${avgOrderValue.toFixed(2)}\nTotal Purchases: ${totalPurchases}\nTotal Costs: $${totalCosts.toFixed(2)}\nNet Profit: $${netProfit.toFixed(2)}\nTop Products by Revenue: ${topProducts.join(', ') || 'N/A'}\nTop Customers by Revenue: ${topCustomers.join(', ') || 'N/A'}\n---\n`;
+        }
+      } catch (e) {
+        console.error('Error fetching business data for chatbot:', e);
+      }
+
+      // Combine system prompt with user message
+      const fullPrompt = `${systemPrompt}${appDocs}${businessData}\n\n[CRITICAL FORMATTING INSTRUCTION: Keep your response extremely brief, direct, and concise. Avoid long paragraphs and excessive greeting/exposition. Give exactly the data requested in the shortest way possible.]\n\nUser Question: ${userMessage}`;
+
+      const keyToUse = this.geminiApiKey || process.env.GEMINI_API_KEY;
       const response = await firstValueFrom(
         this.httpService.post<any>(
-          `${this.geminiUrl}?key=${this.geminiApiKey}`,
+          `${this.geminiUrl}?key=${keyToUse}`,
           {
             contents: [
               {
@@ -67,14 +136,19 @@ export class ChatbotService {
         )
       );
 
-      const reply = 
+      const reply =
         (response.data as any)?.candidates?.[0]?.content?.parts?.[0]?.text ||
         'Sorry, I could not generate a response at this time.';
 
       return { reply };
     } catch (error: any) {
       console.error('Gemini API Error:', error?.message || error);
-      
+
+      const status = error?.response?.status;
+      if (status === 400 || status === 403 || status === 404) {
+        return { reply: `I hit an error communicating with Gemini API (Status ${status}). Your API key might be invalid or improperly synced! Error details: ` + (error?.message || '') };
+      }
+
       // Provide fallback response when API fails
       return this.getFallbackResponse(userMessage, user);
     }
@@ -114,7 +188,7 @@ export class ChatbotService {
 
         const companyId = new Types.ObjectId(user.companyId);
         const sales = await this.saleModel.find({ companyId }).exec();
-        
+
         // Get unique customers
         const uniqueCustomers = new Set<string>();
         sales.forEach(sale => {
@@ -127,11 +201,10 @@ export class ChatbotService {
         const totalSales = sales.length;
 
         return {
-          reply: `📊 **Your Customer Overview:**\n\n👥 **Unique Customers:** ${customerCount}\n📦 **Total Sales Transactions:** ${totalSales}\n\n${
-            customerCount === 0 
-              ? '💡 Start by adding sales data to track your customers!' 
-              : `Top customers include: ${Array.from(uniqueCustomers).slice(0, 5).join(', ')}`
-          }`
+          reply: `📊 **Your Customer Overview:**\n\n👥 **Unique Customers:** ${customerCount}\n📦 **Total Sales Transactions:** ${totalSales}\n\n${customerCount === 0
+            ? '💡 Start by adding sales data to track your customers!'
+            : `Top customers include: ${Array.from(uniqueCustomers).slice(0, 5).join(', ')}`
+            }`
         };
       } catch (error) {
         console.error('Error fetching customer count:', error);
@@ -195,7 +268,7 @@ export class ChatbotService {
 
         // Extract product name if mentioned
         const productMatch = this.extractProductName(message);
-        
+
         if (productMatch) {
           return await this.analyzeProductInventory(user.companyId, productMatch);
         } else {
@@ -236,7 +309,7 @@ export class ChatbotService {
 
         // Extract product name from the message
         const productMatch = this.extractProductName(message);
-        
+
         if (productMatch) {
           // Search for specific product
           return await this.analyzeProductProfitability(user.companyId, productMatch);
@@ -285,7 +358,7 @@ export class ChatbotService {
     // "is [product] profitable?"
     // "is [product] making profit?"
     // "[product] profitability"
-    
+
     const patterns = [
       /is\s+([^?]+)\s+(?:profitable|making profit|profit|a profit)/,
       /([^\s]+)\s+(?:profitable|profitability|profit)/,
@@ -307,7 +380,7 @@ export class ChatbotService {
 
       // Get sales for this product
       const sales = await this.saleModel
-        .find({ 
+        .find({
           companyId: companyObjectId,
           product: { $regex: productName, $options: 'i' }
         })
@@ -315,7 +388,7 @@ export class ChatbotService {
 
       // Get purchases for this product
       const purchases = await this.purchaseModel
-        .find({ 
+        .find({
           companyId: companyObjectId,
           item: { $regex: productName, $options: 'i' }
         })
@@ -336,12 +409,11 @@ export class ChatbotService {
       const profitStatus = profit > 0 ? 'PROFITABLE' : profit === 0 ? 'BREAK-EVEN' : 'LOSS';
 
       return {
-        reply: `📊 **Product Profitability Analysis: "${productName}"**\n\n${statusEmoji} **Status:** ${profitStatus}\n\n💰 **Financial Summary:**\n📈 Total Revenue: $${totalRevenue.toFixed(2)}\n📉 Total Cost: $${totalCost.toFixed(2)}\n💵 Profit/Loss: $${profit.toFixed(2)}\n📊 Margin: ${profitMargin}%\n\n📦 **Volume:**\n🛒 Sales Transactions: ${sales.length}\n📦 Purchase Transactions: ${purchases.length}\n\n${
-            profit > 0 
-              ? `🎯 Great! This product is generating positive returns. Consider scaling up! 📈`
-              : profit === 0
-              ? `⚠️ This product is breaking even. Review pricing and costs for improvement.`
-              : `⚠️ Warning: This product is currently operating at a loss. Recommend reviewing pricing strategy and costs.`
+        reply: `📊 **Product Profitability Analysis: "${productName}"**\n\n${statusEmoji} **Status:** ${profitStatus}\n\n💰 **Financial Summary:**\n📈 Total Revenue: $${totalRevenue.toFixed(2)}\n📉 Total Cost: $${totalCost.toFixed(2)}\n💵 Profit/Loss: $${profit.toFixed(2)}\n📊 Margin: ${profitMargin}%\n\n📦 **Volume:**\n🛒 Sales Transactions: ${sales.length}\n📦 Purchase Transactions: ${purchases.length}\n\n${profit > 0
+          ? `🎯 Great! This product is generating positive returns. Consider scaling up! 📈`
+          : profit === 0
+            ? `⚠️ This product is breaking even. Review pricing and costs for improvement.`
+            : `⚠️ Warning: This product is currently operating at a loss. Recommend reviewing pricing strategy and costs.`
           }`
       };
     } catch (error) {

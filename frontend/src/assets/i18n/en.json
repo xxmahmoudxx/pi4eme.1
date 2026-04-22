@@ -163,6 +163,7 @@
         "UPLOADING": "Saving face to server...",
         "ENROLLED": "Face enrolled successfully! You can now use face login.",
         "OPEN_CAMERA": "Open Camera",
+        "CAPTURE_LOGIN": "Login",
         "CAPTURE_VERIFY": "Capture & Verify",
         "CAPTURE_ENROLL": "Capture & Enroll",
         "RETRY": "Retry",
@@ -232,6 +233,16 @@
         "BACK": "Back",
         "FACE_RECOGNITION": "Face Recognition",
         "FACE_DESC": "Enroll or verify your face for quick passwordless login.",
+        "THEME": "Theme Preferences",
+        "THEME_DESC": "Customize your dashboard visual appearance and color theme.",
+        "MODE": "Display Mode",
+        "LIGHT": "Light",
+        "DARK": "Dark",
+        "COLOR_THEME": "Color Palette",
+        "THEME_OCEAN": "Ocean",
+        "THEME_EMERALD": "Emerald",
+        "THEME_SUNSET": "Sunset",
+        "THEME_AMETHYST": "Amethyst",
         "DAYS": "days"
     },
     "CHATBOT": {
@@ -409,7 +420,9 @@
         "ITEM_PLACEHOLDER": "e.g. Raw Material X",
         "CATEGORY_PLACEHOLDER": "e.g. Hardware",
         "UNIT_PRICE_PLACEHOLDER": "or provide Total",
-        "TOTAL_PLACEHOLDER": "or provide Unit Price"
+        "TOTAL_PLACEHOLDER": "or provide Unit Price",
+        "REQUEST_SENT": "Request sent to accountant for approval. It will only be added after approval.",
+        "ADDED_SUCCESS": "Purchase added successfully."
     },
     "REPORT": {
         "TITLE": "Financial Report",

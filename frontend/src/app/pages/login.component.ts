@@ -151,7 +151,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   styles: [`
     .login-wrapper {
       min-height: calc(100vh - 64px);
-      background: linear-gradient(145deg, #021024 0%, #052659 55%, #5483B3 100%);
+      background: linear-gradient(145deg, var(--c-darkest, #021024) 0%, var(--c-dark, #052659) 55%, var(--c-mid, #5483B3) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -184,14 +184,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       margin: 0 0 6px;
       font-size: 24px;
       font-weight: 800;
-      color: #021024;
+      color: var(--c-darkest, #021024);
       border: none !important;
       padding: 0 !important;
     }
     .card-header p {
       margin: 0;
       font-size: 13.5px;
-      color: #5483B3;
+      color: var(--c-mid, #5483B3);
     }
 
     .verified-banner {
@@ -210,17 +210,17 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .tab {
       flex: 1; padding: 11px 10px; border: none;
       background: transparent; cursor: pointer;
-      font-size: 13.5px; font-weight: 500; color: #5483B3;
+      font-size: 13.5px; font-weight: 500; color: var(--c-mid, #5483B3);
       font-family: inherit;
       transition: all 0.18s ease;
     }
     .tab.active {
-      background: linear-gradient(135deg, #052659, #5483B3);
+      background: linear-gradient(135deg, var(--c-dark, #052659), var(--c-mid, #5483B3));
       color: #fff; font-weight: 700;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(5,38,89,0.25);
     }
-    .tab:hover:not(.active) { background: rgba(193,232,255,0.5); color: #052659; }
+    .tab:hover:not(.active) { background: var(--c-lightest, #C1E8FF); color: var(--c-dark, #052659); }
 
     form { display: flex; flex-direction: column; gap: 16px; }
 
@@ -228,32 +228,32 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
     .forgot-link {
       font-size: 11.5px; font-weight: 700;
-      color: #5483B3; text-decoration: none;
+      color: var(--c-mid, #5483B3); text-decoration: none;
       transition: color 0.2s;
     }
-    .forgot-link:hover { color: #021024; text-decoration: underline; }
+    .forgot-link:hover { color: var(--c-darkest, #021024); text-decoration: underline; }
 
     label {
       font-size: 11.5px; font-weight: 700;
-      color: #5483B3; letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--c-mid, #5483B3); letter-spacing: 0.6px; text-transform: uppercase;
     }
     input[type=email], input[type=password], input[type=text] {
       width: 100%; padding: 11px 14px;
-      border-radius: 8px; border: 1.5px solid #C1E8FF;
+      border-radius: 8px; border: 1.5px solid var(--c-lightest, #C1E8FF);
       font-size: 14px; font-family: inherit;
-      color: #021024; background: #f9fdff;
+      color: var(--c-darkest, #021024); background: #f9fdff;
       transition: all 0.18s ease;
       outline: none;
     }
     input:focus {
-      border-color: #5483B3;
+      border-color: var(--c-mid, #5483B3);
       background: #fff;
       box-shadow: 0 0 0 3px rgba(84,131,179,0.15);
     }
 
     .btn-primary {
       width: 100%; padding: 13px 20px;
-      background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
+      background: linear-gradient(135deg, var(--c-dark, #052659) 0%, var(--c-mid, #5483B3) 100%);
       color: #fff; border: none; border-radius: 8px;
       font-size: 15px; font-weight: 700; font-family: inherit;
       cursor: pointer; transition: all 0.2s;
@@ -261,14 +261,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       letter-spacing: 0.2px;
     }
     .btn-primary:hover:not(:disabled) {
-      background: linear-gradient(135deg, #021024 0%, #052659 100%);
+      background: linear-gradient(135deg, var(--c-darkest, #021024) 0%, var(--c-dark, #052659) 100%);
       box-shadow: 0 4px 16px rgba(5,38,89,0.4);
       transform: translateY(-1px);
     }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .hint { font-size: 13px; color: #5483B3; margin-top: 14px; text-align: center; }
-    .hint a { color: #052659; font-weight: 700; text-decoration: none; }
+    .hint { font-size: 13px; color: var(--c-mid, #5483B3); margin-top: 14px; text-align: center; }
+    .hint a { color: var(--c-dark, #052659); font-weight: 700; text-decoration: none; }
     .hint a:hover { text-decoration: underline; }
 
     /* OTP */
@@ -277,15 +277,15 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
       gap: 16px; padding: 10px 0;
     }
     .otp-icon { font-size: 52px; line-height: 1; }
-    .otp-section h3 { margin: 0; font-size: 20px; font-weight: 700; color: #021024; border: none !important; padding: 0 !important; }
-    .otp-hint { margin: 0; font-size: 13px; color: #5483B3; text-align: center; }
+    .otp-section h3 { margin: 0; font-size: 20px; font-weight: 700; color: var(--c-darkest, #021024); border: none !important; padding: 0 !important; }
+    .otp-hint { margin: 0; font-size: 13px; color: var(--c-mid, #5483B3); text-align: center; }
     .otp-input {
       width: 170px; text-align: center; font-size: 30px; letter-spacing: 8px;
-      padding: 14px; border-radius: 10px; border: 2px solid #5483B3;
-      font-weight: 700; color: #052659; font-family: monospace;
-      background: #f0f6ff;
+      padding: 14px; border-radius: 10px; border: 2px solid var(--c-mid, #5483B3);
+      font-weight: 700; color: var(--c-dark, #052659); font-family: monospace;
+      background: var(--c-bg, #f0f6ff);
     }
-    .otp-input:focus { outline: none; border-color: #052659; box-shadow: 0 0 0 3px rgba(84,131,179,0.2); }
+    .otp-input:focus { outline: none; border-color: var(--c-dark, #052659); box-shadow: 0 0 0 3px rgba(84,131,179,0.2); }
     .error-msg { color: #c0392b; font-size: 13px; margin: 0; }
     .btn-back {
       background: none; border: none; color: #5483B3; cursor: pointer;
@@ -307,20 +307,20 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
     .status-badge {
       padding: 10px 14px; border-radius: 8px;
-      background: #f0f6ff; color: #052659; font-size: 13px;
-      border: 1px solid #C1E8FF;
+      background: var(--c-bg, #f0f6ff); color: var(--c-dark, #052659); font-size: 13px;
+      border: 1px solid var(--c-lightest, #C1E8FF);
     }
     .status-badge.success  { background: #e9f7ef; color: #1e8449; border-color: #a9dfbf; font-weight: 600; }
     .status-badge.failed   { background: #fce7e7; color: #c0392b; border-color: #f5b7b1; }
     .status-badge.no-face  { background: #fef9e7; color: #b7770d; border-color: #f9e79f; }
     .status-badge.scanning,
     .status-badge.loading  { background: #fef9e7; color: #b7770d; border-color: #f9e79f; }
-    .status-badge.camera   { background: #C1E8FF; color: #052659; border-color: #7DA0CA; }
+    .status-badge.camera   { background: var(--c-lightest, #C1E8FF); color: var(--c-dark, #052659); border-color: var(--c-light, #7DA0CA); }
 
     .face-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-face {
       padding: 10px 20px; border-radius: 8px; border: none;
-      background: linear-gradient(135deg, #052659, #5483B3);
+      background: linear-gradient(135deg, var(--c-dark, #052659), var(--c-mid, #5483B3));
       color: #fff; cursor: pointer;
       font-weight: 600; font-size: 13px; font-family: inherit;
       transition: all 0.2s;

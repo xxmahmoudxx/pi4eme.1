@@ -202,7 +202,8 @@ export class PurchasesService {
     // ── Read ─────────────────────────────────────────────────────
     async findAll(companyId: string): Promise<Purchase[]> {
         const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
-        return this.purchaseModel.find({ companyId: cid }).sort({ date: -1 }).exec();
+        // Exclude pending_review requests — they don't enter the DB until approved
+        return this.purchaseModel.find({ companyId: cid, status: { $ne: 'pending_review' } }).sort({ date: -1 }).exec();
     }
 
     async delete(companyId: string, id: string): Promise<void> {
@@ -214,7 +215,7 @@ export class PurchasesService {
     async getKpis(companyId: string) {
         const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         const [result] = await this.purchaseModel.aggregate([
-            { $match: { companyId: cid } },
+            { $match: { companyId: cid, status: { $ne: 'pending_review' } } },
             {
                 $group: {
                     _id: null,
@@ -228,7 +229,7 @@ export class PurchasesService {
         ]);
 
         const [topSupplier] = await this.purchaseModel.aggregate([
-            { $match: { companyId: cid } },
+            { $match: { companyId: cid, status: { $ne: 'pending_review' } } },
             { $group: { _id: '$supplier', total: { $sum: '$totalCost' } } },
             { $sort: { total: -1 } },
             { $limit: 1 },
@@ -249,7 +250,7 @@ export class PurchasesService {
         const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         const dateFormat = interval === 'month' ? '%Y-%m' : '%Y-%m-%d';
         return this.purchaseModel.aggregate([
-            { $match: { companyId: cid } },
+            { $match: { companyId: cid, status: { $ne: 'pending_review' } } },
             {
                 $group: {
                     _id: { $dateToString: { format: dateFormat, date: '$date' } },
@@ -264,7 +265,7 @@ export class PurchasesService {
     async bySupplier(companyId: string) {
         const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         return this.purchaseModel.aggregate([
-            { $match: { companyId: cid } },
+            { $match: { companyId: cid, status: { $ne: 'pending_review' } } },
             { $group: { _id: '$supplier', total: { $sum: '$totalCost' }, count: { $sum: 1 } } },
             { $sort: { total: -1 } },
         ]);
@@ -273,7 +274,7 @@ export class PurchasesService {
     async byCategory(companyId: string) {
         const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
         return this.purchaseModel.aggregate([
-            { $match: { companyId: cid } },
+            { $match: { companyId: cid, status: { $ne: 'pending_review' } } },
             { $group: { _id: { $ifNull: ['$category', 'Uncategorized'] }, total: { $sum: '$totalCost' }, count: { $sum: 1 } } },
             { $sort: { total: -1 } },
         ]);
@@ -519,16 +520,25 @@ export class PurchasesService {
         return this.purchaseModel.find(query).sort({ date: -1 }).exec();
     }
 
-    async reviewRequest(companyId: string, id: string, review: { status: 'APPROVED' | 'REJECTED', comment?: string }): Promise<Purchase> {
+    async reviewRequest(companyId: string, id: string, review: { status: 'APPROVED' | 'REJECTED', comment?: string }): Promise<Purchase | null> {
+        const cid = Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId;
+
+        if (review.status === 'REJECTED') {
+            // Hard-delete on rejection — data never enters the real DB flow
+            await this.purchaseModel.deleteOne({ _id: id, companyId: cid }).exec();
+            return null;
+        }
+
+        // APPROVED: update status to 'received' so it enters normal data flow
         const update: any = {
-            finalStatus: review.status,
+            finalStatus: 'APPROVED',
             accountantComment: review.comment || '',
             reviewedAt: new Date(),
-            status: review.status === 'APPROVED' ? 'received' : 'cancelled'
+            status: 'received',
         };
 
         return this.purchaseModel.findOneAndUpdate(
-            { _id: id, companyId: Types.ObjectId.isValid(companyId) ? new Types.ObjectId(companyId) : companyId },
+            { _id: id, companyId: cid },
             { $set: update },
             { new: true }
         ).exec();

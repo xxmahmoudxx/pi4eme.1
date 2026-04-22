@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ThemeService } from '../services/theme.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 type SetupStep = 'idle' | 'qr' | 'confirming' | 'done';
@@ -262,6 +263,58 @@ type DisableStep = 'idle' | 'confirming';
         </section>
 
         <!-- ══════════════════════════════════════════════════════════════════════ -->
+        <!-- ── Theme Settings Section ── -->
+        <!-- ══════════════════════════════════════════════════════════════════════ -->
+        <section class="section-card" [class.expanded]="activeSection === 'theme'" (click)="activeSection === 'theme' ? null : activeSection = 'theme'">
+          <div class="section-header">
+            <div class="section-icon">🎨</div>
+            <div class="section-info">
+              <h3>{{ 'SETTINGS.THEME' | translate }}</h3>
+              <p class="section-desc">{{ 'SETTINGS.THEME_DESC' | translate }}</p>
+            </div>
+            <span class="arrow" *ngIf="activeSection !== 'theme'">&#8594;</span>
+          </div>
+
+          <div class="section-content" *ngIf="activeSection === 'theme'" (click)="$event.stopPropagation()">
+            <div class="theme-options">
+              <div class="theme-block">
+                <h4>{{ 'SETTINGS.MODE' | translate }}</h4>
+                <div class="mode-toggles">
+                  <button class="btn btn-mode" [class.active]="!isDarkMode" (click)="setDarkMode(false)">
+                    <span class="mode-icon">☀️</span> {{ 'SETTINGS.LIGHT' | translate }}
+                  </button>
+                  <button class="btn btn-mode" [class.active]="isDarkMode" (click)="setDarkMode(true)">
+                    <span class="mode-icon">🌙</span> {{ 'SETTINGS.DARK' | translate }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="theme-block">
+                <h4>{{ 'SETTINGS.COLOR_THEME' | translate }}</h4>
+                <div class="color-palette">
+                  <div class="color-swatch-wrapper" [class.active]="currentTheme === 'default'" (click)="setColorTheme('default')">
+                    <div class="color-swatch" style="background: linear-gradient(135deg, #052659, #5483B3);"></div>
+                    <span>{{ 'SETTINGS.THEME_OCEAN' | translate }}</span>
+                  </div>
+                  <div class="color-swatch-wrapper" [class.active]="currentTheme === 'emerald'" (click)="setColorTheme('emerald')">
+                    <div class="color-swatch" style="background: linear-gradient(135deg, #065f46, #10b981);"></div>
+                    <span>{{ 'SETTINGS.THEME_EMERALD' | translate }}</span>
+                  </div>
+                  <div class="color-swatch-wrapper" [class.active]="currentTheme === 'sunset'" (click)="setColorTheme('sunset')">
+                    <div class="color-swatch" style="background: linear-gradient(135deg, #9a3412, #f97316);"></div>
+                    <span>{{ 'SETTINGS.THEME_SUNSET' | translate }}</span>
+                  </div>
+                  <div class="color-swatch-wrapper" [class.active]="currentTheme === 'purple'" (click)="setColorTheme('purple')">
+                    <div class="color-swatch" style="background: linear-gradient(135deg, #5b21b6, #8b5cf6);"></div>
+                    <span>{{ 'SETTINGS.THEME_AMETHYST' | translate }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════════════ -->
         <!-- ── Face Recognition Section ── -->
         <!-- ══════════════════════════════════════════════════════════════════════ -->
         <section class="section-card clickable" routerLink="/face-verify">
@@ -297,18 +350,17 @@ type DisableStep = 'idle' | 'confirming';
     .section-header {
       display: flex; align-items: center; gap: 14px;
     }
-    .section-icon { font-size: 28px; flex-shrink: 0; }
     .section-info { flex: 1; }
-    .section-info h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #021024; }
-    .section-desc { margin: 0; font-size: 13px; color: #5483B3; line-height: 1.5; }
-
-    .arrow { font-size: 20px; color: #7DA0CA; flex-shrink: 0; }
+    .section-info h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-primary, #021024); }
+    .section-desc { margin: 2px 0 0; font-size: 13px; color: var(--c-mid, #5483B3); }
+    .arrow { color: var(--c-light, #7DA0CA); transition: transform 0.2s; }
 
     .badge {
       font-size: 11px; font-weight: 700; padding: 4px 10px;
       border-radius: 99px; white-space: nowrap; flex-shrink: 0;
       letter-spacing: 0.4px; text-transform: uppercase;
     }
+    .section-card:hover .section-icon { background: var(--c-dark, #052659); color: white; transform: scale(1.05); }
     .badge-on  { background: #d1fae5; color: #059669; border: 1px solid #a9dfbf; }
     .badge-off { background: #f0f6ff; color: #5483B3; border: 1px solid #C1E8FF; }
 
@@ -327,14 +379,14 @@ type DisableStep = 'idle' | 'confirming';
       transition: all 0.18s ease;
     }
     .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-primary { background: linear-gradient(135deg, #052659, #5483B3); color: #fff; box-shadow: 0 2px 8px rgba(5,38,89,0.25); }
-    .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, #021024, #052659); box-shadow: 0 4px 14px rgba(5,38,89,0.35); transform: translateY(-1px); }
+    .btn-primary { background: linear-gradient(135deg, var(--c-dark, #052659), var(--c-mid, #5483B3)); color: #fff; box-shadow: 0 2px 8px rgba(5,38,89,0.25); }
+    .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--c-darkest, #021024), var(--c-dark, #052659)); box-shadow: 0 4px 14px rgba(5,38,89,0.35); transform: translateY(-1px); }
     .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: #fff; box-shadow: 0 2px 8px rgba(5,150,105,0.25); }
     .btn-success:hover:not(:disabled) { background: linear-gradient(135deg, #047857, #059669); transform: translateY(-1px); }
     .btn-danger { background: linear-gradient(135deg, #c0392b, #ef4444); color: #fff; box-shadow: 0 2px 8px rgba(192,57,43,0.25); }
     .btn-danger:hover:not(:disabled) { background: linear-gradient(135deg, #922b21, #c0392b); transform: translateY(-1px); }
-    .btn-ghost { background: #f0f6ff; color: #052659; border: 1.5px solid #C1E8FF; }
-    .btn-ghost:hover:not(:disabled) { background: #C1E8FF; border-color: #7DA0CA; }
+    .btn-ghost { background: var(--c-bg, #f0f6ff); color: var(--c-dark, #052659); border: 1.5px solid var(--c-lightest, #C1E8FF); }
+    .btn-ghost:hover:not(:disabled) { background: var(--c-lightest, #C1E8FF); border-color: var(--c-light, #7DA0CA); }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-sm { padding: 5px 12px; font-size: 12px; }
 
@@ -416,6 +468,12 @@ type DisableStep = 'idle' | 'confirming';
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 600;
     }
+    .section-icon { 
+      width: 44px; height: 44px; border-radius: 12px; 
+      background: var(--c-bg, #f0f6ff); 
+      color: var(--c-dark, #052659);
+      display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.2s; 
+    }
     .photo-actions { display: flex; flex-direction: column; gap: 6px; }
     .upload-btn { cursor: pointer; }
     .photo-hint { font-size: 11px; color: #7DA0CA; }
@@ -447,14 +505,14 @@ type DisableStep = 'idle' | 'confirming';
     /* ── Account: Edit form ── */
     .edit-form { display: flex; flex-direction: column; gap: 14px; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-label { font-size: 11.5px; color: #5483B3; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+    .form-label { font-size: 11.5px; color: var(--c-mid, #5483B3); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
     .form-input {
-      padding: 10px 14px; border: 1.5px solid #C1E8FF; border-radius: 8px;
-      font-size: 14px; color: #021024; font-family: inherit;
+      padding: 10px 14px; border: 1.5px solid var(--c-lightest, #C1E8FF); border-radius: 8px;
+      font-size: 14px; color: var(--c-darkest, #021024); font-family: inherit;
       background: #f9fdff; outline: none; transition: all 0.18s;
     }
     .form-input:focus {
-      border-color: #5483B3;
+      border-color: var(--c-mid, #5483B3);
       background: #fff;
       box-shadow: 0 0 0 3px rgba(84,131,179,0.15);
     }
@@ -464,12 +522,39 @@ type DisableStep = 'idle' | 'confirming';
       background: #e9f7ef; padding: 10px 14px; border-radius: 8px;
       border: 1px solid #a9dfbf; font-weight: 500;
     }
+    
+    /* ── Theme Options ── */
+    .theme-options { display: flex; flex-direction: column; gap: 24px; padding-top: 8px; }
+    .theme-block h4 { margin: 0 0 12px; font-size: 14px; color: var(--text-primary, #021024); }
+    .mode-toggles { display: flex; gap: 12px; }
+    .btn-mode { 
+      flex: 1; padding: 12px; background: transparent; border: 2px solid var(--border-color, #e0e0e0);
+      color: var(--text-primary, #021024); border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    :root.dark-theme .btn-mode { color: #ffffff !important; }
+    .btn-mode.active { border-color: var(--c-mid, #5483B3); background: rgba(84, 131, 179, 0.1); }
+    
+    .color-palette { display: flex; gap: 16px; flex-wrap: wrap; }
+    .color-swatch-wrapper {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      cursor: pointer; padding: 12px; border-radius: 12px; border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .color-swatch-wrapper:hover { background: rgba(84, 131, 179, 0.05); }
+    .color-swatch-wrapper.active { border-color: var(--c-mid, #5483B3); background: rgba(84, 131, 179, 0.1); }
+    .color-swatch { width: 48px; height: 48px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .color-swatch-wrapper span { font-size: 12px; font-weight: 600; color: var(--text-primary, #021024); }
+    :root.dark-theme .color-swatch-wrapper span { color: #ffffff !important; }
   `],
 })
 export class SettingsComponent implements OnInit {
   loading = true;
   twoFactorEnabled = false;
-  activeSection: 'account' | '2fa' | 'face' | null = null;
+  activeSection: 'account' | '2fa' | 'face' | 'theme' | null = null;
+  
+  // ── Theme section ──
+  isDarkMode = false;
+  currentTheme = 'default';
 
   // ── Account section ──
   userProfile: any = null;
@@ -507,10 +592,18 @@ export class SettingsComponent implements OnInit {
   actionLoading = false;
   actionError = '';
 
-  constructor(private authService: AuthService, private translate: TranslateService) { }
+  constructor(
+    private authService: AuthService, 
+    private translate: TranslateService,
+    private themeService: ThemeService
+  ) { }
 
   ngOnInit() {
     this.isCompanyOwner = this.authService.getUserRole() === 'CompanyOwner';
+
+    // Load theme settings
+    this.themeService.isDarkMode$.subscribe(isDark => this.isDarkMode = isDark);
+    this.themeService.colorTheme$.subscribe(theme => this.currentTheme = theme);
 
     // Load profile
     this.authService.getProfile().subscribe({
@@ -713,5 +806,15 @@ export class SettingsComponent implements OnInit {
     this.disableStep = 'idle';
     this.disableCode = '';
     this.actionError = '';
+  }
+
+  // ── Theme Management ──
+
+  setDarkMode(isDark: boolean) {
+    this.themeService.setTheme(isDark);
+  }
+
+  setColorTheme(theme: string) {
+    this.themeService.setColorTheme(theme);
   }
 }

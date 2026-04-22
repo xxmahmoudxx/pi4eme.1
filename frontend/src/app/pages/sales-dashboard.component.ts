@@ -8,6 +8,7 @@ import { CsvMappingComponent } from '../components/csv-mapping.component';
 import { DynamicFormComponent, FormFieldDef } from '../components/dynamic-form.component';
 import { InvoiceImageUploadComponent, InvoiceExtraction } from '../components/invoice-image-upload.component';
 import { ApiService } from '../services/api.service';
+import { ThemeService } from '../services/theme.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -148,18 +149,18 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   `,
   styles: [`
     .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 26px; font-weight: 800; color: #021024; margin: 0 0 6px; }
-    .page-subtitle { color: #5483B3; font-size: 14px; margin: 0; }
-    .hint { color: #7DA0CA; font-size: 12px; margin: 0 0 8px; }
+    .page-header h1 { font-size: 26px; font-weight: 800; color: var(--c-darkest, #021024); margin: 0 0 6px; }
+    .page-subtitle { color: var(--c-mid, #5483B3); font-size: 14px; margin: 0; }
+    .hint { color: var(--c-light, #7DA0CA); font-size: 12px; margin: 0 0 8px; }
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .kpi-card { display: flex; align-items: center; gap: 14px; background: white; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(2,16,36,0.08); border: 1px solid rgba(84,131,179,0.1); transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card { display: flex; align-items: center; gap: 14px; background: var(--bg-primary, white); border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(2,16,36,0.08); border: 1px solid rgba(84,131,179,0.1); transition: transform 0.2s, box-shadow 0.2s; }
     .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(2,16,36,0.12); }
-    .kpi-card.accent { background: linear-gradient(135deg, #052659, #5483B3); }
+    .kpi-card.accent { background: linear-gradient(135deg, var(--c-dark, #052659), var(--c-mid, #5483B3)); }
     .kpi-card.accent .kpi-value, .kpi-card.accent .kpi-label { color: white; }
     .kpi-icon { font-size: 28px; } .kpi-content { display: flex; flex-direction: column; }
-    .kpi-value { font-size: 20px; font-weight: 800; color: #021024; }
-    .kpi-label { font-size: 11px; color: #5483B3; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-    .card-icon { font-size: 28px; margin-bottom: 4px; font-weight: 800; color: #052659; }
+    .kpi-value { font-size: 20px; font-weight: 800; color: var(--c-darkest, #021024); }
+    .kpi-label { font-size: 11px; color: var(--c-mid, #5483B3); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .card-icon { font-size: 28px; margin-bottom: 4px; font-weight: 800; color: var(--c-dark, #052659); }
     .status-msg { margin-top: 10px; padding: 10px 14px; background: #e9f7ef; color: #1e8449; border-radius: 8px; font-size: 13px; font-weight: 500; border: 1px solid #a9dfbf; }
     .status-msg.error { background: #fce7e7; color: #c0392b; border-color: #f5b7b1; }
     .validation-errors { margin-top: 8px; } .val-err { font-size: 12px; color: #b7770d; margin: 4px 0; }
@@ -171,18 +172,18 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .btn-del:hover { background: #fce7e7; }
     .empty-state { text-align: center; padding: 40px; }
     .empty-icon { font-size: 48px; margin-bottom: 10px; }
-    .empty-state h3 { color: #052659; margin-bottom: 8px; } .empty-state p { color: #5483B3; font-size: 14px; }
+    .empty-state h3 { color: var(--c-dark, #052659); margin-bottom: 8px; } .empty-state p { color: var(--c-mid, #5483B3); font-size: 14px; }
     .loading-state { text-align: center; padding: 40px; }
-    .spinner { width: 36px; height: 36px; margin: 0 auto 12px; border: 3px solid #C1E8FF; border-top: 3px solid #052659; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .spinner { width: 36px; height: 36px; margin: 0 auto 12px; border: 3px solid var(--c-lightest, #C1E8FF); border-top: 3px solid var(--c-dark, #052659); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .ai-section { border: 1.5px solid rgba(84,131,179,0.2); background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%); }
     .ai-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
-    .ai-header h2 { margin: 0 0 4px; font-size: 18px; color: #021024; border: none !important; padding: 0 !important; }
-    .ai-subtitle { color: #5483B3; font-size: 13px; margin: 0; }
-    .ai-badge { background: linear-gradient(135deg, #052659, #5483B3); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .ai-header h2 { margin: 0 0 4px; font-size: 18px; color: var(--c-darkest, #021024); border: none !important; padding: 0 !important; }
+    .ai-subtitle { color: var(--c-mid, #5483B3); font-size: 13px; margin: 0; }
+    .ai-badge { background: linear-gradient(135deg, var(--c-dark, #052659), var(--c-mid, #5483B3)); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
     .perf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-    .perf-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+    .perf-card { background: var(--bg-primary, white); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color, #e2e8f0); transition: all 0.2s; }
     .perf-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
     .perf-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .perf-icon { font-size: 24px; }
@@ -197,14 +198,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     .perf-trend { font-size: 24px; font-weight: 800; }
     .perf-metrics { display: flex; gap: 14px; margin-bottom: 8px; }
     .pm { display: flex; flex-direction: column; }
-    .pm-v { font-size: 14px; font-weight: 800; color: #052659; }
-    .pm-l { font-size: 10px; color: #7DA0CA; text-transform: uppercase; font-weight: 600; }
+    .pm-v { font-size: 14px; font-weight: 800; color: var(--c-dark, #052659); }
+    .pm-l { font-size: 10px; color: var(--c-light, #7DA0CA); text-transform: uppercase; font-weight: 600; }
     .positive { color: #059669 !important; }
     .negative { color: #ef4444 !important; }
-    .perf-explain { font-size: 12px; color: #5483B3; margin: 0; line-height: 1.4; }
+    .perf-explain { font-size: 12px; color: var(--c-mid, #5483B3); margin: 0; line-height: 1.4; }
     .ai-loading { display: flex; align-items: center; gap: 12px; padding: 16px 20px; }
-    .spinner-sm { width: 20px; height: 20px; border: 2px solid #C1E8FF; border-top: 2px solid #052659; border-radius: 50%; animation: spin 0.8s linear infinite; }
-    .ai-loading p { margin: 0; color: #5483B3; font-size: 13px; }
+    .spinner-sm { width: 20px; height: 20px; border: 2px solid var(--c-lightest, #C1E8FF); border-top: 2px solid var(--c-dark, #052659); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .ai-loading p { margin: 0; color: var(--c-mid, #5483B3); font-size: 13px; }
   `],
 })
 export class SalesDashboardComponent implements OnInit {
@@ -237,11 +238,34 @@ export class SalesDashboardComponent implements OnInit {
   barChartOptions: ChartOptions<'bar'> = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } };
   doughnutData: ChartData<'doughnut'> = { labels: [], datasets: [] };
   doughnutOptions: ChartOptions<'doughnut'> = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } };
-  private chartColors = ['#052659', '#5483B3', '#7DA0CA', '#C1E8FF', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+  private chartColors: string[] = [];
 
-  constructor(private api: ApiService, private translate: TranslateService) { }
+  constructor(
+    private api: ApiService, 
+    private translate: TranslateService,
+    private themeService: ThemeService
+  ) { }
 
-  ngOnInit() { this.loadAll(); }
+  ngOnInit() { 
+    this.loadAll(); 
+    // Listen for theme/color changes to update charts
+    this.themeService.colorTheme$.subscribe(() => this.updateChartColors());
+    this.themeService.isDarkMode$.subscribe(() => this.updateChartColors());
+  }
+
+  private updateChartColors() {
+    const style = getComputedStyle(document.documentElement);
+    const cDark = style.getPropertyValue('--c-dark').trim() || '#052659';
+    const cMid = style.getPropertyValue('--c-mid').trim() || '#5483B3';
+    const cLight = style.getPropertyValue('--c-light').trim() || '#7DA0CA';
+    const cLightest = style.getPropertyValue('--c-lightest').trim() || '#C1E8FF';
+    
+    this.chartColors = [cDark, cMid, cLight, cLightest, '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+    
+    if (this.kpis) {
+      this.loadCharts();
+    }
+  }
 
   loadAll() {
     this.loading = true;
@@ -252,8 +276,23 @@ export class SalesDashboardComponent implements OnInit {
   }
 
   loadCharts() {
+    const style = getComputedStyle(document.documentElement);
+    const cDark = style.getPropertyValue('--c-dark').trim() || '#052659';
+    const cMid = style.getPropertyValue('--c-mid').trim() || '#5483B3';
+
     this.api.getRevenueOverTime('day').subscribe((data) => {
-      this.lineChartData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), label: this.translate.instant('REPORT.REVENUE'), borderColor: '#052659', backgroundColor: 'rgba(84,131,179,0.15)', tension: 0.4, fill: true, pointBackgroundColor: '#052659' }] };
+      this.lineChartData = { 
+        labels: data.map((d) => d._id), 
+        datasets: [{ 
+          data: data.map((d) => d.revenue), 
+          label: this.translate.instant('REPORT.REVENUE'), 
+          borderColor: cDark, 
+          backgroundColor: cMid + '40', // Adding transparency
+          tension: 0.4, 
+          fill: true, 
+          pointBackgroundColor: cDark 
+        }] 
+      };
     });
     this.api.getRevenueByProduct().subscribe((data) => {
       this.barChartData = { labels: data.map((d) => d._id), datasets: [{ data: data.map((d) => d.revenue), label: this.translate.instant('REPORT.REVENUE'), backgroundColor: data.map((_, i) => this.chartColors[i % this.chartColors.length]), borderRadius: 6 }] };
