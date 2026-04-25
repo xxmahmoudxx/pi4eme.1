@@ -214,6 +214,44 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiBase}/analytics/product-performance`);
   }
 
+  // —— Accountant AI Reports ———————————————————————————————————————————————
+  generateAccountantAiReport(payload: {
+    includeWebResearch?: boolean;
+    focusAreas?: string[];
+    customInstructions?: string;
+  }) {
+    return this.http.post<any>(`${this.apiBase}/accountant-ai-reports/generate`, payload);
+  }
+
+  regenerateAccountantAiReport(
+    reportId: string,
+    payload: { includeWebResearch?: boolean; focusAreas?: string[]; customInstructions?: string },
+  ) {
+    return this.http.post<any>(`${this.apiBase}/accountant-ai-reports/${reportId}/regenerate`, payload);
+  }
+
+  getAccountantAiReports(limit = 30) {
+    return this.http.get<any[]>(`${this.apiBase}/accountant-ai-reports?limit=${limit}`);
+  }
+
+  getAccountantAiReportById(reportId: string) {
+    return this.http.get<any>(`${this.apiBase}/accountant-ai-reports/${reportId}`);
+  }
+
+  updateAccountantAiReportDraft(
+    reportId: string,
+    payload: { editedDraft: string; shortEmailSummary?: string },
+  ) {
+    return this.http.patch<any>(`${this.apiBase}/accountant-ai-reports/${reportId}/draft`, payload);
+  }
+
+  approveAndSendAccountantAiReport(
+    reportId: string,
+    payload: { finalApprovedText?: string; shortEmailSummary?: string },
+  ) {
+    return this.http.post<any>(`${this.apiBase}/accountant-ai-reports/${reportId}/approve-send`, payload);
+  }
+
   // ── Stock / Inventory ────────────────────────────────────────
   getStock() {
     return this.http.get<any[]>(`${this.apiBase}/inventory/stock`);

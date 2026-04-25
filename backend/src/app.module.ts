@@ -11,6 +11,7 @@ import { OcrModule } from './ocr/ocr.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { CustomersModule } from './customers/customers.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+import { AccountantAiReportsModule } from './accountant-ai-reports/accountant-ai-reports.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
     AnalyticsModule,
     OcrModule,
     ChatbotModule,
+    AccountantAiReportsModule,
   ],
   controllers: [AppController],
 })

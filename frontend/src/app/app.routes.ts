@@ -19,6 +19,7 @@ import { rolesGuard } from './guards/roles.guard';
 import { AuthCallbackComponent } from './pages/auth-callback.component';
 import { PurchaseRequestsComponent } from './pages/purchase-requests.component';
 import { PurchaseHistoryComponent } from './pages/purchase-history.component';
+import { AccountantAiReportsComponent } from './pages/accountant-ai-reports.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -33,6 +34,7 @@ export const routes: Routes = [
   { path: 'report', component: ReportDashboardComponent, canActivate: [authGuard, rolesGuard(['CompanyOwner', 'Accountant'], '/admin')] },
   { path: 'purchase-requests', component: PurchaseRequestsComponent, canActivate: [authGuard, rolesGuard(['Accountant'], '/sales')] },
   { path: 'purchase-history', component: PurchaseHistoryComponent, canActivate: [authGuard, rolesGuard(['Accountant'], '/sales')] },
+  { path: 'accountant-ai-reports', component: AccountantAiReportsComponent, canActivate: [authGuard, rolesGuard(['Accountant'], '/sales')] },
   { path: 'assistant', component: AssistantComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminPanelComponent, canActivate: [authGuard, rolesGuard(['Admin'], '/sales')] },
   { path: 'face-verify', component: FaceVerifyComponent, canActivate: [authGuard] },
