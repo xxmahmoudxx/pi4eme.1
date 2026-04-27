@@ -18,12 +18,35 @@ import os
 import sys
 import traceback
 import tempfile
+import requests as http_requests
 from datetime import datetime, timedelta
 from sklearn.linear_model import LinearRegression
 
-# ── Tesseract path configuration (Windows) ────────────────────────────
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"D:\imagepiworker\tesseract.exe"
+
+# ── Load .env file (same pattern as ai-agent-service) ─────────────────
+def load_env_file():
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            clean = line.strip()
+            if not clean or clean.startswith('#') or '=' not in clean:
+                continue
+            key, value = clean.split('=', 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key:
+                os.environ[key] = value
+
+
+load_env_file()
+
+# ── OCR.space configuration (from environment variables) ──────────────
+OCR_PROVIDER = os.getenv('OCR_PROVIDER', 'ocr_space')
+OCR_API_KEY = os.getenv('OCR_API_KEY', '')
+OCR_API_URL = os.getenv('OCR_API_URL', 'https://api.ocr.space/parse/image')
+OCR_ENGINE = os.getenv('OCR_ENGINE', '2')
 
 app = Flask(__name__)
 CORS(app)
@@ -541,23 +564,85 @@ def health_check():
 
 
 # ════════════════════════════════════════════════════════════════
-# FEATURE 6: OCR — INVOICE IMAGE TEXT EXTRACTION (OPTIONAL)
-# Requires: pip install pytesseract Pillow
-# Also requires Tesseract-OCR installed on the system.
-# On Windows: download from https://github.com/UB-Mannheim/tesseract/wiki
-# On Ubuntu: sudo apt install tesseract-ocr
+# FEATURE 6: OCR — INVOICE IMAGE TEXT EXTRACTION (OCR.space API)
+# Uses OCR.space cloud API instead of local Tesseract.
+# Requires: OCR_API_KEY set in .env
 # ════════════════════════════════════════════════════════════════
+
+def call_ocr_space(file_path, filename):
+    """
+    Send an image file to OCR.space API and return extracted text.
+    Raises RuntimeError on any failure with a descriptive message.
+    """
+    if not OCR_API_KEY:
+        raise RuntimeError('OCR_API_KEY is not configured. Set it in ml-service/.env')
+
+    print(f"[OCR] Calling OCR.space API: engine={OCR_ENGINE}, url={OCR_API_URL}")
+    sys.stdout.flush()
+
+    with open(file_path, 'rb') as f:
+        try:
+            resp = http_requests.post(
+                OCR_API_URL,
+                files={'file': (filename, f)},
+                data={
+                    'apikey': OCR_API_KEY,
+                    'language': 'eng',
+                    'OCREngine': OCR_ENGINE,
+                    'isTable': 'true',
+                    'scale': 'true',
+                },
+                timeout=60,
+            )
+        except http_requests.exceptions.Timeout:
+            raise RuntimeError('OCR.space API request timed out (60s). Try a smaller image.')
+        except http_requests.exceptions.ConnectionError:
+            raise RuntimeError('Could not connect to OCR.space API. Check your internet connection.')
+        except http_requests.exceptions.RequestException as req_err:
+            raise RuntimeError(f'OCR.space request failed: {str(req_err)}')
+
+    print(f"[OCR] OCR.space HTTP status: {resp.status_code}")
+    sys.stdout.flush()
+
+    if resp.status_code != 200:
+        raise RuntimeError(f'OCR.space returned HTTP {resp.status_code}: {resp.text[:300]}')
+
+    try:
+        data = resp.json()
+    except ValueError:
+        raise RuntimeError('OCR.space returned invalid JSON response')
+
+    # Check for API-level errors
+    if data.get('IsErroredOnProcessing', False):
+        err_msg = '; '.join(data.get('ErrorMessage', []) or ['Unknown OCR.space error'])
+        raise RuntimeError(f'OCR.space processing error: {err_msg}')
+
+    if data.get('OCRExitCode', 0) not in (1, 2):
+        err_msg = '; '.join(data.get('ErrorMessage', []) or [f"Exit code {data.get('OCRExitCode')}"])
+        raise RuntimeError(f'OCR.space failed (exit code {data.get("OCRExitCode")}): {err_msg}')
+
+    parsed_results = data.get('ParsedResults', [])
+    if not parsed_results:
+        raise RuntimeError('OCR.space returned no parsed results. Image may be unreadable.')
+
+    text = parsed_results[0].get('ParsedText', '')
+    if not text or not text.strip():
+        raise RuntimeError('OCR.space returned empty text. Image may be blank or unreadable.')
+
+    return text
+
 
 @app.route('/ocr/extract', methods=['POST'])
 def ocr_extract():
     """
     POST /ocr/extract
-    Accepts an image file, runs Tesseract OCR, then parses structured invoice data.
+    Accepts an image file, sends it to OCR.space API, then parses structured invoice data.
     Returns { text, parsedRows, metadata }
     """
     print("=" * 60)
     print("[OCR] Incoming request")
     print(f"[OCR] FILES keys: {list(request.files.keys())}")
+    print(f"[OCR] Provider: {OCR_PROVIDER}, API key set: {bool(OCR_API_KEY)}")
     sys.stdout.flush()
 
     try:
@@ -571,27 +656,25 @@ def ocr_extract():
         print(f"[OCR] Content-Type: {file.content_type}")
         sys.stdout.flush()
 
-        from PIL import Image, ImageFilter
+        # Validate content type
+        allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/bmp', 'image/tiff']
+        if file.content_type and file.content_type not in allowed_types:
+            return jsonify({'text': '', 'parsedRows': [], 'error': f'Invalid image type: {file.content_type}'}), 400
 
-        # Verify Tesseract is reachable
-        tess_version = pytesseract.get_tesseract_version()
-        print(f"[OCR] Tesseract version: {tess_version}")
-
+        # Save to temp file
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename or '.png')[1]) as tmp:
             file.save(tmp)
             tmp_path = tmp.name
 
-        print(f"[OCR] Temp file saved: {tmp_path} ({os.path.getsize(tmp_path)} bytes)")
+        file_size = os.path.getsize(tmp_path)
+        print(f"[OCR] Temp file saved: {tmp_path} ({file_size} bytes)")
 
-        image = Image.open(tmp_path)
-        print(f"[OCR] Image opened: size={image.size}, mode={image.mode}")
+        if file_size == 0:
+            os.unlink(tmp_path)
+            return jsonify({'text': '', 'parsedRows': [], 'error': 'Uploaded file is empty (0 bytes)'}), 400
 
-        # Preprocess: convert to RGB first (handles palette/RGBA), then grayscale + sharpen
-        if image.mode in ('P', 'RGBA', 'LA'):
-            image = image.convert('RGB')
-        image = image.convert('L').filter(ImageFilter.SHARPEN)
-
-        text = pytesseract.image_to_string(image)
+        # Call OCR.space API
+        text = call_ocr_space(tmp_path, file.filename or 'invoice.png')
         os.unlink(tmp_path)
 
         print(f"[OCR] Raw text length: {len(text)} chars, lines: {len(text.strip().splitlines())}")
@@ -614,6 +697,11 @@ def ocr_extract():
             'parsedRows': parsed_rows,
             'metadata': metadata,
         })
+
+    except RuntimeError as re:
+        print(f"[OCR] RUNTIME ERROR: {str(re)}")
+        sys.stdout.flush()
+        return jsonify({'text': '', 'parsedRows': [], 'error': str(re)}), 500
 
     except Exception as e:
         print(f"[OCR] EXCEPTION: {str(e)}")
