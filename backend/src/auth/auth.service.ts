@@ -51,9 +51,6 @@ export class AuthService implements OnModuleInit {
     const user = await this.userModel.findOne({ email: email.toLowerCase() }).exec();
     if (!user) throw new UnauthorizedException('Invalid email or password');
     if (user.status !== 'active') throw new UnauthorizedException('Account is deactivated');
-    if (!user.isEmailVerified && user.passwordHash !== 'GITHUB_AUTH') {
-      throw new UnauthorizedException('Please verify your email before logging in');
-    }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
     if (!isValid) throw new UnauthorizedException('Invalid email or password');
@@ -118,28 +115,19 @@ export class AuthService implements OnModuleInit {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    const user = await this.userModel.create({
+    await this.userModel.create({
       companyId,
       name: dto.name,
       email,
       passwordHash,
       role: dto.role,
       status: 'active',
-      isEmailVerified: false,
-      emailVerificationToken: verificationToken,
+      isEmailVerified: true,
+      emailVerificationToken: null,
     });
 
-    try {
-      await this.mailService.sendVerificationEmail(email, verificationToken);
-      return { message: 'Account created! Please check your email to verify your account.' };
-    } catch {
-      user.isEmailVerified = true;
-      user.emailVerificationToken = null;
-      await user.save();
-      return { message: 'Account created successfully! You can now log in.' };
-    }
+    return { message: 'Account created successfully! You can now log in.' };
   }
 
   async findOrCreateGithubUser(profile: any) {

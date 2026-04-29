@@ -33,7 +33,7 @@ export class User {
   @Prop({ default: null })
   twoFactorSecret: string | null;
 
-  @Prop({ default: false })
+  @Prop({ default: true })
   isEmailVerified: boolean;
 
   @Prop({ type: String, default: null })

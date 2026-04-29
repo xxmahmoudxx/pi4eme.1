@@ -261,7 +261,7 @@
         "COMPANY_NAME": "Nom de l'Entreprise",
         "CONFIRM_PASS": "Confirmer le mot de passe",
         "SIGNUP_BTN": "S'inscrire",
-        "SIGNUP_SUCCESS": "Compte créé ! Veuillez vérifier votre email pour confirmer votre compte avant de vous connecter.",
+        "SIGNUP_SUCCESS": "Compte créé avec succès ! Vous pouvez maintenant vous connecter.",
         "ERR_NAME": "Le nom doit comporter au moins 2 lettres et ne peut pas être exactement deux mots",
         "ERR_EMAIL": "L'email doit contenir @ et .",
         "ERR_COMPANY": "Le nom de l'entreprise ne peut pas contenir uniquement des chiffres",

@@ -369,7 +369,9 @@ export class EtlService {
         // ── Optional fields with defaults ──
         const supplier = this.cleanString(row.supplier) || 'Unknown';
         const category = this.cleanString(row.category) || '';
-        const status = this.cleanString(row.status) || 'received';
+        const PURCHASE_STATUSES = ['pending', 'received', 'cancelled', 'pending_review'];
+        const rawStatus = this.cleanString(row.status).toLowerCase();
+        const status = PURCHASE_STATUSES.includes(rawStatus) ? rawStatus : 'received';
         const notes = this.cleanString(row.notes) || '';
 
         return {
@@ -433,7 +435,12 @@ export class EtlService {
         // ── Optional fields with defaults ──
         const customer = this.cleanString(row.customer) || 'Unknown';
         const category = this.cleanString(row.category) || '';
-        const status = this.cleanString(row.status) || 'confirmed';
+        const SALE_STATUSES = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+        const rawStatus = this.cleanString(row.status).toLowerCase();
+        // Map common purchase-style "received" → "delivered" (received goods = delivered to customer)
+        const STATUS_ALIASES: Record<string, string> = { received: 'delivered', paid: 'confirmed' };
+        const aliased = STATUS_ALIASES[rawStatus] || rawStatus;
+        const status = SALE_STATUSES.includes(aliased) ? aliased : 'confirmed';
         const notes = this.cleanString(row.notes) || '';
 
         return {

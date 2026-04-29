@@ -13,7 +13,8 @@ import * as path from 'path';
 @Injectable()
 export class ChatbotService {
   private readonly geminiApiKey: string;
-  private readonly geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+  private readonly geminiModel: string;
+  private readonly geminiUrl: string;
 
   constructor(
     private httpService: HttpService,
@@ -23,6 +24,8 @@ export class ChatbotService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {
     this.geminiApiKey = this.configService.get<string>('GEMINI_API_KEY');
+    this.geminiModel = this.configService.get<string>('GEMINI_MODEL') || 'gemini-2.0-flash-lite';
+    this.geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${this.geminiModel}:generateContent`;
   }
 
   async getResponse(userMessage: string, systemPrompt: string, user: any): Promise<{ reply: string }> {

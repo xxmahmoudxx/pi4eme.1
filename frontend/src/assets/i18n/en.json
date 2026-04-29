@@ -269,7 +269,7 @@
         "FORGOT": "Forgot your password?",
         "SIGNIN_BTN": "Sign In",
         "SIGNUP_BTN": "Sign Up",
-        "SIGNUP_SUCCESS": "Account created! Please check your email to verify your account before logging in.",
+        "SIGNUP_SUCCESS": "Account created successfully! You can now log in.",
         "ERR_NAME": "Name must have at least 2 letters and cannot be exactly two words",
         "ERR_EMAIL": "Email must contain @ and .",
         "ERR_COMPANY": "Company name cannot be only numbers",

@@ -443,6 +443,9 @@ export class LoginComponent {
     if (!this.email) { alert(this.translate.instant('AUTH.ENTER_EMAIL_FIRST')); return; }
     this.faceStatus = 'loading';
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('NotSupported: getUserMedia API unavailable. Open via http://localhost (not 127.0.0.1) or HTTPS.');
+      }
       const [stream] = await Promise.all([
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 } }),
         this.faceService.loadModels(),
@@ -454,8 +457,23 @@ export class LoginComponent {
         const video = document.querySelector<HTMLVideoElement>('video.camera-preview');
         if (video) video.srcObject = this.stream;
       }, 100);
-    } catch {
-      this.errorMsg = this.translate.instant('FACE.CAMERA_DENIED');
+    } catch (err: any) {
+      console.error('[Camera] getUserMedia failed:', err);
+      const name = err?.name || '';
+      const base = this.translate.instant('FACE.CAMERA_DENIED');
+      let detail = err?.message || '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        detail = 'Browser permission denied. Click the camera icon in the address bar and allow access, then reload.';
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        detail = 'No camera device found. Check that your webcam is connected and not disabled in BIOS/system settings.';
+      } else if (name === 'NotReadableError' || name === 'TrackStartError') {
+        detail = 'Camera is busy — another app (Zoom, Cheese, browser tab) is using it. Close it and retry.';
+      } else if (name === 'OverconstrainedError') {
+        detail = 'Camera does not support the requested resolution.';
+      } else if (name === 'SecurityError') {
+        detail = 'Blocked due to insecure context. Use http://localhost:4200 (not file:// or remote IP without HTTPS).';
+      }
+      this.errorMsg = `${base} (${name || 'Error'}: ${detail})`;
       this.faceStatus = 'failed';
       this.cameraActive = false;
     }

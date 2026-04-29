@@ -25,4 +25,15 @@ npm-debug.log*
 Thumbs.db
 
 # Temp files
-tmpclaude*backend/.env 
+tmpclaude*backend/.env
+
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Generated reports / local storage
+backend/storage/
+*.pdf
+EOF
