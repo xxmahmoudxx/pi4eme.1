@@ -3,3 +3,5 @@ flask-cors==4.0.0
 numpy==1.26.4
 scikit-learn==1.4.2
 requests==2.32.3
+pytest==8.3.3
+pytest-cov==5.0.0

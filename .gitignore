@@ -37,3 +37,22 @@ env/
 backend/storage/
 *.pdf
 EOF
+
+# Test coverage
+coverage/
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+# Angular/Karma coverage
+frontend/coverage/
+backend/coverage/
+
+# Python service coverage
+ml-service/coverage.xml
+ml-service/.coverage
+ai-agent-service/coverage.xml
+ai-agent-service/.coverage

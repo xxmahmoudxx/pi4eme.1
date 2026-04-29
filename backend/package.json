@@ -90,9 +90,20 @@
             "^.+\\.(t|j)s$": "ts-jest"
         },
         "collectCoverageFrom": [
-            "**/*.(t|j)s"
+            "**/*.(t|j)s",
+            "!**/*.module.ts",
+            "!**/main.ts",
+            "!**/seed.ts",
+            "!**/*.dto.ts",
+            "!**/schemas/**",
+            "!**/dto/**"
         ],
         "coverageDirectory": "../coverage",
+        "coverageReporters": [
+            "text",
+            "lcov",
+            "html"
+        ],
         "testEnvironment": "node"
     }
 }
