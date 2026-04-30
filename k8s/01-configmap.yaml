@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pi4eme-config
+  namespace: pi4eme
+data:
+  # ----- Backend (NestJS) non-secret -----
+  PORT: "3000"
+  MONGODB_URI: "mongodb://mongodb:27017/bi_platform"
+  GITHUB_CALLBACK_URL: "http://localhost:3000/auth/github/callback"
+  MAIL_HOST: "smtp.gmail.com"
+  MAIL_PORT: "587"
+  MAIL_FROM: "beaumzoughi@gmail.com"
+  BACKEND_URL: "http://localhost:3000"
+  FRONTEND_URL: "http://localhost:4200"
+  ML_SERVICE_URL: "http://ml-service:5000"
+  AI_AGENT_SERVICE_URL: "http://ai-agent-service:5001"
+  AI_AGENT_TIMEOUT_MS: "120000"
+  ACCOUNTANT_REPORT_PDF_DIR: "storage/accountant-reports"
+
+  # ----- ML service (Flask OCR) non-secret -----
+  OCR_PROVIDER: "ocr_space"
+  OCR_API_URL: "https://api.ocr.space/parse/image"
+  OCR_ENGINE: "2"
+
+  # ----- AI agent service non-secret -----
+  AI_AGENT_PORT: "5001"
+  GEMINI_MODEL: "gemini-2.0-flash-lite"
+  GEMINI_API_ENDPOINT: "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+  AI_AGENT_TIMEOUT_SECONDS: "90"
+  AI_AGENT_MAX_OUTPUT_TOKENS: "4096"
+  AI_AGENT_USE_WEB_RESEARCH: "true"
+  AI_AGENT_MAX_WEB_CITATIONS: "8"

@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# Kubernetes local-only real secrets (Mission 11 demo)
+k8s/local-secrets.yaml
+
 # Node modules
 node_modules/
 

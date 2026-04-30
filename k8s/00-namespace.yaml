@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pi4eme
+  labels:
+    name: pi4eme
+    app.kubernetes.io/part-of: pi4eme

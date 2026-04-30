@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-agent-service
+  namespace: pi4eme
+  labels:
+    app: ai-agent-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-agent-service
+  template:
+    metadata:
+      labels:
+        app: ai-agent-service
+    spec:
+      containers:
+        - name: ai-agent-service
+          image: lmahdyyyy/pi4eme-ai-agent-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+          envFrom:
+            - configMapRef:
+                name: pi4eme-config
+            - secretRef:
+                name: pi4eme-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-agent-service
+  namespace: pi4eme
+  labels:
+    app: ai-agent-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-agent-service
+  ports:
+    - name: http
+      port: 5001
+      targetPort: 5001

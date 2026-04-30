@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  namespace: pi4eme
+  labels:
+    app: ml-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-service
+  template:
+    metadata:
+      labels:
+        app: ml-service
+    spec:
+      containers:
+        - name: ml-service
+          image: lmahdyyyy/pi4eme-ml-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: pi4eme-config
+            - secretRef:
+                name: pi4eme-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-service
+  namespace: pi4eme
+  labels:
+    app: ml-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ml-service
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
