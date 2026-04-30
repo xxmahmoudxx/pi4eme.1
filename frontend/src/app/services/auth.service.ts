@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap, map } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
+import { BACKEND_URL } from './backend-url';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private tokenKey = 'bi_token';
-  private apiBase = 'http://localhost:3000';
+  private apiBase = BACKEND_URL;
   private loggedIn = new BehaviorSubject<boolean>(this.hasToken());
   private currentUserRole = new BehaviorSubject<string | null>(
     this.getRoleFromToken(),

@@ -11,7 +11,7 @@ under `lmahdyyyy/*`.
 | `01-configmap.yaml` | yes | All non-secret env vars (URLs, ports, model names) |
 | `02-secrets-example.yaml` | yes | Template Secret with `REPLACE_ME_*` placeholders |
 | `03-mongodb.yaml` | yes | Mongo 7 Deployment + ClusterIP Service + 2Gi PVC |
-| `04-backend.yaml` | yes | NestJS Deployment + ClusterIP Service (3000) |
+| `04-backend.yaml` | yes | NestJS Deployment + NodePort Service (3000 → 30000) |
 | `05-frontend.yaml` | yes | Angular/Nginx Deployment + NodePort 30080 |
 | `06-ml-service.yaml` | yes | Flask OCR Deployment + ClusterIP Service (5000) |
 | `07-ai-agent-service.yaml` | yes | AI agent Deployment + ClusterIP Service (5001) |
@@ -63,19 +63,14 @@ http://<master-ip>:30080
 | ML service | `http://ml-service:5000` |
 | AI agent | `http://ai-agent-service:5001` |
 
-## Caveat — frontend → backend URL
+## Frontend → backend URL
 
-The Angular bundle has the backend URL hard-coded as `http://localhost:3000`
-(see `frontend/src/app/services/api.service.ts` and friends). For the kubeadm
-demo, the simplest workarounds are:
+Resolved at runtime via `frontend/src/app/services/backend-url.ts`:
+- When the browser host is `localhost` / `127.0.0.1` → `http://localhost:3000` (dev)
+- Otherwise → `http://${window.location.hostname}:30000` (kubeadm demo)
 
-1. Run the browser on the master node so `localhost:3000` is reachable via
-   `kubectl port-forward -n pi4eme svc/backend 3000:3000`, **or**
-2. Temporarily expose the backend with a NodePort and rebuild the frontend
-   image with the new URL (out of scope for Mission 10).
-
-This is not a Mission 10 deliverable; it is a build-time concern of the
-frontend bundle.
+So when the user opens `http://<master-ip>:30080`, the bundle calls
+`http://<master-ip>:30000` for the backend.
 
 ## Tearing down
 

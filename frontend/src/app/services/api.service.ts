@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BACKEND_URL } from './backend-url';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private apiBase = 'http://localhost:3000';
+  private apiBase = BACKEND_URL;
 
   constructor(private http: HttpClient) { }
 

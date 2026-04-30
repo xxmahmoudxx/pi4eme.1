@@ -5,6 +5,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { FaceRecognitionService } from '../services/face-recognition.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { BACKEND_URL } from '../services/backend-url';
 
 
 @Component({
@@ -128,7 +129,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
         <div class="divider" *ngIf="step === 'credentials' && mode === 'password'">or</div>
 
-        <a href="http://localhost:3000/auth/github" style="text-decoration: none;" *ngIf="step === 'credentials' && mode === 'password'">
+        <a [href]="githubAuthUrl" style="text-decoration: none;" *ngIf="step === 'credentials' && mode === 'password'">
           <button type="button" class="github-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577
@@ -352,6 +353,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   `],
 })
 export class LoginComponent {
+  readonly githubAuthUrl = `${BACKEND_URL}/auth/github`;
   mode: 'password' | 'face' = 'password';
   step: 'credentials' | 'otp' = 'credentials';
   verifiedMessage = false;

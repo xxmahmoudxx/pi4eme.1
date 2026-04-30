@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import * as faceapi from 'face-api.js';
+import { BACKEND_URL } from './backend-url';
 
 @Injectable({ providedIn: 'root' })
 export class FaceRecognitionService {
   private modelsLoaded = false;
   private readonly modelsPath = '/assets/models';
-  private readonly apiBase = 'http://localhost:3000/auth';
+  private readonly apiBase = `${BACKEND_URL}/auth`;
 
   constructor(private http: HttpClient) {}
 

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './auth.service';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { BACKEND_URL } from './backend-url';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -35,7 +36,7 @@ export class ChatbotService {
   private readonly RATE_LIMIT_WINDOW = 60000; // 1 minute
   private readonly MAX_MESSAGES_PER_WINDOW = 10;
 
-  private readonly BACKEND_URL = 'http://localhost:3000';
+  private readonly BACKEND_URL = BACKEND_URL;
 
   constructor(private http: HttpClient, private authService: AuthService) {
     this.initializeWelcomeMessage();
