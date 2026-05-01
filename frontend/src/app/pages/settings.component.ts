@@ -114,6 +114,10 @@ type DisableStep = 'idle' | 'confirming';
 
               <div *ngIf="!editingCompany" class="info-rows">
                 <div class="info-row">
+                  <span class="info-label">{{ 'SETTINGS.COMPANY_ID' | translate }}</span>
+                  <span class="info-value">{{ userProfile?.companyId || ('SETTINGS.NOT_AVAILABLE' | translate) }}</span>
+                </div>
+                <div class="info-row">
                   <span class="info-label">{{ 'SETTINGS.COMPANY_NAME' | translate }}</span>
                   <span class="info-value">{{ companyConfig.companyName }}</span>
                 </div>

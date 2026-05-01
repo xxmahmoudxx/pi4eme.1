@@ -216,6 +216,8 @@
         "EMAIL": "Email",
         "ROLE": "Role",
         "COMPANY_NAME": "Company Name",
+        "COMPANY_ID": "Company ID",
+        "NOT_AVAILABLE": "Not available",
         "TAX_RATE": "Tax Rate",
         "CURRENCY": "Currency",
         "NOTIF_EMAIL": "Notification Email",
