@@ -7,11 +7,11 @@ data:
   # ----- Backend (NestJS) non-secret -----
   PORT: "3000"
   MONGODB_URI: "mongodb://mongodb:27017/bi_platform"
-  GITHUB_CALLBACK_URL: "http://localhost:3000/auth/github/callback"
+  GITHUB_CALLBACK_URL: "https://pi4emebackend.onrender.com/auth/github/callback"
   MAIL_HOST: "smtp.gmail.com"
   MAIL_PORT: "587"
   MAIL_FROM: "beaumzoughi@gmail.com"
-  BACKEND_URL: "http://localhost:3000"
+  BACKEND_URL: "https://pi4emebackend.onrender.com"
   FRONTEND_URL: "http://localhost:4200"
   ML_SERVICE_URL: "http://ml-service:5000"
   AI_AGENT_SERVICE_URL: "http://ai-agent-service:5001"

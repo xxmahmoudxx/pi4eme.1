@@ -18,7 +18,7 @@ export class MailService {
   }
 
   async sendVerificationEmail(email: string, token: string) {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const backendUrl = process.env.BACKEND_URL || 'https://pi4emebackend.onrender.com';
     const verifyUrl = `${backendUrl}/auth/verify-email?token=${token}`;
 
     const info = await this.transporter.sendMail({
