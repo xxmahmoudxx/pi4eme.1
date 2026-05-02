@@ -4,8 +4,20 @@ import { json } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const allowedOrigins = (process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: allowedOrigins.length ? allowedOrigins : true,
+      credentials: true,
+    },
+  });
+
   app.use(json({ limit: '5mb' }));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,9 +28,9 @@ async function bootstrap() {
   );
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
-  // eslint-disable-next-line no-console
-  console.log(`BI API running on http://localhost:${port}`);
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`BI API running on port ${port}`);
 }
 
 bootstrap();
