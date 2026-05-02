@@ -91,7 +91,7 @@ export class AuthController {
   async githubCallback(@Req() req, @Res() res) {
     const result = await this.authService.loginGithubUser(req.user);
     const token = result.access_token;
-    res.redirect(`http://localhost:4200/auth/callback?token=${token}`);
+    res.redirect(`https://pi4eme-1.vercel.app/auth/callback?token=${token}`);
   }
 
   // ── Email Verification ──────────────────────────────────────────────────────
@@ -99,7 +99,7 @@ export class AuthController {
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string, @Res() res: any) {
     await this.authService.verifyEmail(token);
-    res.redirect('http://localhost:4200/login?verified=true');
+    res.redirect('https://pi4eme-1.vercel.app/login?verified=true');
   }
 
   // ── Profile Endpoints ───────────────────────────────────────────────────────
